@@ -15,6 +15,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         MainWindow.cpp
 
-HEADERS  += MainWindow.hpp
+HEADERS  += MainWindow.hpp \
+    StructureChart.hpp \
+    ClassChart.hpp \
+    ChartsBase.hpp
 
 FORMS    += MainWindow.ui
+
+CONFIG += c++11
