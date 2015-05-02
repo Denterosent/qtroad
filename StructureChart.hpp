@@ -25,11 +25,22 @@ struct BlockSequence
 
 struct SimpleBlock : public Block
 {
+		SimpleBlock(std::string command)
+			: command(command)
+		{
+		}
 		std::string command;
 };
 
 struct IfElseBlock : public Block
 {
+		IfElseBlock(std::string condition, BlockSequence yes, BlockSequence no)
+			: condition(condition)
+			, yes(yes)
+			, no(no)
+		{
+		}
+
 		std::string condition;
 		BlockSequence yes;
 		BlockSequence no;
