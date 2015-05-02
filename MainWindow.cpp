@@ -28,7 +28,7 @@ void MainWindow::on_actionGenerate_triggered()
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
 
-	StructureChart* chart;
+	StructureChart* chart = new StructureChart();
 	//chart->declarations.emplace_back(new ClassType(), 'v');
 	chart->headline = "This is a headline!!!";
 
