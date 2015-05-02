@@ -33,7 +33,7 @@
     <item>
      <widget class="QPushButton" name="btnGenerate">
       <property name="text">
-       <string>&gt;&gt; Genrate &gt;&gt;</string>
+       <string>&gt;&gt; Generate &gt;&gt;</string>
       </property>
      </widget>
     </item>
