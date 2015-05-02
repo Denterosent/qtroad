@@ -14,7 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    Parser.cpp
+    Parser.cpp\
+ChartsBase.cpp
 
 HEADERS  += MainWindow.hpp \
     StructureChart.hpp \

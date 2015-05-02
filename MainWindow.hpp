@@ -2,6 +2,7 @@
 #define MAINWINDOW_HPP
 
 #include "ui_MainWindow.h"
+#include "StructureChart.hpp"
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -16,4 +17,16 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 		void on_actionOpen_triggered();
 };
 
+class StructureChartDrawer
+{
+	private:
+		QGraphicsScene* scene;
+		StructureChart* chart;
+	public:
+		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
+		void drawHeadline();
+		void drawDeclarations();
+		void drawBody();
+		void drawStructureChart();
+};
 #endif // MAINWINDOW_HPP
