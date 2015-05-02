@@ -9,6 +9,8 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);
+	private slots:
+		void on_btnGenerate_clicked();
 };
 
 #endif // MAINWINDOW_HPP
