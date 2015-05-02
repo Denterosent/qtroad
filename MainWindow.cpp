@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
-#include <iostream>
+#include <QFileDialog>
+#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -16,7 +17,7 @@ void MainWindow::resetGraphicsView()
 	}
 }
 
-void MainWindow::on_btnGenerate_clicked()
+void MainWindow::on_actionGenerate_triggered()
 {
 	std::string input = plainTextEdit->toPlainText().toStdString();
 	const char* begin = &*input.cbegin();
@@ -25,6 +26,18 @@ void MainWindow::on_btnGenerate_clicked()
 	resetGraphicsView();
 	QGraphicsScene* scene = new QGraphicsScene(this);
 	scene->setSceneRect(0.f, 0.f, 200.f, 200.f);
-	scene->addLine(0.f, 0.f, 100.f, 100.f);
+	scene->addRect(0.f, 0.f, 100.f, 100.f);
 	graphicsView->setScene(scene);
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+	QStringList files = QFileDialog::getOpenFileNames(this, "Select code files", "../qtroad", "C/C++ (*.c *.h *.cpp *.hpp)");
+	QString content;
+	for (QString fileName : files) {
+		QFile file(fileName);
+		file.open(QIODevice::ReadOnly);
+		content += QTextStream(&file).readAll() + "\n";
+	}
+	plainTextEdit->setPlainText(content);
 }

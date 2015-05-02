@@ -12,7 +12,8 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 	private:
 		void resetGraphicsView();
 	private slots:
-		void on_btnGenerate_clicked();
+		void on_actionGenerate_triggered();
+		void on_actionOpen_triggered();
 };
 
 #endif // MAINWINDOW_HPP
