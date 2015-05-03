@@ -25,17 +25,25 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* end = &*input.cend();
 
 	resetGraphicsView();
+	/*create testenvironment========================================================================*/
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
-
 	StructureChart* chart;
-	//chart->declarations.emplace_back(new ClassType(), 'v');
 	chart->headline = "This is a headline!!!";
+/*
+	Declaration dec1;
+	dec1.varName = "spielBrettDaten[0..4][0..4]";
+	PrimitiveType type1;
 
+
+	dec1.type = type1.createFromUmlName("GZ");
+
+	chart->declarations.push_back(dec1);
+*/
 	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
 	drawer->drawHeadline();
 	drawer->drawSurroundingRectangle();
-
+	//===============================================================================================
 	graphicsView->setScene(scene);
 }
 
@@ -68,7 +76,12 @@ void StructureChartDrawer::drawHeadline()
 void StructureChartDrawer::drawDeclarations()
 {
 	for (Declaration& decl : chart->declarations)
-	scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+}
+
+void StructureChartDrawer::drawBody()
+{
+
 }
 
 void StructureChartDrawer::drawStructureChart()

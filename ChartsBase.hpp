@@ -6,6 +6,7 @@
 class Type
 {
 	public:
+		std::string name;
 		virtual std::string cppName() = 0;
 		virtual std::string umlName() = 0;
 		static Type* createFromUmlName(std::string type);
@@ -14,7 +15,6 @@ class Type
 class ClassType : public Type
 {
 	public:
-		std::string name;
 		virtual std::string cppName() override;
 		virtual std::string umlName() override;
 };

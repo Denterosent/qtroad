@@ -16,3 +16,14 @@ std::string ClassType::umlName()
 {
 	return name;
 }
+
+
+std::string PrimitiveType::cppName()
+{
+	return name;
+}
+
+std::string PrimitiveType::umlName()
+{
+	return name;
+}
