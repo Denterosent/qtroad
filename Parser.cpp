@@ -34,9 +34,17 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 			ret.blocks.push_back(new IfElseBlock{condition, yes, BlockSequence()});
 			skipWhitespaces(begin);
 
-			if(match(begin, end, "if else")) {
-				std::string condition = getCondition(begin, end);
+			if(matchWithFollowing(begin, end, "else" , '{')) {
+				condition = getCondition(begin, end);
 				expect(begin, end, "{");
+				const char* blockBegin = begin;
+				skipBody(begin, end);
+				const char* blockEnd = begin;
+				begin++;
+
+				BlockSequence no = parseFunctionBody(blockBegin, blockEnd);
+				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()});
+				skipWhitespaces(begin);
 			}
 		} else if (match(begin, end, "switch")) {
 
@@ -58,6 +66,7 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 			begin = commandEnd;
 		}
 	}
+	return ret;
 }
 
 void Parser::skipWhitespaces(const char*& c)
