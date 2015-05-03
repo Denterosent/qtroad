@@ -34,11 +34,7 @@ void MainWindow::on_actionGenerate_triggered()
 
 	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
 	drawer->drawHeadline();
-
-	/*
-	scene->setSceneRect(0.f, 0.f, 200.f, 200.f);
-	scene->addRect(0.f, 0.f, 100.f, 100.f);
-	*/
+	drawer->drawSurroundingRectangle();
 
 	graphicsView->setScene(scene);
 }
@@ -60,6 +56,8 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 {
 	scene = pScene;
 	chart = pChart;
+	rect_size_x = 100;
+	rect_size_y = 200;
 }
 
 void StructureChartDrawer::drawHeadline()
@@ -77,5 +75,11 @@ void StructureChartDrawer::drawStructureChart()
 {
 	drawHeadline();
 	drawDeclarations();
+}
+
+void StructureChartDrawer::drawSurroundingRectangle()
+{
+	scene->setSceneRect(0.f, 0.f, rect_size_x, rect_size_y);
+	scene->addRect(0.f, 0.f, rect_size_x, rect_size_y);
 }
 

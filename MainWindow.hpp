@@ -22,11 +22,14 @@ class StructureChartDrawer
 	private:
 		QGraphicsScene* scene;
 		StructureChart* chart;
+		float rect_size_x;
+		float rect_size_y;
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
 		void drawHeadline();
 		void drawDeclarations();
 		void drawBody();
 		void drawStructureChart();
+		void drawSurroundingRectangle();
 };
 #endif // MAINWINDOW_HPP
