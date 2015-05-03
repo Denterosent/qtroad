@@ -2,6 +2,9 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include "StructureChart.hpp"
+#include <QGraphicsSimpleTextItem>
+#include <QGraphicsRectItem>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -18,6 +21,35 @@ void MainWindow::resetGraphicsView()
 	}
 }
 
+QGraphicsItemGroup* generateClassDiagram(QString name, QString attribs, QString ops)
+{
+	QGraphicsItemGroup* group = new QGraphicsItemGroup();
+
+	QGraphicsSimpleTextItem* text1 = new QGraphicsSimpleTextItem(group);
+	text1->setText(name);
+
+	QGraphicsSimpleTextItem* text2 = new QGraphicsSimpleTextItem(group);
+	text2->setText(attribs);
+	text2->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()));
+
+	QGraphicsSimpleTextItem* text3 = new QGraphicsSimpleTextItem(group);
+	text3->setText(ops);
+	text3->setPos(text2->mapToParent(text2->boundingRect().bottomLeft()));
+
+	QGraphicsRectItem* rect = new QGraphicsRectItem(group);
+	rect->setRect(group->childrenBoundingRect());
+
+	QGraphicsLineItem* line1 = new QGraphicsLineItem(group);
+	line1->setLine(QLineF(text1->mapToParent(text1->boundingRect().bottomLeft()),
+						  text1->mapToParent(rect->boundingRect().right(), text1->boundingRect().bottom())));
+
+	QGraphicsLineItem* line2 = new QGraphicsLineItem(group);
+	line2->setLine(QLineF(text2->mapToParent(text2->boundingRect().bottomLeft()),
+						  text2->mapToParent(rect->boundingRect().right(), text2->boundingRect().bottom())));
+
+	return group;
+}
+
 void MainWindow::on_actionGenerate_triggered()
 {
 	std::string input = plainTextEdit->toPlainText().toStdString();
@@ -27,18 +59,19 @@ void MainWindow::on_actionGenerate_triggered()
 	resetGraphicsView();
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
+	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
+	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
+	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10.5, 0));
+	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
+	scene->addItem(classDiagram1);
+	scene->addItem(classDiagram2);
 
-	StructureChart* chart = new StructureChart();
-	//chart->declarations.emplace_back(new ClassType(), 'v');
-	chart->headline = "This is a headline!!!";
+//	StructureChart* chart = new StructureChart();
+//	//chart->declarations.emplace_back(new ClassType(), 'v');
+//	chart->headline = "This is a headline!!!";
 
-	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
-	drawer->drawHeadline();
-
-	/*
-	scene->setSceneRect(0.f, 0.f, 200.f, 200.f);
-	scene->addRect(0.f, 0.f, 100.f, 100.f);
-	*/
+//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
+//	drawer->drawHeadline();
 
 	graphicsView->setScene(scene);
 }
