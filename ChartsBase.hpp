@@ -5,8 +5,9 @@
 
 class Type
 {
-	public:
+	protected:
 		std::string name;
+	public:
 		virtual std::string cppName() = 0;
 		virtual std::string umlName() = 0;
 		static Type* createFromUmlName(std::string type);
