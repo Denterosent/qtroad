@@ -106,6 +106,12 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	chart = pChart;
 	rect_size_x = 100;
 	rect_size_y = 200;
+	top = 0;
+	numberOfWays = 1;
+	currentWay = 1;
+	heightOfRects = 30;
+	maxWidth = 500;
+	loopOffset = 20;
 }
 
 void StructureChartDrawer::drawHeadline()
@@ -119,15 +125,49 @@ void StructureChartDrawer::drawDeclarations()
 		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
 }
 
-void StructureChartDrawer::drawBody()
+void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
 {
-
+	for(int i = 0; i < anzElemente; i++){
+		zuPruefendesElement = ptrVectorOfBlockSequence[i];
+		int loopOffset = 0;
+			switch(zuPruefendesElement){
+			case SimpleBlock:
+				drawRectWithCommandInside(SimpleBlock.command, (maxWidth/numberOfWays.f)*(currentWay - 1), top, maxWidth/numberOfWays.f - loopOffset, heightOfRects );
+				//ToDo: implement function above
+				break;
+			case IfElseBlock:
+				drawHeading();
+				numberOfWays++;
+				drawBody(IfElseBlock.yes*);
+				currentWay++;
+				drawBody(IfElseBlock.no*);
+				currentWay--;
+				numberOfWays--;
+				break;
+			case LoopBlock:
+				if(LoopBlock.headControlled){
+					drawHeading();
+				}
+				loopOffset = 20;
+				drawBody(LoopBlock.body*);
+				loopOffset = 0;
+				if(!LoopBlock.headControlled){
+					drawHeading();
+				}
+				break;
+			case SwitchBlock:
+				//ToDo
+				break;
+			}
+	top += heightOfRects;
+	}
 }
 
 void StructureChartDrawer::drawStructureChart()
 {
 	drawHeadline();
 	drawDeclarations();
+	//drawBody();
 }
 
 void StructureChartDrawer::drawSurroundingRectangle()

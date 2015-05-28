@@ -24,6 +24,13 @@ class StructureChartDrawer
 		StructureChart* chart;
 		float rect_size_x;
 		float rect_size_y;
+		int top;
+		int numberOfWays;
+		int heightOfRects;
+		int maxWidth;
+		int currentWay;
+		int loopOffset;
+
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
 		void drawHeadline();
