@@ -26,9 +26,9 @@ class StructureChartDrawer
 		float rect_size_y;
 		int top;
 		int numberOfWays;
+		int currentWay;
 		int heightOfRects;
 		int maxWidth;
-		int currentWay;
 		int loopOffset;
 
 	public:

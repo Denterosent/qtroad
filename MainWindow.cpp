@@ -57,6 +57,7 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* end = &*input.cend();
 
 	resetGraphicsView();
+
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
@@ -65,11 +66,16 @@ void MainWindow::on_actionGenerate_triggered()
 	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
 	scene->addItem(classDiagram1);
 	scene->addItem(classDiagram2);
-	
+
+
 	/*create testenvironment========================================================================*/
 	StructureChart* chart = new StructureChart();
 	//chart->declarations.emplace_back(new ClassType(), 'v');
 	chart->headline = "This is a headline!!!";
+	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
+	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
+	chart->root.blocks.push_back( firstSimpleBlock );
+	chart->root.blocks.push_back( secondSimpleBlock );
 /*
 	Declaration dec1;
 	dec1.varName = "spielBrettDaten[0..4][0..4]";
@@ -83,6 +89,9 @@ void MainWindow::on_actionGenerate_triggered()
 	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
 	//drawer->drawHeadline();
 	//drawer->drawSurroundingRectangle();
+
+	//SimpleBlock* test = chart->root.blocks[0]; - why doesn't this work?
+	//scene->addSimpleText(QString::fromStdString(test->command));
 	//===============================================================================================
 	graphicsView->setScene(scene);
 }
@@ -125,8 +134,8 @@ void StructureChartDrawer::drawDeclarations()
 		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
 }
 
-void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
-{
+void StructureChartDrawer::drawBody(/*Block* ptrVectorOfBlockSequence*/)
+{/*
 	for(int i = 0; i < anzElemente; i++){
 		zuPruefendesElement = ptrVectorOfBlockSequence[i];
 		int loopOffset = 0;
@@ -160,7 +169,7 @@ void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
 				break;
 			}
 	top += heightOfRects;
-	}
+	}*/
 }
 
 void StructureChartDrawer::drawStructureChart()
