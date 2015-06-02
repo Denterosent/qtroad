@@ -6,6 +6,7 @@
 #include <map>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <memory>
+#include <vector>
 
 struct Declaration
 {
@@ -21,6 +22,7 @@ struct Block
 struct BlockSequence
 {
 		boost::ptr_vector<Block> blocks;
+//		std::vector<std::shared_ptr<Block>> blocks;
 };
 
 struct SimpleBlock : public Block

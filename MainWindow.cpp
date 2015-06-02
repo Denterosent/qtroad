@@ -68,30 +68,22 @@ void MainWindow::on_actionGenerate_triggered()
 	scene->addItem(classDiagram2);
 
 
-	/*create testenvironment========================================================================*/
+	/*===============================create testenvironment structure chart===========================*/
 	StructureChart* chart = new StructureChart();
-	//chart->declarations.emplace_back(new ClassType(), 'v');
-	chart->headline = "This is a headline!!!";
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
+
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
-/*
-	Declaration dec1;
-	dec1.varName = "spielBrettDaten[0..4][0..4]";
-	PrimitiveType type1;
+
+//	SimpleBlock testBlock = chart->root.blocks.at(0);
+//	std::string test = testBlock.command;
 
 
-	dec1.type = type1.createFromUmlName("GZ");
+//	scene->addSimpleText(QString::fromStdString(test));
 
-	chart->declarations.push_back(dec1);
-*/
-	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
-	//drawer->drawHeadline();
-	//drawer->drawSurroundingRectangle();
-
-	//SimpleBlock* test = chart->root.blocks[0]; - why doesn't this work?
-	//scene->addSimpleText(QString::fromStdString(test->command));
+	//	chart->headline = "This is a headline!!!";
+	//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
 	//===============================================================================================
 	graphicsView->setScene(scene);
 }
@@ -108,7 +100,6 @@ void MainWindow::on_actionOpen_triggered()
 	plainTextEdit->setPlainText(content);
 }
 
-//===========================================================================================================
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart)
 {
 	scene = pScene;
@@ -184,4 +175,3 @@ void StructureChartDrawer::drawSurroundingRectangle()
 	scene->setSceneRect(0.f, 0.f, rect_size_x, rect_size_y);
 	scene->addRect(0.f, 0.f, rect_size_x, rect_size_y);
 }
-
