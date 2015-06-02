@@ -36,6 +36,7 @@ class StructureChartDrawer
 		void drawHeadline();
 		void drawDeclarations();
 		void drawBody();
+		QGraphicsItemGroup* drawTestBody(boost::ptr_vector<Block> vector);
 		void drawStructureChart();
 		void drawSurroundingRectangle();
 };

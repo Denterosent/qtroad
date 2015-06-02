@@ -61,38 +61,51 @@ void MainWindow::on_actionGenerate_triggered()
 
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
+	/*
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
 	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
 	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10.5, 0));
 	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
 	scene->addItem(classDiagram1);
-	scene->addItem(classDiagram2);
+	scene->addItem(classDiagram2);*/
 
 
 	/*===============================create testenvironment structure chart===========================*/
 	StructureChart* chart = new StructureChart();
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
-
+	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me also!!! :-)") ;
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
+	chart->root.blocks.push_back( thirdSimpleBlock );
+	chart->headline = "This is a headline!!!";
 
-	//	SimpleBlock& testBlock = chart->root.blocks[0];
-	//	std::string test = testBlock.command;
+	//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
+	//	QGraphicsItemGroup* structureChart = drawer->drawTestBody(chart->root.blocks);
+
+	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+	QGraphicsSimpleTextItem* saveCommandBlock;
+	QString text;
+
 	for(int i = 0; i < chart->root.blocks.size(); i++){
 		Block* block = &(chart->root.blocks[i]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
-		std::string test;
 		if (simpleBlock) {
-			test = simpleBlock->command;
-			std::cout << "Block is a simple Block\n";
+			text = QString::fromStdString(simpleBlock->command);
+			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(structureChart);
+			commandBlock->setText(text);
+			if(i){
+				commandBlock->setPos(saveCommandBlock->mapToParent(saveCommandBlock->boundingRect().bottomLeft()));
+			}
+			std::cout << "ok\n";
+			saveCommandBlock = commandBlock;
 		} else {
-			std::cout << "Block is no simple Block\n";
+			std::cout << "Error: Block is not a simple Block\n";
 		}
-		scene->addSimpleText(QString::fromStdString(test));
 	}
-	//	chart->headline = "This is a headline!!!";
-	//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
+
+
+	scene->addItem(structureChart);
 	//===============================================================================================
 	graphicsView->setScene(scene);
 }
@@ -130,12 +143,36 @@ void StructureChartDrawer::drawHeadline()
 
 void StructureChartDrawer::drawDeclarations()
 {
-	for (Declaration& decl : chart->declarations)
+	for (Declaration& decl : chart->declarations){
 		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+	}
 }
 
-void StructureChartDrawer::drawBody(/*Block* ptrVectorOfBlockSequence*/)
-{/*
+QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block> vector){
+	QGraphicsItemGroup* group = new QGraphicsItemGroup();
+
+	for(int i = 0; i < vector.size(); i++){
+		Block* block = &(vector[i]);
+		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
+		QString text;
+		if (simpleBlock) {
+			text = QString::fromStdString(simpleBlock->command);
+
+			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
+			commandBlock->setText(text);
+			//commandBlock->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()));
+
+			std::cout << "Block is a simple Block\n";
+		} else {
+			std::cout << "Block is no simple Block\n";
+		}
+	}
+
+	return group;
+}
+
+/*void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
+{
 	for(int i = 0; i < anzElemente; i++){
 		zuPruefendesElement = ptrVectorOfBlockSequence[i];
 		int loopOffset = 0;
@@ -169,14 +206,14 @@ void StructureChartDrawer::drawBody(/*Block* ptrVectorOfBlockSequence*/)
 				break;
 			}
 	top += heightOfRects;
-	}*/
-}
+	}
+}*/
 
 void StructureChartDrawer::drawStructureChart()
 {
 	drawHeadline();
-	drawDeclarations();
-	//drawBody();
+	//drawDeclarations();
+
 }
 
 void StructureChartDrawer::drawSurroundingRectangle()
