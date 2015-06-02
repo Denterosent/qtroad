@@ -16,7 +16,9 @@ struct Declaration
 
 struct Block
 {
-
+		virtual ~Block()
+		{
+		}
 };
 
 struct BlockSequence

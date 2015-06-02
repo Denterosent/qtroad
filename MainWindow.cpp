@@ -50,6 +50,7 @@ QGraphicsItemGroup* generateClassDiagram(QString name, QString attribs, QString 
 	return group;
 }
 
+
 void MainWindow::on_actionGenerate_triggered()
 {
 	std::string input = plainTextEdit->toPlainText().toStdString();
@@ -76,12 +77,20 @@ void MainWindow::on_actionGenerate_triggered()
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
 
-//	SimpleBlock testBlock = chart->root.blocks.at(0);
-//	std::string test = testBlock.command;
-
-
-//	scene->addSimpleText(QString::fromStdString(test));
-
+	//	SimpleBlock& testBlock = chart->root.blocks[0];
+	//	std::string test = testBlock.command;
+	for(int i = 0; i < chart->root.blocks.size(); i++){
+		Block* block = &(chart->root.blocks[i]);
+		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
+		std::string test;
+		if (simpleBlock) {
+			test = simpleBlock->command;
+			std::cout << "Block is a simple Block\n";
+		} else {
+			std::cout << "Block is no simple Block\n";
+		}
+		scene->addSimpleText(QString::fromStdString(test));
+	}
 	//	chart->headline = "This is a headline!!!";
 	//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
 	//===============================================================================================
@@ -132,7 +141,7 @@ void StructureChartDrawer::drawBody(/*Block* ptrVectorOfBlockSequence*/)
 		int loopOffset = 0;
 			switch(zuPruefendesElement){
 			case SimpleBlock:
-				drawRectWithCommandInside(SimpleBlock.command, (maxWidth/numberOfWays.f)*(currentWay - 1), top, maxWidth/numberOfWays.f - loopOffset, heightOfRects );
+				drawRectWithCommandInside(SimpleBlock.command, (maxWidth/numberOfWays.f)*(currentWay - 1)+ loopOffset, top, maxWidth/numberOfWays.f - loopOffset, heightOfRects );
 				//ToDo: implement function above
 				break;
 			case IfElseBlock:
