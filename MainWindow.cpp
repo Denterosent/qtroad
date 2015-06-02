@@ -61,13 +61,13 @@ void MainWindow::on_actionGenerate_triggered()
 
 	QGraphicsScene* scene = new QGraphicsScene(this);
 
-	/*
+
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
 	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
 	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10.5, 0));
 	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
 	scene->addItem(classDiagram1);
-	scene->addItem(classDiagram2);*/
+	scene->addItem(classDiagram2);
 
 
 	/*===============================create testenvironment structure chart===========================*/
@@ -84,27 +84,33 @@ void MainWindow::on_actionGenerate_triggered()
 	//	QGraphicsItemGroup* structureChart = drawer->drawTestBody(chart->root.blocks);
 
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+	QGraphicsSimpleTextItem* commandBlock;
 	QGraphicsSimpleTextItem* saveCommandBlock;
 	QString text;
+	QGraphicsRectItem* rect = new QGraphicsRectItem(structureChart);
 
-	for(int i = 0; i < chart->root.blocks.size(); i++){
+
+	for(unsigned int i = 0; i < chart->root.blocks.size(); i++){
 		Block* block = &(chart->root.blocks[i]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			text = QString::fromStdString(simpleBlock->command);
-			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(structureChart);
+			commandBlock = new QGraphicsSimpleTextItem(structureChart);
 			commandBlock->setText(text);
 			if(i){
 				commandBlock->setPos(saveCommandBlock->mapToParent(saveCommandBlock->boundingRect().bottomLeft()));
 			}
-			std::cout << "ok\n";
+			rect->setRect(structureChart->childrenBoundingRect());
+			QGraphicsLineItem* line = new QGraphicsLineItem(structureChart);
+			line->setLine(QLineF(commandBlock->mapToParent(commandBlock->boundingRect().bottomLeft()),
+								  commandBlock->mapToParent(rect->boundingRect().right(), commandBlock->boundingRect().bottom())));
 			saveCommandBlock = commandBlock;
 		} else {
 			std::cout << "Error: Block is not a simple Block\n";
 		}
 	}
 
-
+	structureChart->setPos(0,100);
 	scene->addItem(structureChart);
 	//===============================================================================================
 	graphicsView->setScene(scene);
@@ -151,7 +157,7 @@ void StructureChartDrawer::drawDeclarations()
 QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block> vector){
 	QGraphicsItemGroup* group = new QGraphicsItemGroup();
 
-	for(int i = 0; i < vector.size(); i++){
+	for(unsigned int i = 0; i < vector.size(); i++){
 		Block* block = &(vector[i]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		QString text;
