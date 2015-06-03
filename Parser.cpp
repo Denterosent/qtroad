@@ -31,7 +31,10 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 			begin++;
 
 			BlockSequence yes = parseFunctionBody(blockBegin, blockEnd);
-			ret.blocks.push_back(new IfElseBlock{condition, yes, BlockSequence()});
+			//Chris, the init structure of the IfElseBlock has been modified.
+			//The two lines, which are commented out don't work with this new structure.
+			//Sorry.
+//			ret.blocks.push_back(new IfElseBlock{condition, yes, BlockSequence()});
 			skipWhitespaces(begin);
 
 			if(matchWithFollowing(begin, end, "else" , '{')) {
@@ -43,7 +46,7 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 				begin++;
 
 				BlockSequence no = parseFunctionBody(blockBegin, blockEnd);
-				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()}); //<<<sure that the order is right? how about (condition, BlockSequence(), no)???
+//				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()}); //<<<sure that the order is right? how about (condition, BlockSequence(), no)???
 				skipWhitespaces(begin);
 			}
 		} else if (match(begin, end, "switch")) {

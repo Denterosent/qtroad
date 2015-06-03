@@ -38,11 +38,12 @@ struct SimpleBlock : public Block
 
 struct IfElseBlock : public Block
 {
-		IfElseBlock(std::string condition, BlockSequence yes, BlockSequence no)
+		IfElseBlock(std::string condition, BlockSequence& yes, BlockSequence& no)
 			: condition(condition)
-			, yes(yes)
-			, no(no)
+
 		{
+			this->yes.blocks.swap(yes.blocks);
+			this->no.blocks.swap(no.blocks);
 		}
 
 		std::string condition;

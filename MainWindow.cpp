@@ -70,19 +70,20 @@ void MainWindow::on_actionGenerate_triggered()
 
 	/*===============================create testenvironment structure chart===========================*/
 	StructureChart* chart = new StructureChart();
-	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
+	SimpleBlock* firstSimpleBlock = new SimpleBlock("simple command") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
-	BlockSequence yesBS = *(new BlockSequence());
-	BlockSequence noBS = *(new BlockSequence());
-	/*yesBS->blocks.push_back( thirdSimpleBlock );
-	noBS->blocks.push_back( firstSimpleBlock );
-	noBS->blocks.push_back( secondSimpleBlock );*/
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("condition", yesBS, noBS);
-	chart->root.blocks.push_back( firstSimpleBlock );
-	chart->root.blocks.push_back( secondSimpleBlock );
+	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command.") ;
+	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
+	BlockSequence yesBS;
+	BlockSequence noBS;
+	yesBS.blocks.push_back( thirdSimpleBlock );
+	noBS.blocks.push_back( firstSimpleBlock );
+	noBS.blocks.push_back( secondSimpleBlock );
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid???", yesBS, noBS);
+	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
-	chart->root.blocks.push_back( thirdSimpleBlock );
+	chart->root.blocks.push_back( fifthSimpleBlock );
 
 	chart->headline = "This is a headline!!!";
 	/*================================================================================================*/
@@ -91,6 +92,10 @@ void MainWindow::on_actionGenerate_triggered()
 	drawer->drawStructureChart();
 
 	graphicsView->setScene(scene);
+
+	delete drawer;
+	delete chart;
+	delete firstSimpleBlock; //wieso tritt hier kein Fehler auf? durch das Löschen von chart wierden doch auch alle elemente von chart gelöscht. Oder?
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -105,10 +110,20 @@ void MainWindow::on_actionOpen_triggered()
 	plainTextEdit->setPlainText(content);
 }
 
-StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart)
+StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart): scene(pScene), chart(pChart)
 {
-	scene = pScene;
-	chart = pChart;
+	/*Support for:
+	 * Simple Blocks
+	 * IfElseBlocks
+	 * recursivity
+	 *
+	 *no Support for:
+	 * LoopBlocks
+	 * SwitchBlocks
+	 * text auto-wrap
+	 * space-filling
+	 */
+
 	top = 50;
 	left = 5;
 	height = 20;
@@ -136,7 +151,6 @@ void StructureChartDrawer::drawDeclarations(QGraphicsItemGroup* group)
 void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
-	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(group);
 	QGraphicsRectItem* commandRect;
 
 	//draw body
@@ -180,25 +194,24 @@ void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_ve
 				trueText->setPos(left+1, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width(), top+ifElseBlockHeight-falseText->boundingRect().height());
 
+				top += ifElseBlockHeight;
+
 				//draw both bodies by calling this function
 				int saveTop = top;
 				int saveLeft = left;
 				int saveWidth = width;
 				width = width*0.5;
-				//drawTestBody(group, ifElseBlock->yes);
+				drawTestBody(group, ifElseBlock->yes.blocks);
 				top = saveTop;
 				left += width;
-				//drawTestBody(group, ifElseBlock->no);
+				drawTestBody(group, ifElseBlock->no.blocks);
 				width = saveWidth;
 				left = saveLeft;
-
-				top += ifElseBlockHeight;
 			}else{
 				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 			}
 		}
 	}
-	boundingRect->setRect(group->childrenBoundingRect());
 }
 
 /*void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
@@ -243,6 +256,8 @@ void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
 	drawTestBody(structureChart, chart->root.blocks);
+	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
+	boundingRect->setRect(structureChart->childrenBoundingRect());
 	drawHeadline(structureChart);
 	structureChart->setPos(0,100);
 	scene->addItem(structureChart);
