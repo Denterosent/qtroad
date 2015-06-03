@@ -50,7 +50,6 @@ QGraphicsItemGroup* generateClassDiagram(QString name, QString attribs, QString 
 	return group;
 }
 
-
 void MainWindow::on_actionGenerate_triggered()
 {
 	std::string input = plainTextEdit->toPlainText().toStdString();
@@ -75,54 +74,23 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me also!!! :-)") ;
+	BlockSequence& yesBS = *(new BlockSequence());
+	BlockSequence& noBS = *(new BlockSequence());
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
+	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( thirdSimpleBlock );
+
 	chart->headline = "This is a headline!!!";
 
-	//	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
-	//	QGraphicsItemGroup* structureChart = drawer->drawTestBody(chart->root.blocks);
-
-	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
-	QGraphicsSimpleTextItem* commandBlock;
-	QString text;
-	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
-	QGraphicsRectItem* commandRect;
-	int top = 50;
-	int left = 5;
-	int height = 20;
-	int maxWidth = 200;
-	int paddingLeft = 5;
-	int paddingTop = 3;
-
-	//draw headline
-	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(structureChart);
-	headline->setText(QString::fromStdString(chart->headline));
-	headline->setPos(paddingLeft, paddingTop);
-
-	//draw body
-	for(unsigned int i = 0; i < chart->root.blocks.size(); i++){
-		Block* block = &(chart->root.blocks[i]);
-		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
-		if (simpleBlock) {
-			text = QString::fromStdString(simpleBlock->command);
-			commandBlock = new QGraphicsSimpleTextItem(structureChart);
-			commandBlock->setText(text);
-			commandBlock->setPos(left+paddingLeft,top+paddingTop);
-
-			commandRect= new QGraphicsRectItem(structureChart);
-			commandRect->setRect(left,top,maxWidth,height);
-
-			top += height;
-		} else {
-			std::cout << "Error: Block is not a simple Block\n";
-		}
-		boundingRect->setRect(structureChart->childrenBoundingRect());
-	}
+	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
+	QGraphicsItemGroup* structureChart = drawer->drawTestBody(chart->root.blocks);
+	drawer->drawHeadline(structureChart);
 
 	structureChart->setPos(0,100);
 	scene->addItem(structureChart);
-	//===============================================================================================
+	/*================================================================================================*/
 	graphicsView->setScene(scene);
 }
 
@@ -142,19 +110,23 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 {
 	scene = pScene;
 	chart = pChart;
-	rect_size_x = 100;
-	rect_size_y = 200;
-	top = 0;
-	numberOfWays = 1;
-	currentWay = 1;
-	heightOfRects = 30;
-	maxWidth = 500;
-	loopOffset = 20;
+	top = 50;
+	left = 5;
+	height = 20;
+	ifElseBlockHeight = height;
+	maxWidth = 200;
+	width = maxWidth;
+	paddingLeft = 5;
+	paddingTop = 3;
+	textSize = 13;
+
 }
 
-void StructureChartDrawer::drawHeadline()
+void StructureChartDrawer::drawHeadline(QGraphicsItemGroup* structureChart)
 {
-	scene->addSimpleText(QString::fromStdString(chart->headline));
+	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(structureChart);
+	headline->setText(QString::fromStdString(chart->headline));
+	headline->setPos(paddingLeft, paddingTop);
 }
 
 void StructureChartDrawer::drawDeclarations()
@@ -164,27 +136,55 @@ void StructureChartDrawer::drawDeclarations()
 	}
 }
 
-QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block> vector){
-	QGraphicsItemGroup* group = new QGraphicsItemGroup();
+QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block>& vector){
+	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+	QGraphicsSimpleTextItem* commandBlock;
+	QString text;
+	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
+	QGraphicsRectItem* commandRect;
 
+	//draw body
 	for(unsigned int i = 0; i < vector.size(); i++){
 		Block* block = &(vector[i]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
-		QString text;
 		if (simpleBlock) {
 			text = QString::fromStdString(simpleBlock->command);
-
-			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
+			commandBlock = new QGraphicsSimpleTextItem(structureChart);
 			commandBlock->setText(text);
-			//commandBlock->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()));
+			commandBlock->setPos(left+paddingLeft,top+paddingTop);
 
-			std::cout << "Block is a simple Block\n";
+			commandRect= new QGraphicsRectItem(structureChart);
+			commandRect->setRect(left,top,maxWidth,height);
+
+			top += height;
 		} else {
-			std::cout << "Block is no simple Block\n";
-		}
-	}
+			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
+			if(ifElseBlock){
+				text = QString::fromStdString(ifElseBlock->condition);
+				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(structureChart);
+				conditionRect->setRect(left, top, maxWidth, ifElseBlockHeight);
+				QGraphicsLineItem* leftLine = new QGraphicsLineItem(structureChart);
+				QGraphicsLineItem* rightLine = new QGraphicsLineItem(structureChart);
+				leftLine->setLine(left, top+1, maxWidth*0.5, top+ifElseBlockHeight);
+				rightLine->setLine(left+maxWidth, top+1, maxWidth*0.5, top+ifElseBlockHeight);
+				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(structureChart);
+				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(structureChart);
+				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(structureChart);
+				conditionText->setText(text);
+				trueText->setText("true");
+				falseText->setText("false");
+				conditionText->setPos(left+width*0.3, top);
+				trueText->setPos(left+1, top+ifElseBlockHeight-textSize);
+				falseText->setPos(left+width-23, top+ifElseBlockHeight-textSize);
 
-	return group;
+				top += ifElseBlockHeight;
+			}else{
+				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
+			}
+		}
+		boundingRect->setRect(structureChart->childrenBoundingRect());
+	}
+	return structureChart;
 }
 
 /*void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
@@ -227,13 +227,5 @@ QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block> 
 
 void StructureChartDrawer::drawStructureChart()
 {
-	drawHeadline();
-	//drawDeclarations();
 
-}
-
-void StructureChartDrawer::drawSurroundingRectangle()
-{
-	scene->setSceneRect(0.f, 0.f, rect_size_x, rect_size_y);
-	scene->addRect(0.f, 0.f, rect_size_x, rect_size_y);
 }

@@ -22,22 +22,22 @@ class StructureChartDrawer
 	private:
 		QGraphicsScene* scene;
 		StructureChart* chart;
-		float rect_size_x;
-		float rect_size_y;
 		int top;
-		int numberOfWays;
-		int currentWay;
-		int heightOfRects;
+		int left;
+		int height;
+		int ifElseBlockHeight;
 		int maxWidth;
-		int loopOffset;
+		int width;
+		int paddingLeft;
+		int paddingTop;
+		int textSize;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
-		void drawHeadline();
+		void drawHeadline(QGraphicsItemGroup* structureChart);
 		void drawDeclarations();
 		void drawBody();
-		QGraphicsItemGroup* drawTestBody(boost::ptr_vector<Block> vector);
+		QGraphicsItemGroup* drawTestBody(boost::ptr_vector<Block>& vector);
 		void drawStructureChart();
-		void drawSurroundingRectangle();
 };
 #endif // MAINWINDOW_HPP
