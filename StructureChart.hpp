@@ -66,7 +66,7 @@ struct LoopBlock : public Block
 struct StructureChart
 {
 		std::string headline;
-		std::vector<Declaration> declarations; //dynamisch veränderbares Feld, !!!muss erst initialisiert werden!!! (pushback)
+		std::vector<Declaration> declarations;
 		BlockSequence root;
 };
 

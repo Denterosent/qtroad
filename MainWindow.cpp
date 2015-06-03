@@ -74,12 +74,12 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
-	BlockSequence* yesBS = new BlockSequence();
-	BlockSequence* noBS = new BlockSequence();
+	BlockSequence yesBS = *(new BlockSequence());
+	BlockSequence noBS = *(new BlockSequence());
 	/*yesBS->blocks.push_back( thirdSimpleBlock );
 	noBS->blocks.push_back( firstSimpleBlock );
 	noBS->blocks.push_back( secondSimpleBlock );*/
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("condition", *(yesBS), *(noBS));
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("condition", yesBS, noBS);
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
@@ -124,14 +124,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	paddingTop = 3;
 }
 
-void StructureChartDrawer::drawHeadline(QGraphicsItemGroup* structureChart)
+void StructureChartDrawer::drawHeadline(QGraphicsItemGroup* group)
 {
-	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(structureChart);
+	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
 	headline->setText(QString::fromStdString(chart->headline));
 	headline->setPos(paddingLeft, paddingTop);
 }
 
-void StructureChartDrawer::drawDeclarations()
+void StructureChartDrawer::drawDeclarations(QGraphicsItemGroup* group)
 {
 	for (Declaration& decl : chart->declarations){
 		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
@@ -155,7 +155,7 @@ void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_ve
 			commandBlock->setPos(left+paddingLeft,top+paddingTop);
 
 			commandRect= new QGraphicsRectItem(group);
-			commandRect->setRect(left,top,maxWidth,height);
+			commandRect->setRect(left,top,width,height);
 
 			top += height;
 		} else {
@@ -163,12 +163,12 @@ void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_ve
 			if(ifElseBlock){
 				//draw Condition-Block
 				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(group);
-				conditionRect->setRect(left, top, maxWidth, ifElseBlockHeight);
+				conditionRect->setRect(left, top, width, ifElseBlockHeight);
 
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
-				leftLine->setLine(left, top+1, maxWidth*0.5, top+ifElseBlockHeight);
-				rightLine->setLine(left+maxWidth, top+1, maxWidth*0.5, top+ifElseBlockHeight);
+				leftLine->setLine(left, top+1, width*0.5, top+ifElseBlockHeight);
+				rightLine->setLine(left+width, top+1, width*0.5, top+ifElseBlockHeight);
 
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
