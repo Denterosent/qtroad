@@ -85,11 +85,22 @@ void MainWindow::on_actionGenerate_triggered()
 
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
 	QGraphicsSimpleTextItem* commandBlock;
-	QGraphicsSimpleTextItem* saveCommandBlock;
 	QString text;
-	QGraphicsRectItem* rect = new QGraphicsRectItem(structureChart);
+	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
+	QGraphicsRectItem* commandRect;
+	int top = 50;
+	int left = 5;
+	int height = 20;
+	int maxWidth = 200;
+	int paddingLeft = 5;
+	int paddingTop = 3;
 
+	//draw headline
+	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(structureChart);
+	headline->setText(QString::fromStdString(chart->headline));
+	headline->setPos(paddingLeft, paddingTop);
 
+	//draw body
 	for(unsigned int i = 0; i < chart->root.blocks.size(); i++){
 		Block* block = &(chart->root.blocks[i]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
@@ -97,17 +108,16 @@ void MainWindow::on_actionGenerate_triggered()
 			text = QString::fromStdString(simpleBlock->command);
 			commandBlock = new QGraphicsSimpleTextItem(structureChart);
 			commandBlock->setText(text);
-			if(i){
-				commandBlock->setPos(saveCommandBlock->mapToParent(saveCommandBlock->boundingRect().bottomLeft()));
-			}
-			rect->setRect(structureChart->childrenBoundingRect());
-			QGraphicsLineItem* line = new QGraphicsLineItem(structureChart);
-			line->setLine(QLineF(commandBlock->mapToParent(commandBlock->boundingRect().bottomLeft()),
-								  commandBlock->mapToParent(rect->boundingRect().right(), commandBlock->boundingRect().bottom())));
-			saveCommandBlock = commandBlock;
+			commandBlock->setPos(left+paddingLeft,top+paddingTop);
+
+			commandRect= new QGraphicsRectItem(structureChart);
+			commandRect->setRect(left,top,maxWidth,height);
+
+			top += height;
 		} else {
 			std::cout << "Error: Block is not a simple Block\n";
 		}
+		boundingRect->setRect(structureChart->childrenBoundingRect());
 	}
 
 	structureChart->setPos(0,100);
