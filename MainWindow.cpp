@@ -74,9 +74,12 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
-	BlockSequence& yesBS = *(new BlockSequence());
-	BlockSequence& noBS = *(new BlockSequence());
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
+	BlockSequence* yesBS = new BlockSequence();
+	BlockSequence* noBS = new BlockSequence();
+	/*yesBS->blocks.push_back( thirdSimpleBlock );
+	noBS->blocks.push_back( firstSimpleBlock );
+	noBS->blocks.push_back( secondSimpleBlock );*/
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("condition", *(yesBS), *(noBS));
 	chart->root.blocks.push_back( firstSimpleBlock );
 	chart->root.blocks.push_back( secondSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
@@ -85,7 +88,8 @@ void MainWindow::on_actionGenerate_triggered()
 	chart->headline = "This is a headline!!!";
 
 	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
-	QGraphicsItemGroup* structureChart = drawer->drawTestBody(chart->root.blocks);
+	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+	drawer->drawTestBody(structureChart, chart->root.blocks);
 	drawer->drawHeadline(structureChart);
 
 	structureChart->setPos(0,100);
@@ -134,11 +138,10 @@ void StructureChartDrawer::drawDeclarations()
 	}
 }
 
-QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block>& vector){
-	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
-	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
+	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(group);
 	QGraphicsRectItem* commandRect;
 
 	//draw body
@@ -147,28 +150,29 @@ QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block>&
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			text = QString::fromStdString(simpleBlock->command);
-			commandBlock = new QGraphicsSimpleTextItem(structureChart);
+			commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
 			commandBlock->setPos(left+paddingLeft,top+paddingTop);
 
-			commandRect= new QGraphicsRectItem(structureChart);
+			commandRect= new QGraphicsRectItem(group);
 			commandRect->setRect(left,top,maxWidth,height);
 
 			top += height;
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
-				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(structureChart);
+				//draw Condition-Block
+				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(group);
 				conditionRect->setRect(left, top, maxWidth, ifElseBlockHeight);
 
-				QGraphicsLineItem* leftLine = new QGraphicsLineItem(structureChart);
-				QGraphicsLineItem* rightLine = new QGraphicsLineItem(structureChart);
+				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
+				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
 				leftLine->setLine(left, top+1, maxWidth*0.5, top+ifElseBlockHeight);
 				rightLine->setLine(left+maxWidth, top+1, maxWidth*0.5, top+ifElseBlockHeight);
 
-				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(structureChart);
-				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(structureChart);
-				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(structureChart);
+				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
+				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
+				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(group);
 				text = QString::fromStdString(ifElseBlock->condition);
 				conditionText->setText(text);
 				trueText->setText("true");
@@ -177,14 +181,26 @@ QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block>&
 				trueText->setPos(left+1, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width(), top+ifElseBlockHeight-falseText->boundingRect().height());
 
+				//draw both bodies by calling this function
+				int saveTop = top;
+				int saveLeft = left;
+				int saveWidth = width;
+				width = width*0.5;
+				//drawTestBody(group, ifElseBlock->yes);
+				top = saveTop;
+				left += width;
+				//drawTestBody(group, ifElseBlock->no);
+				width = saveWidth;
+				left = saveLeft;
+
+
 				top += ifElseBlockHeight;
 			}else{
 				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 			}
 		}
 	}
-	boundingRect->setRect(structureChart->childrenBoundingRect());
-	return structureChart;
+	boundingRect->setRect(group->childrenBoundingRect());
 }
 
 /*void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)

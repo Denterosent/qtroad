@@ -43,7 +43,7 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 				begin++;
 
 				BlockSequence no = parseFunctionBody(blockBegin, blockEnd);
-				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()});
+				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()}); //<<<sure that the order is right? how about (condition, BlockSequence(), no)???
 				skipWhitespaces(begin);
 			}
 		} else if (match(begin, end, "switch")) {
