@@ -35,8 +35,7 @@ class StructureChartDrawer
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
 		void drawHeadline(QGraphicsItemGroup* group);
 		void drawDeclarations(QGraphicsItemGroup* group);
-		void drawBody();
-		void drawTestBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector);
+		void drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector);
 		void drawStructureChart();
 };
 #endif // MAINWINDOW_HPP

@@ -80,7 +80,7 @@ void MainWindow::on_actionGenerate_triggered()
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid???", yesBS, noBS);
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
@@ -121,7 +121,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * LoopBlocks
 	 * SwitchBlocks
 	 * text auto-wrap
-	 * space-filling
+	 * space-managing
 	 */
 
 	top = 50;
@@ -148,7 +148,7 @@ void StructureChartDrawer::drawDeclarations(QGraphicsItemGroup* group)
 	}
 }
 
-void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
+void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
 	QGraphicsRectItem* commandRect;
@@ -201,10 +201,10 @@ void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_ve
 				int saveLeft = left;
 				int saveWidth = width;
 				width = width*0.5;
-				drawTestBody(group, ifElseBlock->yes.blocks);
+				drawBody(group, ifElseBlock->yes.blocks);
 				top = saveTop;
 				left += width;
-				drawTestBody(group, ifElseBlock->no.blocks);
+				drawBody(group, ifElseBlock->no.blocks);
 				width = saveWidth;
 				left = saveLeft;
 			}else{
@@ -214,48 +214,24 @@ void StructureChartDrawer::drawTestBody(QGraphicsItemGroup* group, boost::ptr_ve
 	}
 }
 
-/*void StructureChartDrawer::drawBody(Block* ptrVectorOfBlockSequence)
-{
-	for(int i = 0; i < anzElemente; i++){
-		zuPruefendesElement = ptrVectorOfBlockSequence[i];
-		int loopOffset = 0;
-			switch(zuPruefendesElement){
-			case SimpleBlock:
-				drawRectWithCommandInside(SimpleBlock.command, (maxWidth/numberOfWays.f)*(currentWay - 1)+ loopOffset, top, maxWidth/numberOfWays.f - loopOffset, heightOfRects );
-				//ToDo: implement function above
-				break;
-			case IfElseBlock:
-				drawHeading();
-				numberOfWays++;
-				drawBody(IfElseBlock.yes*);
-				currentWay++;
-				drawBody(IfElseBlock.no*);
-				currentWay--;
-				numberOfWays--;
-				break;
-			case LoopBlock:
-				if(LoopBlock.headControlled){
-					drawHeading();
-				}
-				loopOffset = 20;
-				drawBody(LoopBlock.body*);
-				loopOffset = 0;
-				if(!LoopBlock.headControlled){
-					drawHeading();
-				}
-				break;
-			case SwitchBlock:
-				//ToDo
-				break;
-			}
-	top += heightOfRects;
+/*
+	LoopBlock:
+	==========
+		if(LoopBlock.headControlled){
+		drawHeading();
 	}
-}*/
+	loopOffset = 20;
+	drawBody(LoopBlock.body.blocks);
+	loopOffset = 0;
+	if(!LoopBlock.headControlled){
+		drawHeading();
+	}
+*/
 
 void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
-	drawTestBody(structureChart, chart->root.blocks);
+	drawBody(structureChart, chart->root.blocks);
 	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
 	boundingRect->setRect(structureChart->childrenBoundingRect());
 	drawHeadline(structureChart);
