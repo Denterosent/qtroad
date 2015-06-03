@@ -30,7 +30,6 @@ class StructureChartDrawer
 		int width;
 		int paddingLeft;
 		int paddingTop;
-		int textSize;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);

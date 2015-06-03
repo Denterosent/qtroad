@@ -73,7 +73,7 @@ void MainWindow::on_actionGenerate_triggered()
 	StructureChart* chart = new StructureChart();
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
-	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me also!!! :-)") ;
+	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
 	BlockSequence& yesBS = *(new BlockSequence());
 	BlockSequence& noBS = *(new BlockSequence());
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
@@ -114,12 +114,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	left = 5;
 	height = 20;
 	ifElseBlockHeight = height;
-	maxWidth = 200;
+	maxWidth = 170;
 	width = maxWidth;
 	paddingLeft = 5;
 	paddingTop = 3;
-	textSize = 13;
-
 }
 
 void StructureChartDrawer::drawHeadline(QGraphicsItemGroup* structureChart)
@@ -160,30 +158,32 @@ QGraphicsItemGroup* StructureChartDrawer::drawTestBody(boost::ptr_vector<Block>&
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
-				text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(structureChart);
 				conditionRect->setRect(left, top, maxWidth, ifElseBlockHeight);
+
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(structureChart);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(structureChart);
 				leftLine->setLine(left, top+1, maxWidth*0.5, top+ifElseBlockHeight);
 				rightLine->setLine(left+maxWidth, top+1, maxWidth*0.5, top+ifElseBlockHeight);
+
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(structureChart);
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(structureChart);
 				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(structureChart);
+				text = QString::fromStdString(ifElseBlock->condition);
 				conditionText->setText(text);
 				trueText->setText("true");
 				falseText->setText("false");
-				conditionText->setPos(left+width*0.3, top);
-				trueText->setPos(left+1, top+ifElseBlockHeight-textSize);
-				falseText->setPos(left+width-23, top+ifElseBlockHeight-textSize);
+				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
+				trueText->setPos(left+1, top+ifElseBlockHeight-trueText->boundingRect().height());
+				falseText->setPos(left+width-falseText->boundingRect().width(), top+ifElseBlockHeight-falseText->boundingRect().height());
 
 				top += ifElseBlockHeight;
 			}else{
 				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 			}
 		}
-		boundingRect->setRect(structureChart->childrenBoundingRect());
 	}
+	boundingRect->setRect(structureChart->childrenBoundingRect());
 	return structureChart;
 }
 
