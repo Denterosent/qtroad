@@ -80,22 +80,22 @@ void MainWindow::on_actionGenerate_triggered()
 	BlockSequence loopBody;
 	loopBody.blocks.push_back(firstLoopBlock);
 	loopBody.blocks.push_back(secondLoopBlock);
-	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, false);
+	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
 	BlockSequence yesBS;
 	BlockSequence noBS;
-	yesBS.blocks.push_back( theLoopBlock );
+//	yesBS.blocks.push_back( theLoopBlock );
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
-//	chart->root.blocks.push_back( theLoopBlock );
+	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
 
-//	PrimitiveType* firstType = new PrimitiveType;
-//	firstType->name = "first decl";
-//	chart->declarations.push_back(firstType);
+	//	PrimitiveType* firstType = new PrimitiveType;
+	//	firstType->name = "first decl";
+	//	chart->declarations.push_back(firstType);
 
 	chart->headline = "This is a headline!!!";
 	/*================================================================================================*/
@@ -207,9 +207,22 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				left += width;
 				drawBody(group, ifElseBlock->no.blocks);
 				rightTop = top;
-				top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
-				width = saveWidth;
 				left = saveLeft;
+				if(leftTop != rightTop){
+					top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
+					QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
+					spaceText->setText("%");
+					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
+					if(leftTop < rightTop){//add spacefiller left
+						spaceRect->setRect(left, leftTop, width, top-leftTop);
+					}else{//addspacefiller right
+						spaceRect->setRect(left+width, rightTop, width, top-rightTop);
+					}
+					spaceText->setPos(spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5-spaceText->boundingRect().width()*0.5,
+									  spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5-spaceText->boundingRect().height()*0.5);
+				}
+				width = saveWidth;
+
 			}else{
 				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
 				if(loopBlock){
@@ -221,6 +234,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 					width += loopOffset;
 					left -= loopOffset;
 					if(!loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
+
 					QGraphicsRectItem* leftBorder = new QGraphicsRectItem(group);
 					leftBorder->setRect(left, saveTop, width, top-saveTop);
 				}else{
@@ -245,12 +259,14 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 
 void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
 	//draw surrounding rectangle
+	int bottom = left;
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
-	surroundingRect->setRect(group->childrenBoundingRect());
+	surroundingRect->setRect(group->childrenBoundingRect().left(), group->childrenBoundingRect().top(),
+							 group->childrenBoundingRect().width() + left, group->childrenBoundingRect().height() + bottom);
 	//draw declarations
-//	for (Declaration& decl : chart->declarations){
-//		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
-//	}
+	//	for (Declaration& decl : chart->declarations){
+	//		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+	//	}
 	//draw headline
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
 	headline->setText(QString::fromStdString(chart->headline));
