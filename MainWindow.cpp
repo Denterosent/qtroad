@@ -196,10 +196,8 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 
 				top += ifElseBlockHeight;
 
-				//draw both bodies by calling this function
-				int saveTop = top;
-				int saveLeft = left;
-				int saveWidth = width;
+				//draw both bodies by calling this function recursively
+				int saveTop = top, saveLeft = left, saveWidth = width;
 				width = width*0.5;
 				drawBody(group, ifElseBlock->yes.blocks);
 				top = saveTop;
@@ -207,6 +205,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 				drawBody(group, ifElseBlock->no.blocks);
 				width = saveWidth;
 				left = saveLeft;
+
 			}else{
 				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 			}
@@ -217,7 +216,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 /*
 	LoopBlock:
 	==========
-		if(LoopBlock.headControlled){
+	if(LoopBlock.headControlled){
 		drawHeading();
 	}
 	loopOffset = 20;
