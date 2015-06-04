@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -60,7 +61,7 @@ void MainWindow::on_actionGenerate_triggered()
 
 	resetGraphicsView();
 
-	QGraphicsScene* scene = new QGraphicsScene(this);
+	scene = new QGraphicsScene(this);
 
 
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
@@ -85,12 +86,12 @@ void MainWindow::on_actionGenerate_triggered()
 	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
 	BlockSequence yesBS;
 	BlockSequence noBS;
-	yesBS.blocks.push_back( theLoopBlock );
+//	yesBS.blocks.push_back( theLoopBlock );
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
-//	chart->root.blocks.push_back( theLoopBlock );
+	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
@@ -110,23 +111,6 @@ void MainWindow::on_actionGenerate_triggered()
 	delete drawer;
 	delete chart;
 	delete firstSimpleBlock; //wieso tritt hier kein Fehler auf? durch das Löschen von chart wierden doch auch alle elemente von chart gelöscht. Oder?
-/*
-	//print graphics view to pdf
-	QPrinter printer;
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setPageSize(QPrinter::A4);
-	printer.setOutputFileName("prints/file.pdf");
-	printer.setDocName("structureAndClassChart.pdf");
-	QPainter painter(&printer);
-	graphicsView->render(&painter);
-//	scene->render(printerPainter, structureChart->boundingRect(), structureChart->boundingRect(), Qt::KeepAspectRatio);*/
-
-	QPrinter printer;
-	if (QPrintDialog(&printer).exec() == QDialog::Accepted) {
-		QPainter painter(&printer);
-		painter.setRenderHint(QPainter::Antialiasing);
-		scene->render(&painter);
-	}
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -139,6 +123,32 @@ void MainWindow::on_actionOpen_triggered()
 		content += QTextStream(&file).readAll() + "\n";
 	}
 	plainTextEdit->setPlainText(content);
+}
+
+void MainWindow::on_actionDirect_Print_triggered()
+{
+	QPrinter printer;
+		if (QPrintDialog(&printer).exec() == QDialog::Accepted) {
+			QPainter painter(&printer);
+			painter.setRenderHint(QPainter::Antialiasing);
+			scene->render(&painter);
+		}
+}
+
+void MainWindow::on_actionPrint_To_PDF_triggered()
+{
+	//print graphics view to pdf
+/*	QPrinter printer;
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	printer.setPageSize(QPrinter::A4);
+	printer.setOutputFileName("prints/file.pdf");
+//	printer.setDocName("structureAndClassChart.pdf");
+	QPainter painter(&printer);
+	graphicsView->render(&painter);
+//	scene->render(printerPainter, structureChart->boundingRect(), structureChart->boundingRect(), Qt::KeepAspectRatio);
+*/
+	QMessageBox msgBox;
+	msgBox.information(nullptr, "Sorry", "This function is currently not implemented.");
 }
 
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart): scene(pScene), chart(pChart)
@@ -200,8 +210,8 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				//draw triangle-lines
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
-				leftLine->setLine(left, top+1, width*0.5, top+ifElseBlockHeight);
-				rightLine->setLine(left+width, top+1, width*0.5, top+ifElseBlockHeight);
+				leftLine->setLine(left, top, width*0.5+left, top+ifElseBlockHeight);
+				rightLine->setLine(left+width, top, width*0.5+left, top+ifElseBlockHeight);
 
 				//draw condition and yes/no -text
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
@@ -212,7 +222,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				trueText->setText("true");
 				falseText->setText("false");
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
-				trueText->setPos(left+3, top+ifElseBlockHeight-trueText->boundingRect().height());
+				trueText->setPos(left+2, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width()-1, top+ifElseBlockHeight-falseText->boundingRect().height());
 
 				top += ifElseBlockHeight;
