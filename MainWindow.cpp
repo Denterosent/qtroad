@@ -171,10 +171,10 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	scene->render(&painter);
 */
 
-/*
+
 	QMessageBox msgBox;
 	msgBox.information(nullptr, "Sorry", "This function is currently not implemented.\n\nIf you have an pdf-printer installed, you can choose \"Direct Print\" with this pdf-printer.");
-
+/*
 	QPrinter printer;
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	printer.setPageSize(QPrinter::A4);
@@ -258,7 +258,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				falseText->setText("false");
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 				trueText->setPos(left+2, top+ifElseBlockHeight-trueText->boundingRect().height());
-				falseText->setPos(left+width-falseText->boundingRect().width()-1, top+ifElseBlockHeight-falseText->boundingRect().height());
+				falseText->setPos(left+width-falseText->boundingRect().width()-2, top+ifElseBlockHeight-falseText->boundingRect().height());
 
 				top += ifElseBlockHeight;
 
