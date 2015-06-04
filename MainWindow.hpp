@@ -35,8 +35,6 @@ class StructureChartDrawer
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
-		void drawHeadline(QGraphicsItemGroup* group);
-		void drawDeclarations(QGraphicsItemGroup* group);
 		void drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector);
 		void drawStructureChart();
 		void drawSurroundings(QGraphicsItemGroup* group);

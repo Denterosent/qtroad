@@ -144,20 +144,6 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	paddingTop = 5;		//only for heading
 }
 
-void StructureChartDrawer::drawHeadline(QGraphicsItemGroup* group)
-{
-	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
-	headline->setText(QString::fromStdString(chart->headline));
-	headline->setPos(paddingLeft, paddingTop);
-}
-
-void StructureChartDrawer::drawDeclarations(QGraphicsItemGroup* group)
-{
-	for (Declaration& decl : chart->declarations){
-		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
-	}
-}
-
 void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
@@ -235,6 +221,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 		}
 	}
 }
+
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock){
 
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
@@ -247,10 +234,17 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 }
 
 void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
-	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(group);
-	boundingRect->setRect(group->childrenBoundingRect());
-//	drawDeclarations(group);
-	drawHeadline(group);
+	//draw surrounding rectangle
+	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
+	surroundingRect->setRect(group->childrenBoundingRect());
+	//draw declarations
+//	for (Declaration& decl : chart->declarations){
+//		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+//	}
+	//draw headline
+	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
+	headline->setText(QString::fromStdString(chart->headline));
+	headline->setPos(paddingLeft, paddingTop);
 }
 
 void StructureChartDrawer::drawStructureChart()
