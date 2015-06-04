@@ -5,6 +5,8 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsRectItem>
 #include <QDebug>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -83,12 +85,12 @@ void MainWindow::on_actionGenerate_triggered()
 	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
 	BlockSequence yesBS;
 	BlockSequence noBS;
-//	yesBS.blocks.push_back( theLoopBlock );
+	yesBS.blocks.push_back( theLoopBlock );
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
-	chart->root.blocks.push_back( theLoopBlock );
+//	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
@@ -108,6 +110,23 @@ void MainWindow::on_actionGenerate_triggered()
 	delete drawer;
 	delete chart;
 	delete firstSimpleBlock; //wieso tritt hier kein Fehler auf? durch das Löschen von chart wierden doch auch alle elemente von chart gelöscht. Oder?
+/*
+	//print graphics view to pdf
+	QPrinter printer;
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	printer.setPageSize(QPrinter::A4);
+	printer.setOutputFileName("prints/file.pdf");
+	printer.setDocName("structureAndClassChart.pdf");
+	QPainter painter(&printer);
+	graphicsView->render(&painter);
+//	scene->render(printerPainter, structureChart->boundingRect(), structureChart->boundingRect(), Qt::KeepAspectRatio);*/
+
+	QPrinter printer;
+	if (QPrintDialog(&printer).exec() == QDialog::Accepted) {
+		QPainter painter(&printer);
+		painter.setRenderHint(QPainter::Antialiasing);
+		scene->render(&painter);
+	}
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -194,7 +213,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				falseText->setText("false");
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 				trueText->setPos(left+3, top+ifElseBlockHeight-trueText->boundingRect().height());
-				falseText->setPos(left+width-falseText->boundingRect().width(), top+ifElseBlockHeight-falseText->boundingRect().height());
+				falseText->setPos(left+width-falseText->boundingRect().width()-1, top+ifElseBlockHeight-falseText->boundingRect().height());
 
 				top += ifElseBlockHeight;
 
