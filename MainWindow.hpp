@@ -26,6 +26,8 @@ class StructureChartDrawer
 		int left;
 		int height;
 		int ifElseBlockHeight;
+		int loopHeadingHeight;
+		int loopOffset;
 		int maxWidth;
 		int width;
 		int paddingLeft;
@@ -37,5 +39,7 @@ class StructureChartDrawer
 		void drawDeclarations(QGraphicsItemGroup* group);
 		void drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector);
 		void drawStructureChart();
+		void drawSurroundings(QGraphicsItemGroup* group);
+		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);
 };
 #endif // MAINWINDOW_HPP

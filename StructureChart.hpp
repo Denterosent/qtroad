@@ -58,7 +58,11 @@ struct SwitchBlock : public Block
 };
 
 struct LoopBlock : public Block
-{
+{		LoopBlock(std::string condition, BlockSequence& body, bool headControlled)
+			: condition(condition), headControlled(headControlled)
+		{
+			this->body.blocks.swap(body.blocks);
+		}
 		std::string condition;
 		BlockSequence body;
 		bool headControlled;

@@ -73,8 +73,14 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("simple command") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
-	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command.") ;
+	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command. <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<") ;
 	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
+	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!");
+	SimpleBlock* secondLoopBlock = new SimpleBlock("LoopBlock");
+	BlockSequence loopBody;
+	loopBody.blocks.push_back(firstLoopBlock);
+	loopBody.blocks.push_back(secondLoopBlock);
+	LoopBlock* theLoopBlock = new LoopBlock("forever young", loopBody, true);
 	BlockSequence yesBS;
 	BlockSequence noBS;
 	yesBS.blocks.push_back( thirdSimpleBlock );
@@ -84,6 +90,7 @@ void MainWindow::on_actionGenerate_triggered()
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
+	chart->root.blocks.push_back( theLoopBlock );
 
 	chart->headline = "This is a headline!!!";
 	/*================================================================================================*/
@@ -116,18 +123,21 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * Simple Blocks
 	 * IfElseBlocks
 	 * recursivity
+	 * LoopBlocks
 	 *
 	 *no Support for:
-	 * LoopBlocks
 	 * SwitchBlocks
 	 * text auto-wrap
 	 * space-managing
+	 * declarations
 	 */
 
 	top = 50;
 	left = 5;
 	height = 20;
 	ifElseBlockHeight = height;
+	loopHeadingHeight = height;
+	loopOffset = 20;
 	maxWidth = 170;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text
@@ -205,35 +215,51 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 				drawBody(group, ifElseBlock->no.blocks);
 				width = saveWidth;
 				left = saveLeft;
-
 			}else{
-				std::cout << "Error: Block is neither a simple Block nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
+				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
+				if(loopBlock){
+					int saveTop = top;
+					if(loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
+					left += loopOffset;
+					width -= loopOffset;
+					drawBody(group, loopBlock->body.blocks);
+					width += loopOffset;
+					left -= loopOffset;
+					if(!loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
+					QGraphicsLineItem* leftBorder = new QGraphicsLineItem(group);
+					leftBorder->setLine(left,saveTop,left,top);
+				}else{
+					std::cout << "Error: Block is neither a simple Block, loop-Block, nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
+				}
 			}
 		}
 	}
 }
+void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock){
 
-/*
-	LoopBlock:
-	==========
-	if(LoopBlock.headControlled){
-		drawHeading();
-	}
-	loopOffset = 20;
-	drawBody(LoopBlock.body.blocks);
-	loopOffset = 0;
-	if(!LoopBlock.headControlled){
-		drawHeading();
-	}
-*/
+	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
+	loopHeading->setText(QString::fromStdString(loopBlock->condition));
+	loopHeading->setPos(left+paddingLeft,top+height*0.5-loopHeading->boundingRect().height()*0.5);
+	QGraphicsLineItem* rightBorder = new QGraphicsLineItem(group);
+	rightBorder->setLine(left+width, top, left+width, top+loopHeadingHeight);
+	top += loopHeadingHeight;
+
+}
+
+void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
+	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(group);
+	boundingRect->setRect(group->childrenBoundingRect());
+//	drawDeclarations(group);
+	drawHeadline(group);
+}
 
 void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+
 	drawBody(structureChart, chart->root.blocks);
-	QGraphicsRectItem* boundingRect = new QGraphicsRectItem(structureChart);
-	boundingRect->setRect(structureChart->childrenBoundingRect());
-	drawHeadline(structureChart);
+	drawSurroundings(structureChart);
+
 	structureChart->setPos(0,100);
 	scene->addItem(structureChart);
 }
