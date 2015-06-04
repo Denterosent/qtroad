@@ -73,24 +73,29 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("simple command") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
 	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
-	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command. <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<") ;
+	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command.") ;
 	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!");
 	SimpleBlock* secondLoopBlock = new SimpleBlock("LoopBlock");
 	BlockSequence loopBody;
 	loopBody.blocks.push_back(firstLoopBlock);
 	loopBody.blocks.push_back(secondLoopBlock);
-	LoopBlock* theLoopBlock = new LoopBlock("forever young", loopBody, true);
+	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, false);
 	BlockSequence yesBS;
 	BlockSequence noBS;
+	yesBS.blocks.push_back( theLoopBlock );
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
+//	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
-	chart->root.blocks.push_back( theLoopBlock );
+
+//	PrimitiveType* firstType = new PrimitiveType;
+//	firstType->name = "first decl";
+//	chart->declarations.push_back(firstType);
 
 	chart->headline = "This is a headline!!!";
 	/*================================================================================================*/
@@ -138,20 +143,21 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	ifElseBlockHeight = height;
 	loopHeadingHeight = height;
 	loopOffset = 20;
-	maxWidth = 170;
+	maxWidth = 300;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text
 	paddingTop = 5;		//only for heading
 }
 
-void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
+int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
 	QGraphicsRectItem* commandRect;
+	unsigned int index;
 
 	//draw body
-	for(unsigned int i = 0; i < vector.size(); i++){
-		Block* block = &(vector[i]);
+	for(index = 0; index < vector.size(); index++){
+		Block* block = &(vector[index]);
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			//draw text
@@ -187,18 +193,21 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 				trueText->setText("true");
 				falseText->setText("false");
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
-				trueText->setPos(left+1, top+ifElseBlockHeight-trueText->boundingRect().height());
+				trueText->setPos(left+3, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width(), top+ifElseBlockHeight-falseText->boundingRect().height());
 
 				top += ifElseBlockHeight;
 
 				//draw both bodies by calling this function recursively
-				int saveTop = top, saveLeft = left, saveWidth = width;
+				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
 				width = width*0.5;
 				drawBody(group, ifElseBlock->yes.blocks);
+				leftTop = top;
 				top = saveTop;
 				left += width;
 				drawBody(group, ifElseBlock->no.blocks);
+				rightTop = top;
+				top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
 				width = saveWidth;
 				left = saveLeft;
 			}else{
@@ -212,25 +221,26 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector
 					width += loopOffset;
 					left -= loopOffset;
 					if(!loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
-					QGraphicsLineItem* leftBorder = new QGraphicsLineItem(group);
-					leftBorder->setLine(left,saveTop,left,top);
+					QGraphicsRectItem* leftBorder = new QGraphicsRectItem(group);
+					leftBorder->setRect(left, saveTop, width, top-saveTop);
 				}else{
 					std::cout << "Error: Block is neither a simple Block, loop-Block, nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 				}
 			}
 		}
 	}
+	int numberOfDrawnBlocks = index+1;
+	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
+	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be usefull to know
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock){
 
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
-	loopHeading->setPos(left+paddingLeft,top+height*0.5-loopHeading->boundingRect().height()*0.5);
-	QGraphicsLineItem* rightBorder = new QGraphicsLineItem(group);
-	rightBorder->setLine(left+width, top, left+width, top+loopHeadingHeight);
-	top += loopHeadingHeight;
+	loopHeading->setPos(left+paddingLeft,top+loopHeadingHeight*0.5-loopHeading->boundingRect().height()*0.5);
 
+	top += loopHeadingHeight;
 }
 
 void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
