@@ -62,7 +62,8 @@ void MainWindow::on_actionGenerate_triggered()
 	resetGraphicsView();
 
 	scene = new QGraphicsScene(this);
-
+	this->actionDirect_Print->setEnabled(true);
+	this->actionPrint_To_PDF->setEnabled(true);
 
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
 	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
@@ -80,21 +81,32 @@ void MainWindow::on_actionGenerate_triggered()
 	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
 	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!");
 	SimpleBlock* secondLoopBlock = new SimpleBlock("LoopBlock");
+	SimpleBlock* yesBlock = new SimpleBlock("positive");
+
+	BlockSequence yesBS2;
+	BlockSequence noBS2;
+	yesBS2.blocks.push_back( yesBlock );
+	IfElseBlock* secondIfElseBlock = new IfElseBlock("condition", yesBS2, noBS2);
+
 	BlockSequence loopBody;
 	loopBody.blocks.push_back(firstLoopBlock);
+	loopBody.blocks.push_back(secondIfElseBlock);
 	loopBody.blocks.push_back(secondLoopBlock);
 	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
+
 	BlockSequence yesBS;
 	BlockSequence noBS;
-//	yesBS.blocks.push_back( theLoopBlock );
+	yesBS.blocks.push_back( theLoopBlock );
 	yesBS.blocks.push_back( thirdSimpleBlock );
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
-	chart->root.blocks.push_back( theLoopBlock );
+
+//	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
 	chart->root.blocks.push_back( fifthSimpleBlock );
+//	chart->root.blocks.push_back( secondIfElseBlock );
 
 	//	PrimitiveType* firstType = new PrimitiveType;
 	//	firstType->name = "first decl";

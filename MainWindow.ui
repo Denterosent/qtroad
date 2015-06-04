@@ -70,6 +70,9 @@
    </property>
   </action>
   <action name="actionDirect_Print">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Direct Print</string>
    </property>
@@ -78,6 +81,9 @@
    </property>
   </action>
   <action name="actionPrint_To_PDF">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Print To PDF</string>
    </property>
