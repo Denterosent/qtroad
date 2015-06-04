@@ -5,9 +5,11 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsRectItem>
 #include <QDebug>
-#include <QtPrintSupport/QPrinter>
-#include <QtPrintSupport/QPrintDialog>
 #include <QMessageBox>
+#include <QtPrintSupport>
+#include <QPainter>
+#include <QPrinter>
+#include <qpainter.h>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -122,9 +124,7 @@ void MainWindow::on_actionGenerate_triggered()
 
 	delete drawer;
 	delete chart;
-	delete firstSimpleBlock; //wieso tritt hier kein Fehler auf? durch das Löschen von chart wierden doch auch alle elemente von chart gelöscht. Oder?
 }
-
 void MainWindow::on_actionOpen_triggered()
 {
 	QStringList files = QFileDialog::getOpenFileNames(this, "Select code files", "../qtroad", "C/C++ (*.c *.h *.cpp *.hpp)");
@@ -140,7 +140,7 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionDirect_Print_triggered()
 {
 	QPrinter printer;
-		if (QPrintDialog(&printer).exec() == QDialog::Accepted) {
+		if (QPrintDialog(&printer).exec() == QDialog::Accepted) { //Bug: while choosing the directory to print a pdf-file with Nitro PDF Creator, qtroad is marked with "no response"
 			QPainter painter(&printer);
 			painter.setRenderHint(QPainter::Antialiasing);
 			scene->render(&painter);
@@ -149,18 +149,41 @@ void MainWindow::on_actionDirect_Print_triggered()
 
 void MainWindow::on_actionPrint_To_PDF_triggered()
 {
-	//print graphics view to pdf
-/*	QPrinter printer;
+	/*//print graphics view to pdf
+	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	printer.setPageSize(QPrinter::A4);
 	printer.setOutputFileName("prints/file.pdf");
-//	printer.setDocName("structureAndClassChart.pdf");
+
 	QPainter painter(&printer);
+	std::cout << "painter inited" << std::endl;
 	graphicsView->render(&painter);
-//	scene->render(printerPainter, structureChart->boundingRect(), structureChart->boundingRect(), Qt::KeepAspectRatio);
+//	scene->render(&painter);*/
+
+/*	QPrinter printer;
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	printer.setPaperSize(QPrinter::A4);
+	printer.setOutputFileName("prints/file.pdf");
+//	printer.setOutputFormat(QPrinter::PdfFormat);
+
+	QPainter painter(&printer);
+	painter.setRenderHint(QPainter::Antialiasing, false);
+	scene->render(&painter);
 */
+
+/*
 	QMessageBox msgBox;
-	msgBox.information(nullptr, "Sorry", "This function is currently not implemented.");
+	msgBox.information(nullptr, "Sorry", "This function is currently not implemented.\n\nIf you have an pdf-printer installed, you can choose \"Direct Print\" with this pdf-printer.");
+
+	QPrinter printer;
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	printer.setPageSize(QPrinter::A4);
+	printer.setOutputFileName("prints/file.pdf");
+
+	QPainter painter(&printer);
+	//painter.setRenderHint(QPainter::Antialiasing);
+
+*/
 }
 
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart): scene(pScene), chart(pChart)
@@ -170,11 +193,11 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * IfElseBlocks
 	 * recursivity
 	 * LoopBlocks
+	 * space-filling blocks
 	 *
 	 *no Support for:
 	 * SwitchBlocks
 	 * text auto-wrap
-	 * space-managing
 	 * declarations
 	 */
 
