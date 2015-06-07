@@ -53,6 +53,10 @@ struct IfElseBlock : public Block
 
 struct SwitchBlock : public Block
 {
+		SwitchBlock(std::string expression, std::map<std::string, BlockSequence> sequences)
+			:expression(expression), sequences(sequences)
+		{
+		}
 		std::string expression;
 		std::map<std::string, BlockSequence> sequences; // Empty string: else
 };

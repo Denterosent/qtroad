@@ -103,7 +103,10 @@ void MainWindow::on_actionGenerate_triggered()
 	noBS.blocks.push_back( firstSimpleBlock );
 	noBS.blocks.push_back( secondSimpleBlock );
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
-
+/*
+	BlockSequence firstCase;
+	std::map<std::string, BlockSequence> cases;
+	SwitchBlock* switchBlock = new SwitchBlock("switch value",);*/
 //	chart->root.blocks.push_back( theLoopBlock );
 	chart->root.blocks.push_back( fourthSimpleBlock );
 	chart->root.blocks.push_back( firstIfElseBlock );
