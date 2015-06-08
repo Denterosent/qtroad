@@ -9,7 +9,6 @@
 #include <QtPrintSupport>
 #include <QPainter>
 #include <QPrinter>
-#include <qpainter.h>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
