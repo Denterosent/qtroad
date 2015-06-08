@@ -26,4 +26,4 @@ HEADERS  += MainWindow.hpp \
 
 FORMS    += MainWindow.ui
 
-CONFIG += c++14
+CONFIG += c++11
