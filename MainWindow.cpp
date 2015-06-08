@@ -152,41 +152,13 @@ void MainWindow::on_actionDirect_Print_triggered()
 
 void MainWindow::on_actionPrint_To_PDF_triggered()
 {
-	/*//print graphics view to pdf
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
+	printer.setOutputFileName(QFileDialog::getSaveFileName(this, "Save File", "", "PDF (*.pdf)"));
 	printer.setPageSize(QPrinter::A4);
-	printer.setOutputFileName("prints/file.pdf");
 
 	QPainter painter(&printer);
-	std::cout << "painter inited" << std::endl;
-	graphicsView->render(&painter);
-//	scene->render(&painter);*/
-
-/*	QPrinter printer;
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setPaperSize(QPrinter::A4);
-	printer.setOutputFileName("prints/file.pdf");
-//	printer.setOutputFormat(QPrinter::PdfFormat);
-
-	QPainter painter(&printer);
-	painter.setRenderHint(QPainter::Antialiasing, false);
 	scene->render(&painter);
-*/
-
-
-	QMessageBox msgBox;
-	msgBox.information(nullptr, "Sorry", "This function is currently not implemented.\n\nIf you have an pdf-printer installed, you can choose \"Direct Print\" with this pdf-printer.");
-/*
-	QPrinter printer;
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setPageSize(QPrinter::A4);
-	printer.setOutputFileName("prints/file.pdf");
-
-	QPainter painter(&printer);
-	//painter.setRenderHint(QPainter::Antialiasing);
-
-*/
 }
 
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart): scene(pScene), chart(pChart)
