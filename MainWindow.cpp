@@ -250,7 +250,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 				if(leftTop != rightTop){
 					top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
 					QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
-					spaceText->setText("%");
+					spaceText->setText("∅");
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){//add spacefiller left
 						spaceRect->setRect(left, leftTop, width, top-leftTop);
