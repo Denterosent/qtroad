@@ -26,31 +26,52 @@ void MainWindow::resetGraphicsView()
 	}
 }
 
-QGraphicsItemGroup* generateClassDiagram(QString name, QString attribs, QString ops)
+QGraphicsItemGroup* generateClassDiagram(std::string str1, std::string str2, std::string str3)
 {
 	QGraphicsItemGroup* group = new QGraphicsItemGroup();
+	group->setHandlesChildEvents(false);
 
-	QGraphicsSimpleTextItem* text1 = new QGraphicsSimpleTextItem(group);
-	text1->setText(name);
+	QGraphicsSimpleTextItem* text1 = new QGraphicsSimpleTextItem();
+	text1->setPos(2., 2.);
+	text1->setText(QString::fromStdString(str1));
+	group->addToGroup(text1);
 
-	QGraphicsSimpleTextItem* text2 = new QGraphicsSimpleTextItem(group);
-	text2->setText(attribs);
-	text2->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()));
+	QGraphicsSimpleTextItem* text2 = new QGraphicsSimpleTextItem();
+	text2->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	if (str2.empty()) {
+		text2->setText("\n");
+		text2->setFont(QFont("", 2));
+	} else {
+		text2->setText(QString::fromStdString(str2));
+	}
+	group->addToGroup(text2);
 
-	QGraphicsSimpleTextItem* text3 = new QGraphicsSimpleTextItem(group);
-	text3->setText(ops);
-	text3->setPos(text2->mapToParent(text2->boundingRect().bottomLeft()));
+	QGraphicsSimpleTextItem* text3 = new QGraphicsSimpleTextItem();
+	text3->setPos(text2->mapToParent(text2->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	if (str3.empty()) {
+		text3->setText("\n");
+		text3->setFont(QFont("", 2));
+	} else {
+		text3->setText(QString::fromStdString(str3));
+	}
+	group->addToGroup(text3);
 
-	QGraphicsRectItem* rect = new QGraphicsRectItem(group);
-	rect->setRect(group->childrenBoundingRect());
+	QRectF textRect = group->boundingRect().adjusted(-1., -1., 0., 0.);
+	textRect.setWidth(std::ceil(textRect.width()));
 
-	QGraphicsLineItem* line1 = new QGraphicsLineItem(group);
+	QGraphicsRectItem* rect = new QGraphicsRectItem();
+	rect->setRect(textRect);
+	group->addToGroup(rect);
+
+	QGraphicsLineItem* line1 = new QGraphicsLineItem();
 	line1->setLine(QLineF(text1->mapToParent(text1->boundingRect().bottomLeft()),
-						  text1->mapToParent(rect->boundingRect().right(), text1->boundingRect().bottom())));
+						  QPointF(textRect.right(), text1->mapToParent(0., text1->boundingRect().bottom()).y())));
+	group->addToGroup(line1);
 
-	QGraphicsLineItem* line2 = new QGraphicsLineItem(group);
+	QGraphicsLineItem* line2 = new QGraphicsLineItem();
 	line2->setLine(QLineF(text2->mapToParent(text2->boundingRect().bottomLeft()),
-						  text2->mapToParent(rect->boundingRect().right(), text2->boundingRect().bottom())));
+						  QPointF(textRect.right(), text2->mapToParent(0., text2->boundingRect().bottom()).y())));
+	group->addToGroup(line2);
 
 	return group;
 }
@@ -69,7 +90,7 @@ void MainWindow::on_actionGenerate_triggered()
 
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
 	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
-	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10.5, 0));
+	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10, 0));
 	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
 	scene->addItem(classDiagram1);
 	scene->addItem(classDiagram2);
