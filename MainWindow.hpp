@@ -38,7 +38,7 @@ class StructureChartDrawer
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
-		int drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector);
+		int drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector);
 		void drawStructureChart();
 		void drawSurroundings(QGraphicsItemGroup* group);
 		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);

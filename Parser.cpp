@@ -61,7 +61,7 @@ BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
 				commandEnd++;
 			}
 
-			ret.blocks.push_back(new SimpleBlock{std::string(begin, commandEnd)});
+			ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{std::string(begin, commandEnd)}));
 
 			if (*commandEnd == ';')
 				commandEnd++;

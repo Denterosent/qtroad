@@ -7,7 +7,7 @@
 struct Result
 {
 		//ClassChart classChart;
-		boost::ptr_vector<StructureChart> structureCharts;
+		std::vector<std::unique_ptr<StructureChart>> structureCharts;
 };
 
 class Parser

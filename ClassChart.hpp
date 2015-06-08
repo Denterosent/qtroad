@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 enum class Visibility { private_, protected_, public_ };
 
@@ -55,8 +54,8 @@ struct Association : public Edge
 
 struct ClassChart
 {
-		boost::ptr_vector<Class> classes;
-		boost::ptr_vector<Edge> edges;
+		std::vector<std::unique_ptr<Class>> classes;
+		std::vector<std::unique_ptr<Edge>> edges;
 };
 
 #endif

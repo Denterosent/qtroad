@@ -108,30 +108,30 @@ void MainWindow::on_actionGenerate_triggered()
 
 	BlockSequence yesBS2;
 	BlockSequence noBS2;
-	yesBS2.blocks.push_back( yesBlock );
+	yesBS2.blocks.push_back(std::unique_ptr<Block>(yesBlock));
 	IfElseBlock* secondIfElseBlock = new IfElseBlock("condition", yesBS2, noBS2);
 
 	BlockSequence loopBody;
-	loopBody.blocks.push_back(firstLoopBlock);
-	loopBody.blocks.push_back(secondIfElseBlock);
-	loopBody.blocks.push_back(secondLoopBlock);
+	loopBody.blocks.push_back(std::unique_ptr<Block>(firstLoopBlock));
+	loopBody.blocks.push_back(std::unique_ptr<Block>(secondIfElseBlock));
+	loopBody.blocks.push_back(std::unique_ptr<Block>(secondLoopBlock));
 	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
 
 	BlockSequence yesBS;
 	BlockSequence noBS;
-	yesBS.blocks.push_back( theLoopBlock );
-	yesBS.blocks.push_back( thirdSimpleBlock );
-	noBS.blocks.push_back( firstSimpleBlock );
-	noBS.blocks.push_back( secondSimpleBlock );
+	yesBS.blocks.push_back(std::unique_ptr<Block>(theLoopBlock));
+	yesBS.blocks.push_back(std::unique_ptr<Block>(thirdSimpleBlock));
+	noBS.blocks.push_back(std::unique_ptr<Block>(firstSimpleBlock));
+	noBS.blocks.push_back(std::unique_ptr<Block>(secondSimpleBlock));
 	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
 /*
 	BlockSequence firstCase;
 	std::map<std::string, BlockSequence> cases;
 	SwitchBlock* switchBlock = new SwitchBlock("switch value",);*/
 //	chart->root.blocks.push_back( theLoopBlock );
-	chart->root.blocks.push_back( fourthSimpleBlock );
-	chart->root.blocks.push_back( firstIfElseBlock );
-	chart->root.blocks.push_back( fifthSimpleBlock );
+	chart->root.blocks.push_back(std::unique_ptr<Block>(fourthSimpleBlock));
+	chart->root.blocks.push_back(std::unique_ptr<Block>(firstIfElseBlock));
+	chart->root.blocks.push_back(std::unique_ptr<Block>(fifthSimpleBlock));
 //	chart->root.blocks.push_back( secondIfElseBlock );
 
 	//	PrimitiveType* firstType = new PrimitiveType;
@@ -209,7 +209,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	paddingTop = 5;		//only for heading
 }
 
-int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<Block>& vector){
+int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector){
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
 	QGraphicsRectItem* commandRect;
@@ -217,7 +217,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, boost::ptr_vector<
 
 	//draw body
 	for(index = 0; index < vector.size(); index++){
-		Block* block = &(vector[index]);
+		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			//draw text

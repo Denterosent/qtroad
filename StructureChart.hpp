@@ -4,7 +4,6 @@
 #include "ChartsBase.hpp"
 #include <string>
 #include <map>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <memory>
 #include <vector>
 
@@ -23,8 +22,7 @@ struct Block
 
 struct BlockSequence
 {
-		boost::ptr_vector<Block> blocks;
-//		std::vector<std::shared_ptr<Block>> blocks;
+		std::vector<std::unique_ptr<Block>> blocks;
 };
 
 struct SimpleBlock : public Block
@@ -54,7 +52,7 @@ struct IfElseBlock : public Block
 struct SwitchBlock : public Block
 {
 		SwitchBlock(std::string expression, std::map<std::string, BlockSequence> sequences)
-			:expression(expression), sequences(sequences)
+			:expression(expression), sequences(std::move(sequences))
 		{
 		}
 		std::string expression;
