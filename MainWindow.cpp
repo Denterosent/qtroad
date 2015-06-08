@@ -310,6 +310,9 @@ void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
 	headline->setText(QString::fromStdString(chart->headline));
 	headline->setPos(paddingLeft, paddingTop);
+	QFont font = headline->font();
+	font.setBold(true);
+	headline->setFont(font);
 }
 
 void StructureChartDrawer::drawStructureChart()
