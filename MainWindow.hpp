@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 #include "StructureChart.hpp"
 
+
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
 		Q_OBJECT

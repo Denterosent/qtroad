@@ -209,14 +209,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	paddingTop = 5;		//only for heading
 }
 
-int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector){
+int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector)
+{
 	QGraphicsSimpleTextItem* commandBlock;
 	QString text;
 	QGraphicsRectItem* commandRect;
-	unsigned int index;
 
 	//draw body
-	for(index = 0; index < vector.size(); index++){
+	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
@@ -303,12 +303,13 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::u
 			}
 		}
 	}
-	int numberOfDrawnBlocks = index+1;
+	int numberOfDrawnBlocks = vector.size();
 	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
 	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be usefull to know
 }
 
-void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock){
+void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
+{
 
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
