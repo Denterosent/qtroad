@@ -143,11 +143,11 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionDirect_Print_triggered()
 {
 	QPrinter printer;
-		if (QPrintDialog(&printer).exec() == QDialog::Accepted) { //Bug: while choosing the directory to print a pdf-file with Nitro PDF Creator, qtroad is marked with "no response"
-			QPainter painter(&printer);
-			painter.setRenderHint(QPainter::Antialiasing);
-			scene->render(&painter);
-		}
+	if (QPrintDialog(&printer).exec() == QDialog::Accepted) { //Bug: while choosing the directory to print a pdf-file with Nitro PDF Creator, qtroad is marked with "no response"
+		QPainter painter(&printer);
+		painter.setRenderHint(QPainter::Antialiasing);
+		scene->render(&painter);
+	}
 }
 
 void MainWindow::on_actionPrint_To_PDF_triggered()
