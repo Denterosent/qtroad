@@ -179,6 +179,7 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	printer.setPageSize(QPrinter::A4);
 
 	QPainter painter(&printer);
+	painter.setRenderHint(QPainter::Antialiasing);
 	scene->render(&painter);
 }
 
