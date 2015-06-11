@@ -141,14 +141,14 @@ void MainWindow::on_actionGenerate_triggered()
 	chart->headline = "This is a headline!!!";
 	/*================================================================================================*/
 
-	StructureChartDrawer* drawer = new StructureChartDrawer(scene, chart);
-	drawer->drawStructureChart();
+	StructureChartDrawer drawer(scene, chart);
+	drawer.drawStructureChart();
 
 	graphicsView->setScene(scene);
 
-	delete drawer;
 	delete chart;
 }
+
 void MainWindow::on_actionOpen_triggered()
 {
 	QStringList files = QFileDialog::getOpenFileNames(this, "Select code files", "../qtroad", "C/C++ (*.c *.h *.cpp *.hpp)");
@@ -211,23 +211,19 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 
 int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector)
 {
-	QGraphicsSimpleTextItem* commandBlock;
-	QString text;
-	QGraphicsRectItem* commandRect;
-
 	//draw body
 	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			//draw text
-			text = QString::fromStdString(simpleBlock->command);
-			commandBlock = new QGraphicsSimpleTextItem(group);
+			QString text = QString::fromStdString(simpleBlock->command);
+			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
 			commandBlock->setPos(left+paddingLeft,top+height*0.5-commandBlock->boundingRect().height()*0.5);
 
 			//draw rect
-			commandRect= new QGraphicsRectItem(group);
+			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
 			commandRect->setRect(left,top,width,height);
 
 			top += height;
@@ -248,7 +244,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::u
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
 				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(group);
-				text = QString::fromStdString(ifElseBlock->condition);
+				QString text = QString::fromStdString(ifElseBlock->condition);
 				conditionText->setText(text);
 				trueText->setText("true");
 				falseText->setText("false");
@@ -318,7 +314,8 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 	top += loopHeadingHeight;
 }
 
-void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group){
+void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
+{
 	//draw surrounding rectangle
 	int bottom = left;
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
