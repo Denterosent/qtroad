@@ -84,40 +84,39 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* end = &*input.cend();
 
 	try {
+		Parser parser(begin, end);
 
-	Parser parser(begin, end);
+		resetGraphicsView();
 
-	resetGraphicsView();
+		scene = new QGraphicsScene(this);
+		this->actionDirect_Print->setEnabled(true);
+		this->actionPrint_To_PDF->setEnabled(true);
 
-	scene = new QGraphicsScene(this);
-	this->actionDirect_Print->setEnabled(true);
-	this->actionPrint_To_PDF->setEnabled(true);
+		QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
+		QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
+		classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
+		classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
+		scene->addItem(classDiagram1);
+		scene->addItem(classDiagram2);
+		QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
+		QPolygonF poly;
+		poly.append(QPointF(0,10));
+		poly.append(QPointF(10*sqrt(2)/2,0));
+		poly.append(QPointF(-10*sqrt(2)/2,0));
+		polygon->setPolygon(poly);
+		polygon->setBrush(QBrush(Qt::SolidPattern));
+		polygon->setRotation(-90);
+		QGraphicsLineItem* line = new QGraphicsLineItem();
+		line->setLine(0,0,38,0);
+		line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
+		polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
+		scene->addItem(line);
+		scene->addItem(polygon);
 
-	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
-	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
-	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
-	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
-	scene->addItem(classDiagram1);
-	scene->addItem(classDiagram2);
-	QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
-	QPolygonF poly;
-	poly.append(QPointF(0,10));
-	poly.append(QPointF(10*sqrt(2)/2,0));
-	poly.append(QPointF(-10*sqrt(2)/2,0));
-	polygon->setPolygon(poly);
-	polygon->setBrush(QBrush(Qt::SolidPattern));
-	polygon->setRotation(-90);
-	QGraphicsLineItem* line = new QGraphicsLineItem();
-	line->setLine(0,0,38,0);
-	line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
-	polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
-	scene->addItem(line);
-	scene->addItem(polygon);
+		StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
+		drawer.drawStructureChart();
 
-	StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
-	drawer.drawStructureChart();
-
-	graphicsView->setScene(scene);
+		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
 		QMessageBox::warning(this, "Parser Error", e.what());
 	}
@@ -212,6 +211,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
+				wrapText(conditionText, width-10);
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 
 				//calculate the height of the condition block
@@ -284,16 +284,28 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
 				}else{
-					std::cout << "Error: Block is neither a simple Block, loop-Block, nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
+					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
+					if(switchBlock){
+						//draw condition
+						QString switchExpression = QString::fromStdString(switchBlock->expression);
+
+						for (std::map<std::string, BlockSequence>::iterator itr = switchBlock->sequences.begin(); itr != switchBlock->sequences.end(); itr++){
+							//draw switchValue
+//							QString::fromStdString(*itr);
+
+							//draw Blocks
+//							drawBody(group, *itr.second.blocks);
+						}
+
+						switchBlock->sequences.size();
+
+					}else{
+					std::cout << "Error: no valid block";
+					}
 				}
 			}
 		}
 	}
-// commented this out because some peolpe din't like it:
-// ====================================================
-//	int numberOfDrawnBlocks = vector.size();
-//	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
-
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
@@ -325,6 +337,21 @@ void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
 	headline->setFont(font);
 }
 
+void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth)
+{
+	int index;
+	QString originalText = inputItem->text();
+	QString newText = originalText;
+
+	if(inputItem->boundingRect().width() > maximumWidth){
+		index = newText.lastIndexOf(" ", -2);
+		std::cout << index << std::endl;
+		newText = newText.insert(index, "\n");
+		inputItem->setText(newText);
+	}
+
+}
+
 void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
@@ -332,6 +359,6 @@ void StructureChartDrawer::drawStructureChart()
 	drawBody(structureChart, chart->root.blocks);
 	drawSurroundings(structureChart);
 
-	structureChart->setPos(0.5,100.5);
+	structureChart->setPos(0.5, 100.5);
 	scene->addItem(structureChart);
 }
