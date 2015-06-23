@@ -34,6 +34,7 @@ class StructureChartDrawer
 		int paddingLeft;
 		int paddingTop;
 		int paddingTopBlock;
+		int paddingBody;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);

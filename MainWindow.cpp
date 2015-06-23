@@ -215,13 +215,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 */
 
 	top = 50;
-	left = 5; //is left, right and bottom offset of body and left offset of SimpleBlocks and LoopBlocks relative to body
+	left = 5; //left offset of SimpleBlocks and LoopBlocks relative to body
 	loopOffset = 20;
 	maxWidth = 300;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text
 	paddingTop = 5;		//only for heading
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
+	paddingBody = 5;
 }
 
 int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -320,8 +321,8 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<
 					left -= loopOffset;
 					if(!loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
 
-					QGraphicsRectItem* leftBorder = new QGraphicsRectItem(group);
-					leftBorder->setRect(left, saveTop, width, top-saveTop);
+					QGraphicsRectItem* border = new QGraphicsRectItem(group);
+					border->setRect(left, saveTop, width, top-saveTop);
 				}else{
 					std::cout << "Error: Block is neither a simple Block, loop-Block, nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
 				}
@@ -348,10 +349,9 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
 {
 	//draw surrounding rectangle
-	int bottom = left;
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
 	surroundingRect->setRect(group->childrenBoundingRect().left(), group->childrenBoundingRect().top(),
-							 group->childrenBoundingRect().width() + left, group->childrenBoundingRect().height() + bottom);
+							 group->childrenBoundingRect().width() + paddingBody, group->childrenBoundingRect().height() + paddingBody);
 	//draw declarations
 	//	for (Declaration& decl : chart->declarations){
 	//		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
