@@ -7,55 +7,94 @@ Parser::Parser(const char *begin, const char *end)
 
 void Parser::parseStructures(const char* begin, const char* end)
 {
-	int i = 0;
-	while(begin != end) {
+
 		parseFunctionBody(begin, end);
-		i++;
-	}
+
 }
 
-BlockSequence Parser::parseFunctionBody(const char* begin, const char* end)
+BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 {
 	BlockSequence ret;
 	while (begin != end) {
-
 		skipWhitespaces(begin);
 
 		if (matchWithFollowing(begin, end, "if", '(')) {
+			const char* yesBlockEnd;
+			const char* yesBlockBegin;
+			const char* noBlockBegin;
+			const char* noBlockEnd;
+
+			bool falseBranche = false;
 			std::string condition = getCondition(begin, end);
 			expect(begin, end, "{");
 
-			const char* blockBegin = begin;
+			yesBlockBegin = begin;
 			skipBody(begin, end);
-			const char* blockEnd = begin;
+			yesBlockEnd = begin;
 			begin++;
 
-			BlockSequence yes = parseFunctionBody(blockBegin, blockEnd);
-			//Chris, the init structure of the IfElseBlock has been modified.
-			//The two lines, which are commented out don't work with this new structure.
-			//Sorry.
-//			ret.blocks.push_back(new IfElseBlock{condition, yes, BlockSequence()});
 			skipWhitespaces(begin);
 
-			if(matchWithFollowing(begin, end, "else" , '{')) {
-				condition = getCondition(begin, end);
-				expect(begin, end, "{");
-				const char* blockBegin = begin;
-				skipBody(begin, end);
-				const char* blockEnd = begin;
-				begin++;
-
-				BlockSequence no = parseFunctionBody(blockBegin, blockEnd);
-//				ret.blocks.push_back(new IfElseBlock{condition, no, BlockSequence()}); //<<<sure that the order is right? how about (condition, BlockSequence(), no)???
+			if(match(begin, end, "else")) {
+				falseBranche = true;
+				skipWhitespaces(begin);
+				if(following(begin, end, "if")) {
+					noBlockBegin = begin;
+					skipBody(begin, end);
+					noBlockEnd = begin;
+					begin++;
+				} else {
+					expect(begin, end, "{");
+					noBlockBegin = begin;
+					skipBody(begin, end);
+					noBlockEnd = begin;
+					begin++;
+				}
 				skipWhitespaces(begin);
 			}
+			BlockSequence yes = parseFunctionBody(yesBlockBegin, yesBlockEnd);
+			if(falseBranche) {
+				BlockSequence no = parseFunctionBody(noBlockBegin, noBlockEnd);
+				ret.blocks.push_back(new IfElseBlock{condition, yes, no});
+			}
+			// missing option that no false Branch is given
 		} else if (match(begin, end, "switch")) {
 
 		} else if (match(begin, end, "while")) {
+			std::string condition = getCondition(begin, end);
+			expect(begin, end, "{");
+
+			const char* whileBlockBegin = begin;
+			skipBody(begin, end);
+			const char* whileBlockEnd = begin;
+			begin++;
+
+			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
+
+			ret.blocks.push_back(new LoopBlock(condition, body, true));
+
+			skipWhitespaces((begin));
 
 		} else if (match(begin, end, "do")) {
 
+			expect(begin, end, "{");
+
+			const char* whileBlockBegin = begin;
+			skipBody(begin, end);
+			const char* whileBlockEnd = begin;
+			begin++;
+
+			skipWhitespaces(begin);
+			expect(begin, end, "while");
+			std::string condition = getCondition(begin, end);
+			expect(begin, end, ";");
+
+			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
+
+			ret.blocks.push_back(new LoopBlock(condition, body, true));
+
 		} else {
+
 			const char* commandEnd = begin;
 			while (*commandEnd != ';' && commandEnd < end) {
 				commandEnd++;
@@ -91,6 +130,19 @@ bool Parser::match(const char*& begin, const char* end, const char* literal)
 	}
 	skipWhitespaces(tmp);
 	begin = tmp;
+	return true;
+}
+bool Parser::following(const char*& begin, const char* end, const char* literal)
+{
+	const char* tmp = begin;
+
+	while (*literal != '\0') {
+		if (*tmp != *literal || tmp == end) {
+			return false;
+		}
+		tmp++;
+		literal++;
+	}
 	return true;
 }
 
@@ -134,7 +186,7 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 	const char* conditionBegin = begin;
 	while (*begin != ')') {
 		if(begin == end) {
-			throw std::runtime_error("An if has no valid Condition");
+			throw std::runtime_error("A if has no valid Condition");
 		}
 		begin++;
 	}

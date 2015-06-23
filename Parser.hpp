@@ -18,10 +18,11 @@ class Parser
 	private:
 
 		void parseStructures(const char* begin, const char* end);
-		BlockSequence parseFunctionBody(const char* begin, const char* end);
+		BlockSequence parseFunctionBody(const char*& begin, const char* end);
 		static void skipWhitespaces(const char*& c);
 		static bool match(const char*& begin, const char* end, const char* literal);
 		static bool matchWithFollowing(const char*& begin, const char* end, const char* literal, const char following);
+		static bool following(const char*& begin, const char* end, const char* literal); // like match but without jumping to the last position of tmp
 		static void expect(const char*& begin, const char* end, const char* literal);
 		std::string getCondition (const char*& begin, const char* end);
 		void skipBody(const char*& begin, const char* end);
