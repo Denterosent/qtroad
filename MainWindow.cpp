@@ -83,6 +83,8 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* begin = &*input.cbegin();
 	const char* end = &*input.cend();
 
+	try {
+
 	Parser parser(begin, end);
 
 	resetGraphicsView();
@@ -116,6 +118,9 @@ void MainWindow::on_actionGenerate_triggered()
 	drawer.drawStructureChart();
 
 	graphicsView->setScene(scene);
+	} catch (std::runtime_error& e) {
+		QMessageBox::warning(this, "Parser Error", e.what());
+	}
 }
 
 void MainWindow::on_actionOpen_triggered()
