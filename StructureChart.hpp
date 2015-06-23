@@ -22,6 +22,8 @@ struct Block
 
 struct BlockSequence
 {
+		BlockSequence() = default;
+		BlockSequence(BlockSequence&&) = default;
 		std::vector<std::unique_ptr<Block>> blocks;
 };
 
@@ -38,10 +40,9 @@ struct IfElseBlock : public Block
 {
 		IfElseBlock(std::string condition, BlockSequence& yes, BlockSequence& no)
 			: condition(condition)
-
+			, yes(std::move(yes))
+			, no(std::move(no))
 		{
-			this->yes.blocks.swap(yes.blocks);
-			this->no.blocks.swap(no.blocks);
 		}
 
 		std::string condition;
@@ -60,10 +61,16 @@ struct SwitchBlock : public Block
 };
 
 struct LoopBlock : public Block
-{		LoopBlock(std::string condition, BlockSequence& body, bool headControlled)
-			: condition(condition), headControlled(headControlled)
+{
+		LoopBlock()
 		{
-			this->body.blocks.swap(body.blocks);
+		}
+
+		LoopBlock(std::string condition, BlockSequence& body, bool headControlled)
+			: condition(condition)
+			, body(std::move(body))
+			, headControlled(headControlled)
+		{
 		}
 		std::string condition;
 		BlockSequence body;
@@ -72,6 +79,14 @@ struct LoopBlock : public Block
 
 struct StructureChart
 {
+		StructureChart()
+		{
+		}
+
+		StructureChart(std::string headline, std::vector<Declaration>&& declarations, BlockSequence root)
+			: headline(headline), declarations(std::move(declarations)), root(std::move(root))
+		{
+		}
 		std::string headline;
 		std::vector<Declaration> declarations;
 		BlockSequence root;
