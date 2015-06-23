@@ -90,10 +90,24 @@ void MainWindow::on_actionGenerate_triggered()
 
 	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
 	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
-	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(10, 0));
+	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
 	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
 	scene->addItem(classDiagram1);
 	scene->addItem(classDiagram2);
+	QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
+	QPolygonF poly;
+	poly.append(QPointF(0,10));
+	poly.append(QPointF(10*sqrt(2)/2,0));
+	poly.append(QPointF(-10*sqrt(2)/2,0));
+	polygon->setPolygon(poly);
+	polygon->setBrush(QBrush(Qt::SolidPattern));
+	polygon->setRotation(-90);
+	QGraphicsLineItem* line = new QGraphicsLineItem();
+	line->setLine(0,0,38,0);
+	line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
+	polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
+	scene->addItem(line);
+	scene->addItem(polygon);
 
 	/*===============================create testenvironment structure chart===========================*/
 	StructureChart* chart = new StructureChart();
