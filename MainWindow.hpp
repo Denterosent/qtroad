@@ -28,18 +28,16 @@ class StructureChartDrawer
 		StructureChart* chart;
 		int top;
 		int left;
-		int height;
-		int ifElseBlockHeight;
-		int loopHeadingHeight;
 		int loopOffset;
 		int maxWidth;
 		int width;
 		int paddingLeft;
 		int paddingTop;
+		int paddingTopBlock;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
-		int drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector);
+		int drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector);
 		void drawStructureChart();
 		void drawSurroundings(QGraphicsItemGroup* group);
 		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);

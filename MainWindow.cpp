@@ -99,23 +99,23 @@ void MainWindow::on_actionGenerate_triggered()
 	StructureChart* chart = new StructureChart();
 	SimpleBlock* firstSimpleBlock = new SimpleBlock("simple command") ;
 	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
-	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)") ;
+	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)\nReally????\nAre you serious?\nhmm") ;
 	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command.") ;
 	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
-	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!");
+	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!\nYolo!!!");
 	SimpleBlock* secondLoopBlock = new SimpleBlock("LoopBlock");
-	SimpleBlock* yesBlock = new SimpleBlock("positive");
+	BlockSequence noBS2;
+	Block* yesBlock = new IfElseBlock("positiveeeee", noBS2, noBS2);
 
 	BlockSequence yesBS2;
-	BlockSequence noBS2;
 	yesBS2.blocks.push_back(std::unique_ptr<Block>(yesBlock));
-	IfElseBlock* secondIfElseBlock = new IfElseBlock("condition", yesBS2, noBS2);
+	IfElseBlock* secondIfElseBlock = new IfElseBlock("condition\ncontinuedCondition12345", yesBS2, noBS2);
 
 	BlockSequence loopBody;
 	loopBody.blocks.push_back(std::unique_ptr<Block>(firstLoopBlock));
 	loopBody.blocks.push_back(std::unique_ptr<Block>(secondIfElseBlock));
 	loopBody.blocks.push_back(std::unique_ptr<Block>(secondLoopBlock));
-	LoopBlock* theLoopBlock = new LoopBlock("forever young!!!", loopBody, true);
+	LoopBlock* theLoopBlock = new LoopBlock("foreve\n young!!!\n.\n.\n.", loopBody, true);
 
 	BlockSequence yesBS;
 	BlockSequence noBS;
@@ -123,7 +123,7 @@ void MainWindow::on_actionGenerate_triggered()
 	yesBS.blocks.push_back(std::unique_ptr<Block>(thirdSimpleBlock));
 	noBS.blocks.push_back(std::unique_ptr<Block>(firstSimpleBlock));
 	noBS.blocks.push_back(std::unique_ptr<Block>(secondSimpleBlock));
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("are you stupid?", yesBS, noBS);
+	IfElseBlock* firstIfElseBlock = new IfElseBlock("i", yesBS, noBS);
 /*
 	BlockSequence firstCase;
 	std::map<std::string, BlockSequence> cases;
@@ -191,6 +191,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * recursivity
 	 * LoopBlocks
 	 * space-filling blocks
+	 * AutoHeight of Blocks
 	 *
 	 *no Support for:
 	 * SwitchBlocks
@@ -200,17 +201,15 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 
 	top = 50;
 	left = 5;
-	height = 20;
-	ifElseBlockHeight = height;
-	loopHeadingHeight = height;
 	loopOffset = 20;
 	maxWidth = 300;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text
 	paddingTop = 5;		//only for heading
+	paddingTopBlock = 3;//is also a padding to bottom and used in every block
 }
 
-int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::unique_ptr<Block>>& vector)
+int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
 	//draw body
 	for(unsigned int index = 0; index < vector.size(); index++){
@@ -221,16 +220,34 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::u
 			QString text = QString::fromStdString(simpleBlock->command);
 			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
-			commandBlock->setPos(left+paddingLeft,top+height*0.5-commandBlock->boundingRect().height()*0.5);
+			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
+
+			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
 
 			//draw rect
 			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
-			commandRect->setRect(left,top,width,height);
+			commandRect->setRect(left,top,width,blockHeight);
 
-			top += height;
+			top += blockHeight;
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
+				//draw condition text
+				QString text = QString::fromStdString(ifElseBlock->condition);
+				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
+				conditionText->setText(text);
+				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
+
+				//calculate the height of the condition block
+				int textHeight = conditionText->boundingRect().height();
+				int textWidth = conditionText->boundingRect().width();
+				int ifElseBlockHeight = (width*textHeight)/(width-textWidth);
+				int maximumHeight = width;
+				if((ifElseBlockHeight > maximumHeight) or (ifElseBlockHeight < 0))
+				{
+					ifElseBlockHeight = maximumHeight;
+				}
+
 				//draw condition-rect
 				QGraphicsRectItem* conditionRect = new QGraphicsRectItem(group);
 				conditionRect->setRect(left, top, width, ifElseBlockHeight);
@@ -241,15 +258,11 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::u
 				leftLine->setLine(left, top, width*0.5+left, top+ifElseBlockHeight);
 				rightLine->setLine(left+width, top, width*0.5+left, top+ifElseBlockHeight);
 
-				//draw condition and yes/no -text
-				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
+				//draw yes/no -text
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
 				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(group);
-				QString text = QString::fromStdString(ifElseBlock->condition);
-				conditionText->setText(text);
 				trueText->setText("true");
 				falseText->setText("false");
-				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 				trueText->setPos(left+2, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width()-2, top+ifElseBlockHeight-falseText->boundingRect().height());
 
