@@ -10,6 +10,7 @@
 #include <QPainter>
 #include <QPrinter>
 #include <iostream>
+#include "Parser.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -82,6 +83,8 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* begin = &*input.cbegin();
 	const char* end = &*input.cend();
 
+	Parser parser(begin, end);
+
 	resetGraphicsView();
 
 	scene = new QGraphicsScene(this);
@@ -109,58 +112,10 @@ void MainWindow::on_actionGenerate_triggered()
 	scene->addItem(line);
 	scene->addItem(polygon);
 
-	/*===============================create testenvironment structure chart===========================*/
-	StructureChart* chart = new StructureChart();
-	SimpleBlock* firstSimpleBlock = new SimpleBlock("simple command") ;
-	SimpleBlock* secondSimpleBlock = new SimpleBlock("this one too") ;
-	SimpleBlock* thirdSimpleBlock = new SimpleBlock("me too :-)\nReally????\nAre you serious?\nhmm") ;
-	SimpleBlock* fourthSimpleBlock = new SimpleBlock("this is a simple command.") ;
-	SimpleBlock* fifthSimpleBlock = new SimpleBlock("this is a normal, simple Command.") ;
-	SimpleBlock* firstLoopBlock = new SimpleBlock("I'm in a loop!\nYolo!!!");
-	SimpleBlock* secondLoopBlock = new SimpleBlock("LoopBlock");
-	BlockSequence noBS2;
-	Block* yesBlock = new IfElseBlock("positiveeeee", noBS2, noBS2);
-
-	BlockSequence yesBS2;
-	yesBS2.blocks.push_back(std::unique_ptr<Block>(yesBlock));
-	IfElseBlock* secondIfElseBlock = new IfElseBlock("condition\ncontinuedCondition12345", yesBS2, noBS2);
-
-	BlockSequence loopBody;
-	loopBody.blocks.push_back(std::unique_ptr<Block>(firstLoopBlock));
-	loopBody.blocks.push_back(std::unique_ptr<Block>(secondIfElseBlock));
-	loopBody.blocks.push_back(std::unique_ptr<Block>(secondLoopBlock));
-	LoopBlock* theLoopBlock = new LoopBlock("foreve\n young!!!\n.\n.\n.", loopBody, true);
-
-	BlockSequence yesBS;
-	BlockSequence noBS;
-	yesBS.blocks.push_back(std::unique_ptr<Block>(theLoopBlock));
-	yesBS.blocks.push_back(std::unique_ptr<Block>(thirdSimpleBlock));
-	noBS.blocks.push_back(std::unique_ptr<Block>(firstSimpleBlock));
-	noBS.blocks.push_back(std::unique_ptr<Block>(secondSimpleBlock));
-	IfElseBlock* firstIfElseBlock = new IfElseBlock("i", yesBS, noBS);
-/*
-	BlockSequence firstCase;
-	std::map<std::string, BlockSequence> cases;
-	SwitchBlock* switchBlock = new SwitchBlock("switch value",);*/
-//	chart->root.blocks.push_back( theLoopBlock );
-	chart->root.blocks.push_back(std::unique_ptr<Block>(fourthSimpleBlock));
-	chart->root.blocks.push_back(std::unique_ptr<Block>(firstIfElseBlock));
-	chart->root.blocks.push_back(std::unique_ptr<Block>(fifthSimpleBlock));
-//	chart->root.blocks.push_back( secondIfElseBlock );
-
-	//	PrimitiveType* firstType = new PrimitiveType;
-	//	firstType->name = "first decl";
-	//	chart->declarations.push_back(firstType);
-
-	chart->headline = "This is a headline!!!";
-	/*================================================================================================*/
-
-	StructureChartDrawer drawer(scene, chart);
+	StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
 	drawer.drawStructureChart();
 
 	graphicsView->setScene(scene);
-
-	delete chart;
 }
 
 void MainWindow::on_actionOpen_triggered()
