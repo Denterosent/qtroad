@@ -300,18 +300,20 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, std::vector<std::u
 			}
 		}
 	}
-	int numberOfDrawnBlocks = vector.size();
-	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
-	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be usefull to know
+// commented this ou because some peolpe din't like it:
+// ====================================================
+//	int numberOfDrawnBlocks = vector.size();
+//	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
+//	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be usefull to know
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
 {
-
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
-	loopHeading->setPos(left+paddingLeft,top+loopHeadingHeight*0.5-loopHeading->boundingRect().height()*0.5);
+	loopHeading->setPos(left+paddingLeft, top + paddingTopBlock);
 
+	int loopHeadingHeight = loopHeading->boundingRect().height() + 2*paddingTopBlock;
 	top += loopHeadingHeight;
 }
 
