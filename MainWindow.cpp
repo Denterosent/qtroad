@@ -342,6 +342,6 @@ void StructureChartDrawer::drawStructureChart()
 	drawBody(structureChart, chart->root.blocks);
 	drawSurroundings(structureChart);
 
-	structureChart->setPos(0,100);
+	structureChart->setPos(0.5,100.5);
 	scene->addItem(structureChart);
 }
