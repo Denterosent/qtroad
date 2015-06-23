@@ -191,16 +191,17 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * recursivity
 	 * LoopBlocks
 	 * space-filling blocks
-	 * AutoHeight of Blocks
+	 * AutoHeight of blocks
 	 *
 	 *no Support for:
 	 * SwitchBlocks
 	 * text auto-wrap
+	 * AutoWidth of blocks
 	 * declarations
 	 */
 
 	top = 50;
-	left = 5;
+	left = 5; //is left, right and bottom offset of body and left offset of SimpleBlocks and LoopBlocks relative to body
 	loopOffset = 20;
 	maxWidth = 300;
 	width = maxWidth;
@@ -313,18 +314,18 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<
 			}
 		}
 	}
-// commented this ou because some peolpe din't like it:
+// commented this out because some peolpe din't like it:
 // ====================================================
 //	int numberOfDrawnBlocks = vector.size();
 //	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
-//	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be usefull to know
+//	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be useful to know
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
 {
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
-	loopHeading->setPos(left+paddingLeft, top + paddingTopBlock);
+	loopHeading->setPos(left+paddingLeft, top+paddingTopBlock);
 
 	int loopHeadingHeight = loopHeading->boundingRect().height() + 2*paddingTopBlock;
 	top += loopHeadingHeight;
