@@ -180,7 +180,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	paddingBody = 5;
 }
 
-int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
+void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
 	//draw body
 	for(unsigned int index = 0; index < vector.size(); index++){
@@ -288,7 +288,7 @@ int StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<
 // ====================================================
 //	int numberOfDrawnBlocks = vector.size();
 //	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
-//	return numberOfDrawnBlocks; //number of drawn blocks by this function call, may be useful to know
+
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
