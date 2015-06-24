@@ -26,6 +26,25 @@
          <family>Monospace</family>
         </font>
        </property>
+       <property name="plainText">
+        <string>Block* block = vector[index].get();
+		SimpleBlock* simpleBlock = dynamic_cast&lt;SimpleBlock*&gt;(block);
+		if (simpleBlock) {
+			//draw text
+			QString text = QString::fromStdString(simpleBlock-&gt;command);
+			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
+			commandBlock-&gt;setText(text);
+			commandBlock-&gt;setPos(left+paddingLeft,top+paddingTopBlock);
+
+			int blockHeight = commandBlock-&gt;boundingRect().height()+paddingTopBlock*2;
+
+			//draw rect
+			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
+			commandRect-&gt;setRect(left,top,width,blockHeight);
+
+			top += blockHeight;
+		}</string>
+       </property>
       </widget>
       <widget class="QGraphicsView" name="graphicsView"/>
      </widget>
