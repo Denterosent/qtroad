@@ -165,10 +165,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * LoopBlocks
 	 * space-filling blocks
 	 * AutoHeight of blocks
+	 * text auto-wrap
 	 *
 	 *no Support for:
 	 * SwitchBlocks
-	 * text auto-wrap
 	 * AutoWidth of blocks
 	 * declarations
 	 */
@@ -194,7 +194,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 			QString text = QString::fromStdString(simpleBlock->command);
 			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
-			wrapText(commandBlock, width-width*0.3);
+			wrapText(commandBlock, width-2*paddingLeft);
 			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
 
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
@@ -312,7 +312,7 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 {
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
-	wrapText(loopHeading, width-width*0.3);
+	wrapText(loopHeading, width-2*paddingLeft);
 	loopHeading->setPos(left+paddingLeft, top+paddingTopBlock);
 
 	int loopHeadingHeight = loopHeading->boundingRect().height() + 2*paddingTopBlock;
@@ -344,31 +344,40 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 	int startingPos = 0, occurencePos = 0, startingPosSave = -1;
 	QString originalText = inputItem->text();
 	QString newText = originalText;
-	int sizeOfString = originalText.size();
-	bool thereAreSpaces = false;
+	bool thereAreOccurences = false;
 
 	if(inputItem->boundingRect().width() > maximumWidth){
 		//fill vector with positions of spaces
 		while(startingPos > startingPosSave){
-			occurencePos = originalText.indexOf(QRegExp("[ ,\.+-/\*>]"), startingPos+1);
+			occurencePos = originalText.indexOf(QRegExp("[ ,.+-/*>]"), startingPos+1);
 
 			if(occurencePos != -1){
 				index.push_back(occurencePos);
-				thereAreSpaces = true;
+				thereAreOccurences = true;
 			}
 			startingPosSave = startingPos;
 			startingPos = occurencePos;
 		}
-		if(thereAreSpaces){
-			std::cout << "vector contents:" << std::endl;
-			for(unsigned int i = 0; i < index.size(); i++)
-				std::cout << "vector:" << index[i] << std::endl;
+		if(thereAreOccurences){
+			//add \n's after occurences
+			int sizeOfString = originalText.size();
+			long halfSizeOfString = std::round(sizeOfString*0.5);
+			long positionToUse = 0;
+			int diffVector, diffSave;
 
-			//add \n's to certain positions
-			int indexToUse = std::ceil((index.size()-1)*0.5);
-			std::cout << "chosen one: " << index[indexToUse] << std::endl << std::endl;
+			for(unsigned int i = 0; i < index.size(); i++){
+				std::cout << index[i] << std::endl;
+				diffVector = std::abs(halfSizeOfString - index[i]);
+				diffSave = std::abs(halfSizeOfString - positionToUse);
+				if(diffVector < diffSave){
+					positionToUse = index[i];
+				}
+			}
 
-			newText = newText.insert(index[indexToUse]+1, "\n"); //add it after the found sign
+			std::cout << "size of text: " << sizeOfString << std::endl;
+			std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
+
+			newText = newText.insert(positionToUse+1, "\n");
 			inputItem->setText(newText);
 		}
 	}
