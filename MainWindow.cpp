@@ -186,7 +186,6 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 
 void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
-	//draw body
 	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
@@ -195,13 +194,14 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 			QString text = QString::fromStdString(simpleBlock->command);
 			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
+			wrapText(commandBlock, width-width*0.3);
 			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
 
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
 
 			//draw rect
 			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
-			commandRect->setRect(left,top,width,blockHeight);
+			commandRect->setRect(left, top, width, blockHeight);
 
 			top += blockHeight;
 		} else {
@@ -211,7 +211,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
-				wrapText(conditionText, width-10);
+				wrapText(conditionText, width-width*0.3);
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 
 				//calculate the height of the condition block
@@ -312,6 +312,7 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 {
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
+	wrapText(loopHeading, width-width*0.3);
 	loopHeading->setPos(left+paddingLeft, top+paddingTopBlock);
 
 	int loopHeadingHeight = loopHeading->boundingRect().height() + 2*paddingTopBlock;
@@ -339,17 +340,38 @@ void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
 
 void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth)
 {
-	int index;
+	std::vector<int> index;
+	int startingPos = 0, occurencePos = 0, startingPosSave = -1;
 	QString originalText = inputItem->text();
 	QString newText = originalText;
+	int sizeOfString = originalText.size();
+	bool thereAreSpaces = false;
 
 	if(inputItem->boundingRect().width() > maximumWidth){
-		index = newText.lastIndexOf(" ", -2);
-		std::cout << index << std::endl;
-		newText = newText.insert(index, "\n");
-		inputItem->setText(newText);
-	}
+		//fill vector with positions of spaces
+		while(startingPos > startingPosSave){
+			occurencePos = originalText.indexOf(QRegExp("[ ,\.+-/\*>]"), startingPos+1);
 
+			if(occurencePos != -1){
+				index.push_back(occurencePos);
+				thereAreSpaces = true;
+			}
+			startingPosSave = startingPos;
+			startingPos = occurencePos;
+		}
+		if(thereAreSpaces){
+			std::cout << "vector contents:" << std::endl;
+			for(unsigned int i = 0; i < index.size(); i++)
+				std::cout << "vector:" << index[i] << std::endl;
+
+			//add \n's to certain positions
+			int indexToUse = std::ceil((index.size()-1)*0.5);
+			std::cout << "chosen one: " << index[indexToUse] << std::endl << std::endl;
+
+			newText = newText.insert(index[indexToUse]+1, "\n"); //add it after the found sign
+			inputItem->setText(newText);
+		}
+	}
 }
 
 void StructureChartDrawer::drawStructureChart()
