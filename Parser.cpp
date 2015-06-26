@@ -262,6 +262,7 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 {
 	bool text = false;
 	bool backslash = false;
+	const char* start = begin;
 	std::string tmp;
 	std::string result;
 	while (begin != end) {
@@ -277,8 +278,14 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '=':
 					if(matchWithFollowing(begin, end, "=", '=')) {
 						tmp.append("=");
-					} else {
-						tmp.append(" \u2190 ");
+					} else{
+						if(begin - 1 >= start) {
+							if(*(begin - 1) == '<' || *(begin - 1) == '>') {
+								tmp.append("=");
+							}
+						} else {
+							tmp.append(" \u2190 ");
+						}
 					}
 					break;
 				case '&':
