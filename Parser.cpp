@@ -16,7 +16,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 {
 	BlockSequence ret;
 	skipWhitespaces(begin, end);
-
+	bool comment = false;
 	while (begin != end) {
 		skipWhitespaces(begin, end);
 
@@ -125,15 +125,26 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			skipWhitespaces(begin, end);
 
 
+		}else if(matchWithFollowing(begin, end, "/", '/')) {
+			begin++;
+			while(*begin != '\n' && begin != end) {
+				begin++;
+			}
+		} else if (matchWithFollowing(begin, end, "/", '*')) {
+			begin++;
+			while(!matchWithFollowing(begin, end, "*", '/') && begin != end) {
+				begin ++;
+			}
+			begin++;
 		}else {
 
 			const char* commandEnd = begin;
 			while (*commandEnd != ';' && commandEnd < end) {
 				commandEnd++;
 			}
-
-			ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
-
+			if(begin != end){
+				ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
+			}
 			if (*commandEnd == ';')
 				commandEnd++;
 
@@ -286,9 +297,9 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 					} else {
 						tmp.append(" not ");
 					}
+					break;
 				case '%':
 					tmp.append(" mod ");
-					break;
 					break;
 				default:
 					if(*begin != '\n' && *begin != '\t') {
@@ -301,18 +312,18 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 		begin++;
 
 	}
-//	bool multipleSpaces = false;
-//	for(unsigned int i = 0; i <= tmp.length(); i++) {
-//		if(tmp[i] == ' ') {
-//			if(multipleSpaces || i == 0 || i == tmp.length()) {
-//				tmp.erase(i);
-//				i--;
-//			}
-//			multipleSpaces = true;
-//		} else {
-//			multipleSpaces = false;
-//		}
-//	}
+	//	bool multipleSpaces = false;
+	//	for(unsigned int i = 0; i <= tmp.length(); i++) {
+	//		if(tmp[i] == ' ') {
+	//			if(multipleSpaces || i == 0 || i == tmp.length()) {
+	//				tmp.erase(i);
+	//				i--;
+	//			}
+	//			multipleSpaces = true;
+	//		} else {
+	//			multipleSpaces = false;
+	//		}
+	//	}
 
 	return tmp;
 }

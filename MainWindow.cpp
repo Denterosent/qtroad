@@ -176,7 +176,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	top = 50;
 	left = 5; //left offset of SimpleBlocks and LoopBlocks relative to body
 	loopOffset = 20;
-	maxWidth = 300;
+	maxWidth = 500;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text
 	paddingTop = 5;		//only for heading
