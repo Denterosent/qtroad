@@ -84,40 +84,39 @@ void MainWindow::on_actionGenerate_triggered()
 	const char* end = &*input.cend();
 
 	try {
+		Parser parser(begin, end);
 
-	Parser parser(begin, end);
+		resetGraphicsView();
 
-	resetGraphicsView();
+		scene = new QGraphicsScene(this);
+		this->actionDirect_Print->setEnabled(true);
+		this->actionPrint_To_PDF->setEnabled(true);
 
-	scene = new QGraphicsScene(this);
-	this->actionDirect_Print->setEnabled(true);
-	this->actionPrint_To_PDF->setEnabled(true);
+		QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
+		QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
+		classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
+		classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
+		scene->addItem(classDiagram1);
+		scene->addItem(classDiagram2);
+		QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
+		QPolygonF poly;
+		poly.append(QPointF(0,10));
+		poly.append(QPointF(10*sqrt(2)/2,0));
+		poly.append(QPointF(-10*sqrt(2)/2,0));
+		polygon->setPolygon(poly);
+		polygon->setBrush(QBrush(Qt::SolidPattern));
+		polygon->setRotation(-90);
+		QGraphicsLineItem* line = new QGraphicsLineItem();
+		line->setLine(0,0,38,0);
+		line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
+		polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
+		scene->addItem(line);
+		scene->addItem(polygon);
 
-	QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
-	QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
-	classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
-	classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
-	scene->addItem(classDiagram1);
-	scene->addItem(classDiagram2);
-	QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
-	QPolygonF poly;
-	poly.append(QPointF(0,10));
-	poly.append(QPointF(10*sqrt(2)/2,0));
-	poly.append(QPointF(-10*sqrt(2)/2,0));
-	polygon->setPolygon(poly);
-	polygon->setBrush(QBrush(Qt::SolidPattern));
-	polygon->setRotation(-90);
-	QGraphicsLineItem* line = new QGraphicsLineItem();
-	line->setLine(0,0,38,0);
-	line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
-	polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
-	scene->addItem(line);
-	scene->addItem(polygon);
+		StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
+		drawer.drawStructureChart();
 
-	StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
-	drawer.drawStructureChart();
-
-	graphicsView->setScene(scene);
+		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
 		QMessageBox::warning(this, "Parser Error", e.what());
 	}
@@ -166,10 +165,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * LoopBlocks
 	 * space-filling blocks
 	 * AutoHeight of blocks
+	 * text auto-wrap
 	 *
 	 *no Support for:
 	 * SwitchBlocks
-	 * text auto-wrap
 	 * AutoWidth of blocks
 	 * declarations
 	 */
@@ -187,7 +186,6 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 
 void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
-	//draw body
 	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
@@ -196,13 +194,14 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 			QString text = QString::fromStdString(simpleBlock->command);
 			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
+			wrapText(commandBlock, width-2*paddingLeft);
 			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
 
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
 
 			//draw rect
 			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
-			commandRect->setRect(left,top,width,blockHeight);
+			commandRect->setRect(left, top, width, blockHeight);
 
 			top += blockHeight;
 		} else {
@@ -212,6 +211,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
+				wrapText(conditionText, width-width*0.3);
 				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
 
 				//calculate the height of the condition block
@@ -284,22 +284,35 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
 				}else{
-					std::cout << "Error: Block is neither a simple Block, loop-Block, nor an IfElseBlock!\nOnly these Blocktypes are implemented.";
+					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
+					if(switchBlock){
+						//draw condition
+						QString switchExpression = QString::fromStdString(switchBlock->expression);
+
+						for (std::map<std::string, BlockSequence>::iterator itr = switchBlock->sequences.begin(); itr != switchBlock->sequences.end(); itr++){
+							//draw switchValue
+//							QString::fromStdString(*itr);
+
+							//draw Blocks
+//							drawBody(group, *itr.second.blocks);
+						}
+
+						switchBlock->sequences.size();
+
+					}else{
+					std::cout << "Error: no valid block";
+					}
 				}
 			}
 		}
 	}
-// commented this out because some peolpe din't like it:
-// ====================================================
-//	int numberOfDrawnBlocks = vector.size();
-//	std::cout << "number of drawn blocks from one call of drawBody(): " << numberOfDrawnBlocks << std::endl;
-
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
 {
 	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 	loopHeading->setText(QString::fromStdString(loopBlock->condition));
+	wrapText(loopHeading, width-2*paddingLeft);
 	loopHeading->setPos(left+paddingLeft, top+paddingTopBlock);
 
 	int loopHeadingHeight = loopHeading->boundingRect().height() + 2*paddingTopBlock;
@@ -325,6 +338,51 @@ void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
 	headline->setFont(font);
 }
 
+void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth)
+{
+	std::vector<int> index;
+	int startingPos = 0, occurencePos = 0, startingPosSave = -1;
+	QString originalText = inputItem->text();
+	QString newText = originalText;
+	bool thereAreOccurences = false;
+
+	if(inputItem->boundingRect().width() > maximumWidth){
+		//fill vector with positions of spaces
+		while(startingPos > startingPosSave){
+			occurencePos = originalText.indexOf(QRegExp("[ ,.+-/*>]"), startingPos+1);
+
+			if(occurencePos != -1){
+				index.push_back(occurencePos);
+				thereAreOccurences = true;
+			}
+			startingPosSave = startingPos;
+			startingPos = occurencePos;
+		}
+		if(thereAreOccurences){
+			//add \n's after occurences
+			int sizeOfString = originalText.size();
+			long halfSizeOfString = std::round(sizeOfString*0.5);
+			long positionToUse = 0;
+			int diffVector, diffSave;
+
+			for(unsigned int i = 0; i < index.size(); i++){
+				std::cout << index[i] << std::endl;
+				diffVector = std::abs(halfSizeOfString - index[i]);
+				diffSave = std::abs(halfSizeOfString - positionToUse);
+				if(diffVector < diffSave){
+					positionToUse = index[i];
+				}
+			}
+
+			std::cout << "size of text: " << sizeOfString << std::endl;
+			std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
+
+			newText = newText.insert(positionToUse+1, "\n");
+			inputItem->setText(newText);
+		}
+	}
+}
+
 void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
@@ -332,6 +390,6 @@ void StructureChartDrawer::drawStructureChart()
 	drawBody(structureChart, chart->root.blocks);
 	drawSurroundings(structureChart);
 
-	structureChart->setPos(0.5,100.5);
+	structureChart->setPos(0.5, 100.5);
 	scene->addItem(structureChart);
 }
