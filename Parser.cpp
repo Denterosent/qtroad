@@ -14,10 +14,10 @@ void Parser::parseStructures(const char* begin, const char* end)
 BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 {
 	BlockSequence ret;
-	skipWhitespaces(begin);
+	skipWhitespaces(begin, end);
 
 	while (begin != end) {
-		skipWhitespaces(begin);
+		skipWhitespaces(begin, end);
 
 		if (matchWithFollowing(begin, end, "if", '(')) {
 			const char* yesBlockEnd;
@@ -33,11 +33,11 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			skipBody(begin, end, 1);
 			yesBlockEnd = begin - 1;
 
-			skipWhitespaces(begin);
+			skipWhitespaces(begin, end);
 
 			if(match(begin, end, "else")) {
 				falseBranche = true;
-				skipWhitespaces(begin);
+				skipWhitespaces(begin, end);
 				if(following(begin, end, "if")) {
 					noBlockBegin = begin;
 					skipIf(begin, end);
@@ -48,7 +48,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 					skipBody(begin, end, 1);
 					noBlockEnd = begin - 1;
 				}
-				skipWhitespaces(begin);
+				skipWhitespaces(begin,end);
 			}
 			BlockSequence yes = parseFunctionBody(yesBlockBegin, yesBlockEnd);
 			if(falseBranche) {
@@ -60,7 +60,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			}
 		} else if (match(begin, end, "switch")) {
 
-		} else if (match(begin, end, "while")) {
+		} else if (matchWithFollowing(begin, end, "while", '(')) {
 			std::string condition = getCondition(begin, end);
 			expect(begin, end, "{");
 
@@ -72,9 +72,9 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			ret.blocks.push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
 
-			skipWhitespaces((begin));
+			skipWhitespaces(begin, end);
 
-		} else if (match(begin, end, "do")) {
+		} else if (matchWithFollowing(begin, end, "do", '{')) {
 
 			expect(begin, end, "{");
 
@@ -82,7 +82,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			skipBody(begin, end, 1);
 			const char* whileBlockEnd = begin - 1;
 
-			skipWhitespaces(begin);
+			skipWhitespaces(begin, end);
 			expect(begin, end, "while");
 			std::string condition = getCondition(begin, end);
 			expect(begin, end, ";");
@@ -91,7 +91,21 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			ret.blocks.push_back(std::unique_ptr<Block>(new LoopBlock(condition, body, false)));
 
-		} else {
+		} else if (matchWithFollowing(begin, end, "for", '(')){
+			std::string condition = getCondition(begin, end);
+			expect(begin, end, "{");
+
+			const char* whileBlockBegin = begin;
+			skipBody(begin, end, 1);
+			const char* whileBlockEnd = begin - 1;
+
+			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
+
+			ret.blocks.push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
+
+			skipWhitespaces(begin, end);
+
+		}else {
 
 			const char* commandEnd = begin;
 			while (*commandEnd != ';' && commandEnd < end) {
@@ -104,15 +118,15 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				commandEnd++;
 
 			begin = commandEnd;
-			skipWhitespaces(begin);
+			skipWhitespaces(begin, end);
 		}
 	}
 	return ret;
 }
 
-void Parser::skipWhitespaces(const char*& c)
+void Parser::skipWhitespaces(const char*& c, const char* end)
 {
-	while (*c == ' ' || *c == '\t' || *c == '\n')
+	while ((*c == ' ' || *c == '\t' || *c == '\n') && c != end)
 		c++;
 }
 
@@ -127,7 +141,7 @@ bool Parser::match(const char*& begin, const char* end, const char* literal)
 		tmp++;
 		literal++;
 	}
-	skipWhitespaces(tmp);
+	skipWhitespaces(tmp, end);
 	begin = tmp;
 	return true;
 }
@@ -156,7 +170,7 @@ bool Parser::matchWithFollowing(const char*& begin, const char* end, const char*
 		tmp++;
 		literal++;
 	}
-	skipWhitespaces(tmp);
+	skipWhitespaces(tmp, end);
 	if(*tmp == following) {
 		begin = tmp;
 		return true;
@@ -170,7 +184,7 @@ void Parser::expect(const char*& begin, const char* end, const char* literal)
 	const char* tmp = begin;
 	while (*literal != '\0') {
 		if (*tmp != *literal || tmp == end) {
-			throw std::runtime_error("Invalid file.");
+			throw std::runtime_error(std::string("Missing ") + literal);
 		}
 		tmp++;
 		literal++;
@@ -180,34 +194,56 @@ void Parser::expect(const char*& begin, const char* end, const char* literal)
 
 std::string Parser::getCondition(const char*& begin, const char* end)
 {
-	skipWhitespaces(begin);
+	int braces = 1;
+	bool text = false;
+	skipWhitespaces(begin, end);
 	expect(begin, end, "(");
+
 	const char* conditionBegin = begin;
-	while (*begin != ')') {
-		if(begin == end) {
-			throw std::runtime_error("A if has no valid Condition");
+	while (braces != 0) {
+		if (*begin == '\\' && begin + 2 < end) {
+			begin = begin + 2;
 		}
-		begin++;
+		if (*begin == '\"' || *begin == '\'') {
+			text = !text;
+		}
+		if(*begin == '(' && !text) {
+			braces++;
+		}else if(*begin == ')' && !text) {
+			braces--;
+		}
+		if(begin == end) {
+			throw std::runtime_error("invalid condition");
+		}
+		if (braces != 0) {
+			begin++;
+		}
 	}
 	const char* conditionEnd = begin;
-	begin++;
-	skipWhitespaces(begin);
+	if(begin != end) {
+		begin ++;
+	}
+	skipWhitespaces(begin, end);
 	return std::string(conditionBegin,conditionEnd);
 }
 
 void Parser::skipBody(const char*& begin, const char* end, int pDepth)
 {
 	int depth = pDepth;
+	bool text = false;
 	while (depth != 0) {
-		if (*begin == '{') {
+		if(*begin == '\\' && begin < end) {
+			begin++;
+		}
+		if (*begin == '{' && !text) {
 			depth++;
 		}
 
-		if (*begin == '}') {
+		if (*begin == '}' && !text) {
 			depth--;
 		}
 		if(begin == end) {
-			throw std::runtime_error("There is a missing curly brace");
+			throw std::runtime_error("Missing }");
 		}
 		begin++;
 	}
