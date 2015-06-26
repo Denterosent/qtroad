@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include <algorithm>
 
 Parser::Parser(const char *begin, const char *end)
 {
@@ -41,7 +42,19 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				if(following(begin, end, "if")) {
 					noBlockBegin = begin;
 					skipIf(begin, end);
-					noBlockEnd = begin - 1;
+					noBlockEnd = begin;
+					skipWhitespaces(begin, end);
+					if (match(begin, end, "else")) {
+						if(following(begin, end, "if")) {
+							skipIf(begin, end);
+							noBlockEnd = begin;
+							skipWhitespaces(begin, end);
+						} else {
+							expect(begin, end, "{");
+							skipBody(begin, end, 1);
+							noBlockEnd = begin;
+						}
+					}
 				} else {
 					expect(begin, end, "{");
 					noBlockBegin = begin;
@@ -105,6 +118,13 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			skipWhitespaces(begin, end);
 
+		}else if (matchWithFollowing(begin, end, "switch", '(')) {
+			std::string condition = getCondition(begin, end);
+			expect(begin, end, "{");
+
+			skipWhitespaces(begin, end);
+
+
 		}else {
 
 			const char* commandEnd = begin;
@@ -112,7 +132,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				commandEnd++;
 			}
 
-			ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{std::string(begin, commandEnd)}));
+			ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
 
 			if (*commandEnd == ';')
 				commandEnd++;
@@ -145,7 +165,7 @@ bool Parser::match(const char*& begin, const char* end, const char* literal)
 	begin = tmp;
 	return true;
 }
-bool Parser::following(const char*& begin, const char* end, const char* literal)
+bool Parser::following(const char* begin, const char* end, const char* literal)
 {
 	const char* tmp = begin;
 
@@ -224,7 +244,77 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 		begin ++;
 	}
 	skipWhitespaces(begin, end);
-	return std::string(conditionBegin,conditionEnd);
+	return cleanSyntax(conditionBegin,conditionEnd);
+}
+
+std::string Parser::cleanSyntax(const char* begin, const char* end)
+{
+	bool text = false;
+	bool backslash = false;
+	std::string tmp;
+	std::string result;
+	while (begin != end) {
+
+		if((*begin == '\"' || *begin == '\'') && !backslash) {
+			text = !text;
+		}
+		if(*begin == '\\') {
+			backslash = !backslash;
+		}
+		if(!text) {
+			switch (*begin) {
+				case '=':
+					if(matchWithFollowing(begin, end, "=", '=')) {
+						tmp.append("=");
+					} else {
+						tmp.append(" \u2190 ");
+					}
+					break;
+				case '&':
+					if(matchWithFollowing(begin, end, "&", '&')) {
+						tmp.append(" and ");
+					}
+					break;
+				case '|':
+					if(matchWithFollowing(begin, end, "|", '|')) {
+						tmp.append(" or ");
+					}
+					break;
+				case '!':
+					if(matchWithFollowing(begin, end, "!", '=')) {
+						tmp.append(" <> ");
+					} else {
+						tmp.append(" not ");
+					}
+				case '%':
+					tmp.append(" mod ");
+					break;
+					break;
+				default:
+					if(*begin != '\n' && *begin != '\t') {
+						tmp += *begin;
+					}
+			}
+		} else {
+			tmp += *begin;
+		}
+		begin++;
+
+	}
+//	bool multipleSpaces = false;
+//	for(unsigned int i = 0; i <= tmp.length(); i++) {
+//		if(tmp[i] == ' ') {
+//			if(multipleSpaces || i == 0 || i == tmp.length()) {
+//				tmp.erase(i);
+//				i--;
+//			}
+//			multipleSpaces = true;
+//		} else {
+//			multipleSpaces = false;
+//		}
+//	}
+
+	return tmp;
 }
 
 void Parser::skipBody(const char*& begin, const char* end, int pDepth)
@@ -260,4 +350,9 @@ void Parser::skipIf(const char*& begin, const char* end)
 const Result& Parser::getResult()
 {
 	return result;
+}
+
+bool Parser::BothAreSpaces(char lhs, char rhs)
+{
+	return (lhs == rhs) && (lhs == ' ');
 }
