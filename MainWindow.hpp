@@ -40,8 +40,9 @@ class StructureChartDrawer
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
 		void drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector);
 		void drawStructureChart();
-		void drawSurroundings(QGraphicsItemGroup* group);
+		void drawHead(QGraphicsItemGroup* group);
 		void wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth);
 		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);
+		void drawSurroundingRect(QGraphicsItemGroup* group);
 };
 #endif // MAINWINDOW_HPP
