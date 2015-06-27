@@ -45,6 +45,5 @@ class StructureChartDrawer
 		void wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth);
 		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);
 		void drawSurroundingRect(QGraphicsItemGroup* group);
-		int getMaxWidth();
 };
 #endif // MAINWINDOW_HPP

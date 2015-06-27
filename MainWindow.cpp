@@ -178,6 +178,8 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * autowrap splits at unwanted signs
 	 */
 
+	maxWidth = 500;
+	width = maxWidth;
 	top = 50;
 	loopOffset = 20;
 	paddingLeft = 5;	//for every text relative to block
