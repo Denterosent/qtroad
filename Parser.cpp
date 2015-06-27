@@ -281,9 +281,9 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 						if(begin - 1 >= start) {
 							if(*(begin - 1) == '<' || *(begin - 1) == '>') {
 								tmp.append("=");
+							} else {
+								tmp.append(" \u2190 ");
 							}
-						} else {
-							tmp.append(" \u2190 ");
 						}
 					}
 					break;
