@@ -35,6 +35,7 @@ class StructureChartDrawer
 		int paddingTop;
 		int paddingTopBlock;
 		int paddingBody;
+		int maxEmtySignScale;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
@@ -44,5 +45,6 @@ class StructureChartDrawer
 		void wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth);
 		void drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock);
 		void drawSurroundingRect(QGraphicsItemGroup* group);
+		int getMaxWidth();
 };
 #endif // MAINWINDOW_HPP

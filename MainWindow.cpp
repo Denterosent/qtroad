@@ -175,18 +175,17 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 
 	/*buglist:
 	 * autowrap gets into a endless loop if not stopped
-	 * autwrap splits at unwanted signs
+	 * autowrap splits at unwanted signs
 	 */
 
 	top = 50;
 	loopOffset = 20;
-	maxWidth = 1000;
-	width = maxWidth;
 	paddingLeft = 5;	//for every text relative to block
 	paddingTop = 5;		//only for heading
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
 	paddingBody = 0;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
+	maxEmtySignScale = 10;
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -270,14 +269,19 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){//add spacefiller left
 						spaceRect->setRect(left, leftTop, std::ceil(width*0.5), top-leftTop);
-					}else{//addspacefiller right
+					}else{//add spacefiller right
 						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
 					}
-					spaceText->setPos(spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5-spaceText->boundingRect().width()*0.5,
-									  spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5-spaceText->boundingRect().height()*0.5);
+					//scale the "∅"
+					int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
+					xMultiplicator = (spaceRect->boundingRect().width())/(spaceText->boundingRect().width());
+					yMultiplicator = (spaceRect->boundingRect().height())/(spaceText->boundingRect().height());
+					multiplicator = std::min(xMultiplicator, yMultiplicator);
+					multiplicator = std::min(multiplicator, maxEmtySignScale);
+					spaceText->setScale(multiplicator);
+					spaceText->setPos((spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5)-(spaceText->boundingRect().width()*multiplicator*0.5),
+									  (spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5)-(spaceText->boundingRect().height()*multiplicator*0.5));
 				}
-				width = saveWidth;
-
 			}else{
 				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
 				if(loopBlock){
