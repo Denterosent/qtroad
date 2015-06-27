@@ -170,12 +170,17 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 *no Support for:
 	 * SwitchBlocks
 	 * AutoWidth of blocks
-	 * declarations
+	 * declarations - in testing phase
+	 */
+
+	/*buglist:
+	 * autowrap gets into a endless loop if not stopped
+	 * autwrap splits at unwanted signs
 	 */
 
 	top = 50;
 	loopOffset = 20;
-	maxWidth = 500;
+	maxWidth = 1000;
 	width = maxWidth;
 	paddingLeft = 5;	//for every text relative to block
 	paddingTop = 5;		//only for heading
@@ -231,8 +236,8 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				//draw triangle-lines
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
-				leftLine->setLine(left, top, width*0.5+left, top+ifElseBlockHeight);
-				rightLine->setLine(left+width, top, width*0.5+left, top+ifElseBlockHeight);
+				leftLine->setLine(left, top, std::ceil(width*0.5+left), top+ifElseBlockHeight);
+				rightLine->setLine(left+width, top, std::ceil(width*0.5+left), top+ifElseBlockHeight);
 
 				//draw yes/no -text
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
@@ -245,24 +250,27 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				top += ifElseBlockHeight;
 
 				//draw both bodies by calling this function recursively
+				//width of left BlockSequence is calculated with "ceil", width of right one with "floor"
 				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
-				width = width*0.5;
+				width = std::ceil(width*0.5);
 				drawBody(group, ifElseBlock->yes.blocks);
 				leftTop = top;
 				top = saveTop;
 				left += width;
+				width = std::floor(saveWidth*0.5);
 				drawBody(group, ifElseBlock->no.blocks);
 				rightTop = top;
 				left = saveLeft;
+				width = saveWidth;
 				if(leftTop != rightTop){
 					top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
 					QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
 					spaceText->setText("∅");
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){//add spacefiller left
-						spaceRect->setRect(left, leftTop, width, top-leftTop);
+						spaceRect->setRect(left, leftTop, std::ceil(width*0.5), top-leftTop);
 					}else{//addspacefiller right
-						spaceRect->setRect(left+width, rightTop, width, top-rightTop);
+						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
 					}
 					spaceText->setPos(spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5-spaceText->boundingRect().width()*0.5,
 									  spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5-spaceText->boundingRect().height()*0.5);
@@ -401,9 +409,9 @@ void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
 void StructureChartDrawer::drawSurroundingRect(QGraphicsItemGroup* group)
 {
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
-	surroundingRect->setRect(group->childrenBoundingRect().left() + 1, group->childrenBoundingRect().top() + 1,
-							 group->childrenBoundingRect().width() + paddingBody - 2, group->childrenBoundingRect().height() + paddingBody - 2);
-	//Why the +1 and -2? - Because without it, Qt would make the line at paddingBody = 0 around the rects, with this constants, line is drawn on the rect-lines of body when paddingBody = 0
+	surroundingRect->setRect(std::floor(group->childrenBoundingRect().left() + 1), std::floor(group->childrenBoundingRect().top() + 1),
+							 std::floor(group->childrenBoundingRect().width() + paddingBody - 1), std::floor(group->childrenBoundingRect().height() + paddingBody - 1));
+	//Why the +1 and -1? - Because without it, Qt would make the line at paddingBody = 0 around the rects, with this constants, line is drawn on the rect-lines of body when paddingBody = 0
 }
 
 void StructureChartDrawer::drawStructureChart()
