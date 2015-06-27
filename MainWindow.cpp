@@ -178,14 +178,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 * autowrap splits at unwanted signs
 	 */
 
-	maxWidth = 500;
-	width = maxWidth;
-	top = 50;
+	maxWidth = 0;
+	width = 500;
+	top = 0;
 	loopOffset = 20;
-	paddingLeft = 5;	//for every text relative to block
-	paddingTop = 5;		//only for heading
+	paddingLeft = 5;	//for every text relative to block, also padding for rigth
+	paddingTop = 5;		//only for heading, also padding bottom
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
-	paddingBody = 0;	//set it to 0, if you don't like the extra margin
+	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
 	maxEmtySignScale = 10;
 }
@@ -204,6 +204,11 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
 
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
+			int blockWidth = commandBlock->boundingRect().width()+paddingLeft*2;
+			if(blockWidth > maxWidth){
+				maxWidth = blockWidth;
+				std::cout << blockWidth << std::endl;
+			}
 
 			//draw rect
 			QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
@@ -219,7 +224,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
-				wrapText(conditionText, width-width*0.3);
+				wrapText(conditionText, std::round(width*0.7));
 				conditionText->setPos(left + std::ceil(width*0.5-conditionText->boundingRect().width()*0.5), top);
 
 				//calculate the height of the condition block
@@ -274,7 +279,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 					}else{//add spacefiller right
 						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
 					}
-					//scale the "∅"
+					//scale the "∅" and position it
 					int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
 					xMultiplicator = (spaceRect->boundingRect().width())/(spaceText->boundingRect().width());
 					yMultiplicator = (spaceRect->boundingRect().height())/(spaceText->boundingRect().height());
@@ -312,7 +317,7 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 //							drawBody(group, *itr.second.blocks);
 						}
 
-						switchBlock->sequences.size();
+//						switchBlock->sequences.size();
 
 					}else{
 						std::cout << "Error: no valid block";
@@ -346,8 +351,8 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 
 	//unexpected behavior: endless loop
 	while((inputItem->boundingRect().width() > maximumWidth) && (numberOfInserts <= 2)){
-		int widthText = inputItem->boundingRect().width();
-		std::cout << "width: " << widthText << std::endl;
+//		int widthText = inputItem->boundingRect().width();
+//		std::cout << "width: " << widthText << std::endl;
 		//fill vector with positions of spaces
 		while(startingPos > startingPosSave){
 			occurencePos = originalText.indexOf(QRegExp("[ ,+->]"), startingPos+1);
@@ -371,7 +376,7 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 
 				//calc pos for one insert
 				for(unsigned int i = 0; i < index.size(); i++){
-					std::cout << index[i] << std::endl;
+//					std::cout << index[i] << std::endl;
 
 					diffVector = std::abs(aimedPosition - index[i]);
 					diffSave = std::abs(aimedPosition - positionToUse);
@@ -380,8 +385,8 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 					}
 				}
 
-				std::cout << "size of text: " << sizeOfString << std::endl;
-				std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
+//				std::cout << "size of text: " << sizeOfString << std::endl;
+//				std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
 
 				newText = newText.insert(positionToUse+1, "\n");
 			}
