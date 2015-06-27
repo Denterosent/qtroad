@@ -393,7 +393,6 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 
 void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
 {
-
 	//draw headline
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
 	headline->setText(QString::fromStdString(chart->headline));
@@ -401,6 +400,8 @@ void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
 	QFont font = headline->font();
 	font.setBold(true);
 	headline->setFont(font);
+
+	top += 2*paddingTop + headline->boundingRect().height();
 
 	//draw declarations - still testing
 //	std::vector<QGraphicsSimpleTextItem*> vecDecl;
