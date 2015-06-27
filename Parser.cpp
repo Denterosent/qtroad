@@ -39,16 +39,19 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			if(match(begin, end, "else")) {
 				falseBranche = true;
 				skipWhitespaces(begin, end);
+
 				if(following(begin, end, "if")) {
 					noBlockBegin = begin;
 					skipIf(begin, end);
 					noBlockEnd = begin;
 					skipWhitespaces(begin, end);
+
 					if (match(begin, end, "else")) {
 						if(following(begin, end, "if")) {
 							skipIf(begin, end);
 							noBlockEnd = begin;
 							skipWhitespaces(begin, end);
+
 						} else {
 							expect(begin, end, "{");
 							skipBody(begin, end, 1);
@@ -227,18 +230,30 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 {
 	int braces = 1;
 	bool text = false;
+	bool singlelineComment = false;
+	bool multilineComment = false;
 	skipWhitespaces(begin, end);
 	expect(begin, end, "(");
 
 	const char* conditionBegin = begin;
 	while (braces != 0) {
-		if (*begin == '\\' && begin + 2 < end) {
+		if (*begin == '\\' && begin + 2 < end && !multilineComment && !singlelineComment) {
 			begin = begin + 2;
 		}
-		if (*begin == '\"' || *begin == '\'') {
+		if (*begin == '\"' || *begin == '\'' && !multilineComment && !singlelineComment) {
 			text = !text;
 		}
-		if(*begin == '(' && !text) {
+		if(matchWithFollowing(begin, end, "/", '*') || matchWithFollowing(begin, end, "/", '*')) {
+			begin++;
+			multilineComment = !multilineComment;
+		}
+		if(matchWithFollowing(begin, end, "/", '/')) {
+			singlelineComment = true;
+		}
+		if(*begin == '\n') {
+			singlelineComment = false;
+		}
+		if(*begin == '(' && !text ) {
 			braces++;
 		}else if(*begin == ')' && !text) {
 			braces--;
@@ -307,15 +322,41 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '%':
 					tmp.append(" mod ");
 					break;
+				case ';':
+					tmp.append(" ");
+					break;
 				case '+':
 					if(matchWithFollowing(begin,end,"+", '+')) {
+
+						if(tmp.find_last_of(" ") != std::string::npos) {
+							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " + 1");
+						} else {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" = " + tmp2 + " + 1");
+						tmp.append(" \u2190 " + tmp2 + " + 1");
+						}
 					} else if (matchWithFollowing(begin,end,"+", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" = " + tmp2 + " + ");
+						tmp.append(" \u2190 " + tmp2 + " + ");
 					} else {
 						tmp.append("+");
+					}
+					break;
+				case '-':
+					if(matchWithFollowing(begin,end,"-", '-')) {
+
+						if(tmp.find_last_of(" ") != std::string::npos) {
+							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " - 1");
+						} else {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" \u2190 " + tmp2 + " - 1");
+						}
+					} else if (matchWithFollowing(begin,end,"-", '=')) {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" \u2190 " + tmp2 + " - ");
+					} else {
+						tmp.append("-");
 					}
 					break;
 				default:
@@ -349,17 +390,28 @@ void Parser::skipBody(const char*& begin, const char* end, int pDepth)
 {
 	int depth = pDepth;
 	bool text = false;
+	bool multilineComment = false;
+	bool singlelineComment = false;
 	while (depth != 0) {
 		if(*begin == '\\' && begin < end) {
 			begin++;
 		}
-		if((*begin == '\"' || *begin == '\'') && begin != end) {
+		if((*begin == '\"' || *begin == '\'') && begin != end && !multilineComment && !singlelineComment) {
 			text = !text;
 		}
-		if (*begin == '{' && !text) {
+		if(matchWithFollowing(begin, end, "/", '*') || matchWithFollowing(begin, end, "/", '*')) {
+			begin++;
+			multilineComment = !multilineComment;
+		}
+		if(matchWithFollowing(begin, end, "/", '/')) {
+			singlelineComment = true;
+		}
+		if(*begin == '\n') {
+			singlelineComment = false;
+		}
+		if (*begin == '{' && !text ) {
 			depth++;
 		}
-
 		if (*begin == '}' && !text) {
 			depth--;
 		}
