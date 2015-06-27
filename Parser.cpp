@@ -39,16 +39,19 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			if(match(begin, end, "else")) {
 				falseBranche = true;
 				skipWhitespaces(begin, end);
+
 				if(following(begin, end, "if")) {
 					noBlockBegin = begin;
 					skipIf(begin, end);
 					noBlockEnd = begin;
 					skipWhitespaces(begin, end);
+
 					if (match(begin, end, "else")) {
 						if(following(begin, end, "if")) {
 							skipIf(begin, end);
 							noBlockEnd = begin;
 							skipWhitespaces(begin, end);
+
 						} else {
 							expect(begin, end, "{");
 							skipBody(begin, end, 1);
@@ -307,15 +310,41 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '%':
 					tmp.append(" mod ");
 					break;
+				case ';':
+					tmp.append(" ");
+					break;
 				case '+':
 					if(matchWithFollowing(begin,end,"+", '+')) {
+
+						if(tmp.find_last_of(" ") != std::string::npos) {
+							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " + 1");
+						} else {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" = " + tmp2 + " + 1");
+						tmp.append(" \u2190 " + tmp2 + " + 1");
+						}
 					} else if (matchWithFollowing(begin,end,"+", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" = " + tmp2 + " + ");
+						tmp.append(" \u2190 " + tmp2 + " + ");
 					} else {
 						tmp.append("+");
+					}
+					break;
+				case '-':
+					if(matchWithFollowing(begin,end,"-", '-')) {
+
+						if(tmp.find_last_of(" ") != std::string::npos) {
+							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " - 1");
+						} else {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" \u2190 " + tmp2 + " - 1");
+						}
+					} else if (matchWithFollowing(begin,end,"-", '=')) {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" \u2190 " + tmp2 + " - ");
+					} else {
+						tmp.append("-");
 					}
 					break;
 				default:
