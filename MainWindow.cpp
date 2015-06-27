@@ -300,8 +300,8 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 						switchBlock->sequences.size();
 
 					}else{
-					std::cout << "Error: no valid block";
-					throw std::runtime_error(std::string("Block is invalid"));
+						std::cout << "Error: no valid block";
+						throw std::runtime_error(std::string("Block is invalid"));
 					}
 				}
 			}
@@ -404,7 +404,6 @@ void StructureChartDrawer::drawSurroundingRect(QGraphicsItemGroup* group)
 	surroundingRect->setRect(group->childrenBoundingRect().left() + 1, group->childrenBoundingRect().top() + 1,
 							 group->childrenBoundingRect().width() + paddingBody - 2, group->childrenBoundingRect().height() + paddingBody - 2);
 	//Why the +1 and -2? - Because without it, Qt would make the line at paddingBody = 0 around the rects, with this constants, line is drawn on the rect-lines of body when paddingBody = 0
-
 }
 
 void StructureChartDrawer::drawStructureChart()
