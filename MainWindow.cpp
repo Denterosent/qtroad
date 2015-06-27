@@ -174,14 +174,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	 */
 
 	top = 50;
-	left = 5; //left offset of SimpleBlocks and LoopBlocks relative to body
 	loopOffset = 20;
 	maxWidth = 500;
 	width = maxWidth;
-	paddingLeft = 5;	//for every text
+	paddingLeft = 5;	//for every text relative to block
 	paddingTop = 5;		//only for heading
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
-	paddingBody = 5;
+	paddingBody = 0;	//set it to 0, if you don't like the extra margin
+	left = paddingBody;
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -319,27 +319,6 @@ void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock*
 	top += loopHeadingHeight;
 }
 
-void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
-{
-	//draw surrounding rectangle
-	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
-	surroundingRect->setRect(group->childrenBoundingRect().left(), group->childrenBoundingRect().top(),
-							 group->childrenBoundingRect().width() + paddingBody, group->childrenBoundingRect().height() + paddingBody);
-
-	//draw headline
-	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
-	headline->setText(QString::fromStdString(chart->headline));
-	headline->setPos(paddingLeft, paddingTop);
-	QFont font = headline->font();
-	font.setBold(true);
-	headline->setFont(font);
-
-	//draw declarations - still testing
-	for (Declaration& decl : chart->declarations){
-		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
-	}
-}
-
 void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth)
 {
 	std::vector<int> index;
@@ -396,12 +375,44 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 	}
 }
 
+void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
+{
+
+	//draw headline
+	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
+	headline->setText(QString::fromStdString(chart->headline));
+	headline->setPos(paddingLeft, paddingTop);
+	QFont font = headline->font();
+	font.setBold(true);
+	headline->setFont(font);
+
+	//draw declarations - still testing
+//	std::vector<QGraphicsSimpleTextItem*> vecDecl;
+	for (Declaration& decl : chart->declarations){
+		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+	}
+		//	for (int i = 0; i < chart->declarations.size(); i++){
+//		vecDecl.push_back(new QGraphicsSimpleTextItem(group));
+//		vecDecl[i].setText(QString::fromStdString(chart->declarations[i].varName+": "+chart->declarations[i].type->umlName()));
+//	}
+}
+
+void StructureChartDrawer::drawSurroundingRect(QGraphicsItemGroup* group)
+{
+	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
+	surroundingRect->setRect(group->childrenBoundingRect().left() + 1, group->childrenBoundingRect().top() + 1,
+							 group->childrenBoundingRect().width() + paddingBody - 2, group->childrenBoundingRect().height() + paddingBody - 2);
+	//Why teh +1 and -2? - Because without it, Qt would make the line at paddingBody = 0 around the rects, with this constants, line is drawn on the rect-lines of body
+
+}
+
 void StructureChartDrawer::drawStructureChart()
 {
 	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
 
+	drawHead(structureChart);
 	drawBody(structureChart, chart->root.blocks);
-	drawSurroundings(structureChart);
+	drawSurroundingRect(structureChart);
 
 	structureChart->setPos(0.5, 100.5);
 	scene->addItem(structureChart);
