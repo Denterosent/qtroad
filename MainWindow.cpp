@@ -325,10 +325,10 @@ void StructureChartDrawer::drawSurroundings(QGraphicsItemGroup* group)
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
 	surroundingRect->setRect(group->childrenBoundingRect().left(), group->childrenBoundingRect().top(),
 							 group->childrenBoundingRect().width() + paddingBody, group->childrenBoundingRect().height() + paddingBody);
-	//draw declarations
-	//	for (Declaration& decl : chart->declarations){
-	//		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
-	//	}
+	//draw declarations - still testing
+		for (Declaration& decl : chart->declarations){
+			scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+		}
 	//draw headline
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
 	headline->setText(QString::fromStdString(chart->headline));
