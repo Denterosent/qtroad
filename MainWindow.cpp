@@ -342,15 +342,18 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 {
 	std::vector<int> index;
 	int startingPos = 0, occurencePos = 0, startingPosSave = -1;
-	QString originalText = inputItem->text();
+	const QString originalText = inputItem->text();
 	QString newText = originalText;
 	bool thereAreOccurences = false;
+	int numberOfInserts = 1;
 
-	if(inputItem->boundingRect().width() > maximumWidth){
+	//unexpected behavior: endless loop
+	while((inputItem->boundingRect().width() > maximumWidth) && (numberOfInserts <= 2)){
+		int widthText = inputItem->boundingRect().width();
+		std::cout << "width: " << widthText << std::endl;
 		//fill vector with positions of spaces
 		while(startingPos > startingPosSave){
-			occurencePos = originalText.indexOf(QRegExp("[ ,.+-/*>]"), startingPos+1);
-
+			occurencePos = originalText.indexOf(QRegExp("[ ,+->]"), startingPos+1);
 			if(occurencePos != -1){
 				index.push_back(occurencePos);
 				thereAreOccurences = true;
@@ -359,27 +362,35 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 			startingPos = occurencePos;
 		}
 		if(thereAreOccurences){
-			//add \n's after occurences
+			//add \n's after occurence
 			int sizeOfString = originalText.size();
-			long halfSizeOfString = std::round(sizeOfString*0.5);
-			long positionToUse = 0;
+			int sizeOfSubsting = std::round(sizeOfString/(numberOfInserts+1));
+			int positionToUse = 0;
 			int diffVector, diffSave;
+			int aimedPosition = 0;
 
-			for(unsigned int i = 0; i < index.size(); i++){
-				std::cout << index[i] << std::endl;
-				diffVector = std::abs(halfSizeOfString - index[i]);
-				diffSave = std::abs(halfSizeOfString - positionToUse);
-				if(diffVector < diffSave){
-					positionToUse = index[i];
+			for(int x = 0; x < numberOfInserts; x++){
+				aimedPosition += sizeOfSubsting;
+
+				//calc pos for one insert
+				for(unsigned int i = 0; i < index.size(); i++){
+					std::cout << index[i] << std::endl;
+
+					diffVector = std::abs(aimedPosition - index[i]);
+					diffSave = std::abs(aimedPosition - positionToUse);
+					if(diffVector < diffSave){
+						positionToUse = index[i];
+					}
 				}
+
+				std::cout << "size of text: " << sizeOfString << std::endl;
+				std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
+
+				newText = newText.insert(positionToUse+1, "\n");
 			}
-
-			std::cout << "size of text: " << sizeOfString << std::endl;
-			std::cout << "chosen one: " << positionToUse << std::endl << std::endl;
-
-			newText = newText.insert(positionToUse+1, "\n");
 			inputItem->setText(newText);
 		}
+		numberOfInserts++;
 	}
 }
 
