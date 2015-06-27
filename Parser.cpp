@@ -230,18 +230,30 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 {
 	int braces = 1;
 	bool text = false;
+	bool singlelineComment = false;
+	bool multilineComment = false;
 	skipWhitespaces(begin, end);
 	expect(begin, end, "(");
 
 	const char* conditionBegin = begin;
 	while (braces != 0) {
-		if (*begin == '\\' && begin + 2 < end) {
+		if (*begin == '\\' && begin + 2 < end && !multilineComment && !singlelineComment) {
 			begin = begin + 2;
 		}
-		if (*begin == '\"' || *begin == '\'') {
+		if (*begin == '\"' || *begin == '\'' && !multilineComment && !singlelineComment) {
 			text = !text;
 		}
-		if(*begin == '(' && !text) {
+		if(matchWithFollowing(begin, end, "/", '*') || matchWithFollowing(begin, end, "/", '*')) {
+			begin++;
+			multilineComment = !multilineComment;
+		}
+		if(matchWithFollowing(begin, end, "/", '/')) {
+			singlelineComment = true;
+		}
+		if(*begin == '\n') {
+			singlelineComment = false;
+		}
+		if(*begin == '(' && !text ) {
 			braces++;
 		}else if(*begin == ')' && !text) {
 			braces--;
@@ -378,17 +390,28 @@ void Parser::skipBody(const char*& begin, const char* end, int pDepth)
 {
 	int depth = pDepth;
 	bool text = false;
+	bool multilineComment = false;
+	bool singlelineComment = false;
 	while (depth != 0) {
 		if(*begin == '\\' && begin < end) {
 			begin++;
 		}
-		if((*begin == '\"' || *begin == '\'') && begin != end) {
+		if((*begin == '\"' || *begin == '\'') && begin != end && !multilineComment && !singlelineComment) {
 			text = !text;
 		}
-		if (*begin == '{' && !text) {
+		if(matchWithFollowing(begin, end, "/", '*') || matchWithFollowing(begin, end, "/", '*')) {
+			begin++;
+			multilineComment = !multilineComment;
+		}
+		if(matchWithFollowing(begin, end, "/", '/')) {
+			singlelineComment = true;
+		}
+		if(*begin == '\n') {
+			singlelineComment = false;
+		}
+		if (*begin == '{' && !text ) {
 			depth++;
 		}
-
 		if (*begin == '}' && !text) {
 			depth--;
 		}
