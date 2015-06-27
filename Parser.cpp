@@ -264,7 +264,6 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 	bool backslash = false;
 	const char* start = begin;
 	std::string tmp;
-	std::string result;
 	while (begin != end) {
 
 		if((*begin == '\"' || *begin == '\'') && !backslash) {
@@ -308,6 +307,17 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '%':
 					tmp.append(" mod ");
 					break;
+				case '+':
+					if(matchWithFollowing(begin,end,"+", '+')) {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" = " + tmp2 + " + 1");
+					} else if (matchWithFollowing(begin,end,"+", '=')) {
+						std::string tmp2 = tmp.substr(0,tmp.length());
+						tmp.append(" = " + tmp2 + " + ");
+					} else {
+						tmp.append("+");
+					}
+					break;
 				default:
 					if(*begin != '\n' && *begin != '\t') {
 						tmp += *begin;
@@ -342,6 +352,9 @@ void Parser::skipBody(const char*& begin, const char* end, int pDepth)
 	while (depth != 0) {
 		if(*begin == '\\' && begin < end) {
 			begin++;
+		}
+		if((*begin == '\"' || *begin == '\'') && begin != end) {
+			text = !text;
 		}
 		if (*begin == '{' && !text) {
 			depth++;
