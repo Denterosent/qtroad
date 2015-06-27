@@ -212,12 +212,14 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
+				//width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
+
 				//draw condition text
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
 				wrapText(conditionText, width-width*0.3);
-				conditionText->setPos(left+width*0.5-conditionText->boundingRect().width()*0.5, top);
+				conditionText->setPos(left + std::ceil(width*0.5-conditionText->boundingRect().width()*0.5), top);
 
 				//calculate the height of the condition block
 				int textHeight = conditionText->boundingRect().height();
@@ -250,7 +252,6 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 				top += ifElseBlockHeight;
 
 				//draw both bodies by calling this function recursively
-				//width of left BlockSequence is calculated with "ceil", width of right one with "floor"
 				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
 				width = std::ceil(width*0.5);
 				drawBody(group, ifElseBlock->yes.blocks);
