@@ -190,7 +190,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChar
 	maxEmtySignScale = 10;
 }
 
-void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector<std::unique_ptr<Block>>& vector)
+void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
 	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
@@ -329,10 +329,8 @@ void StructureChartDrawer::drawBody(QGraphicsItemGroup* group, const std::vector
 	}
 }
 
-void StructureChartDrawer::drawLoopHeading(QGraphicsItemGroup* group, LoopBlock* loopBlock)
+void StructureChartDrawer::drawLoopHeading(QGraphicsSimpleTextItem* loopHeading)
 {
-	QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
-	loopHeading->setText(QString::fromStdString(loopBlock->condition));
 	wrapText(loopHeading, width-2*paddingLeft);
 	loopHeading->setPos(left+paddingLeft, top+paddingTopBlock);
 
@@ -396,7 +394,7 @@ void StructureChartDrawer::wrapText(QGraphicsSimpleTextItem* inputItem, int maxi
 	}
 }
 
-void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
+void StructureChartDrawer::drawHead(QGraphicsItem* group)
 {
 	//draw headline
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
@@ -419,7 +417,7 @@ void StructureChartDrawer::drawHead(QGraphicsItemGroup* group)
 //	}
 }
 
-void StructureChartDrawer::drawSurroundingRect(QGraphicsItemGroup* group)
+void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
 {
 	QGraphicsRectItem* surroundingRect = new QGraphicsRectItem(group);
 	surroundingRect->setRect(std::floor(group->childrenBoundingRect().left() + 1), std::floor(group->childrenBoundingRect().top() + 1),
@@ -429,7 +427,7 @@ void StructureChartDrawer::drawSurroundingRect(QGraphicsItemGroup* group)
 
 void StructureChartDrawer::drawStructureChart()
 {
-	QGraphicsItemGroup* structureChart = new QGraphicsItemGroup();
+	QGraphicsItem* structureChart = new QGraphicsItemGroup();
 
 	drawHead(structureChart);
 	drawBody(structureChart, chart->root.blocks);
