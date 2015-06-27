@@ -20,14 +20,16 @@ class Parser
 
 		void parseStructures(const char* begin, const char* end);
 		BlockSequence parseFunctionBody(const char*& begin, const char* end);
-		static void skipWhitespaces(const char*& c);
+		static void skipWhitespaces(const char*& c, const char* end);
 		static bool match(const char*& begin, const char* end, const char* literal);
 		static bool matchWithFollowing(const char*& begin, const char* end, const char* literal, const char following);
-		static bool following(const char*& begin, const char* end, const char* literal); // like match but without jumping to the last position of tmp
+		static bool following(const char* begin, const char* end, const char* literal); // like match but without jumping to the last position of tmp
 		static void expect(const char*& begin, const char* end, const char* literal);
 		std::string getCondition (const char*& begin, const char* end);
+		std::string cleanSyntax (const char* begin, const char* end);
 		void skipBody(const char*& begin, const char* end, int pDepth);
 		void skipIf(const char*& begin, const char* end);
+		bool BothAreSpaces(char lhs, char rhs);
 
 		Result result;
 
