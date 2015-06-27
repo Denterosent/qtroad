@@ -156,7 +156,8 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	scene->render(&painter);
 }
 
-StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart): scene(pScene), chart(pChart)
+StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart):
+	scene(pScene), chart(pChart)
 {
 	/*Support for:
 	 * Simple Blocks
@@ -292,14 +293,17 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			}else{
 				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
 				if(loopBlock){
+					QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
+					loopHeading->setText(QString::fromStdString(loopBlock->condition));
+
 					int saveTop = top;
-					if(loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
+					if(loopBlock->headControlled){drawLoopHeading(loopHeading);}
 					left += loopOffset;
 					width -= loopOffset;
 					drawBody(group, loopBlock->body.blocks);
 					width += loopOffset;
 					left -= loopOffset;
-					if(!loopBlock->headControlled){drawLoopHeading(group, loopBlock);}
+					if(!loopBlock->headControlled){drawLoopHeading(loopHeading);}
 
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
