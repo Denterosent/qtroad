@@ -165,9 +165,10 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	}
 }
 
-StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
-	scene(pScene)
+StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 {
+	scene = pScene; //for easier handling of parser
+
 	/*Support for:
 	 * Simple Blocks
 	 * IfElseBlocks
@@ -176,7 +177,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
 	 * space-filling blocks
 	 * AutoHeight of blocks
 	 * text auto-wrap
-	 * multiple Structure Charts
+	 * multiple Structure-Charts
 	 *
 	 *no Support for:
 	 * SwitchBlocks
@@ -199,7 +200,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
 	maxEmtySignScale = 10;
-	maximumHeightOfIfElseBlock = width; //If ElseBlock doesn't get bigger than a square
+	maximumHeightOfIfElseBlock = width; //IfElseBlock doesn't get bigger than a square
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -285,9 +286,11 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
 					spaceText->setText("∅");
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
-					if(leftTop < rightTop){//add spacefiller left
+					if(leftTop < rightTop){
+						//add spacefiller left
 						spaceRect->setRect(left, leftTop, std::ceil(width*0.5), top-leftTop);
-					}else{//add spacefiller right
+					}else{
+						//add spacefiller right
 						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
 					}
 					//scale the "∅" and position it
@@ -334,7 +337,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 //						switchBlock->sequences.size();
 
 					}else{
-						std::cout << "Error: no valid block";
+						std::cout << "Error: no valid block" << std::endl;
 						throw std::runtime_error(std::string("Block is invalid"));
 					}
 				}
