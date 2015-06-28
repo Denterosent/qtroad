@@ -269,7 +269,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			int blockWidth = commandBlock->boundingRect().width()+paddingLeft*2;
 			if(blockWidth > maxWidth){
 				maxWidth = blockWidth;
-				std::cout << blockWidth << std::endl;
+//				std::cout << blockWidth << std::endl;
 			}
 
 			//draw rect
@@ -473,14 +473,16 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 	top += 2*paddingTop + headline->boundingRect().height();
 
 	//draw declarations - still testing
-//	std::vector<QGraphicsSimpleTextItem*> vecDecl;
+	QGraphicsSimpleTextItem* declarationTextItem = new QGraphicsSimpleTextItem(group);
+	QString declarationText = "";
+
 	for (Declaration& decl : chart->declarations){
-		scene->addSimpleText(QString::fromStdString(decl.varName+": "+decl.type->umlName()));
+		declarationText += QString::fromStdString(decl.varName+": "+decl.type->umlName()+"\n");
 	}
-		//	for (int i = 0; i < chart->declarations.size(); i++){
-//		vecDecl.push_back(new QGraphicsSimpleTextItem(group));
-//		vecDecl[i].setText(QString::fromStdString(chart->declarations[i].varName+": "+chart->declarations[i].type->umlName()));
-//	}
+	declarationTextItem->setText(declarationText);
+
+	top += 2*paddingTop + declarationTextItem->boundingRect().height();
+
 }
 
 void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
