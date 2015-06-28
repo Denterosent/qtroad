@@ -154,14 +154,15 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 {
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setOutputFileName(QFileDialog::getSaveFileName(this, "Save File", "", "PDF (*.pdf)"));
-	printer.setPageSize(QPrinter::A4);
+	QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "PDF (*.pdf)");
 
-	//Bug: when FileDiaog is cancelled, a direct print is intiated
-
-	QPainter painter(&printer);
-	painter.setRenderHint(QPainter::Antialiasing);
-	scene->render(&painter);
+	if(fileName != 0){
+		printer.setOutputFileName(fileName);
+		printer.setPageSize(QPrinter::A4);
+		QPainter painter(&printer);
+		painter.setRenderHint(QPainter::Antialiasing);
+		scene->render(&painter);
+	}
 }
 
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
