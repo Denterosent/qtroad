@@ -199,6 +199,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
 	maxEmtySignScale = 10;
+	maximumHeightOfIfElseBlock = width; //If ElseBlock doesn't get bigger than a square
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -242,10 +243,9 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				int textHeight = conditionText->boundingRect().height();
 				int textWidth = conditionText->boundingRect().width();
 				int ifElseBlockHeight = (width*textHeight)/(width-textWidth);
-				int maximumHeight = width;
-				if((ifElseBlockHeight > maximumHeight) or (ifElseBlockHeight < 0))
+				if((ifElseBlockHeight > maximumHeightOfIfElseBlock) or (ifElseBlockHeight < 0))
 				{
-					ifElseBlockHeight = maximumHeight;
+					ifElseBlockHeight = maximumHeightOfIfElseBlock;
 				}
 
 				//draw condition-rect
