@@ -16,6 +16,13 @@ struct Argument
 
 struct Operation
 {
+		Operation(std::string name, Type* returnType, Visibility visibility)
+			: name(name)
+			, returnType(returnType)
+			, visibility(visibility)
+		{
+		}
+
 		std::string name;
 		std::unique_ptr<Type> returnType;
 		std::vector<Argument> arguments;
@@ -24,6 +31,13 @@ struct Operation
 
 struct Attribute
 {
+		Attribute(std::string name, Type* type, Visibility visibility)
+			: name(name)
+			, type(type)
+			, visibility(visibility)
+		{
+		}
+
 		std::string name;
 		std::unique_ptr<Type> type;
 		Visibility visibility;
