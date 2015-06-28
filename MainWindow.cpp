@@ -117,9 +117,37 @@ void MainWindow::on_actionGenerate_triggered()
 		QGraphicsItem* structureChart = drawer.drawStructureChart(parser.getResult().structureCharts.front().get());
 		structureChart->setPos(0.5, 100.5);
 		scene->addItem(structureChart);
-//		QGraphicsItem* structureChart2 = drawer.drawStructureChart(parser.getResult().structureCharts.front().get());
-//		structureChart2->setPos(700.5, 400.5);
-//		scene->addItem(structureChart2);
+
+		//-------------create test environment for switchBlock-----------------------
+		StructureChart* chart2 = new StructureChart;
+
+		SimpleBlock* sb1 = new SimpleBlock("sb1");
+		SimpleBlock* sb2 = new SimpleBlock("sb2\nsb2");
+		SimpleBlock* sb3 = new SimpleBlock("sb3");
+		SimpleBlock* sb4 = new SimpleBlock("sb4");
+		SimpleBlock* sb11 = new SimpleBlock("sb11");
+		SimpleBlock* sb21 = new SimpleBlock("sb21");
+		SimpleBlock* sb31 = new SimpleBlock("sb31");
+		SimpleBlock* sb41 = new SimpleBlock("sb41");
+
+		std::map<std::string, BlockSequence> theMap;
+		theMap["eins"].blocks.emplace_back(sb1);
+		theMap["eins"].blocks.emplace_back(sb3);
+		theMap["zwei"].blocks.emplace_back(sb2);
+		theMap["drei"].blocks.emplace_back(sb11);
+		theMap["vier"].blocks.emplace_back(sb21);
+		theMap["vier"].blocks.emplace_back(sb31);
+		theMap["vier"].blocks.emplace_back(sb41);
+
+		SwitchBlock* switchBlock = new SwitchBlock("switch-expression", theMap);
+
+		chart2->root.blocks.emplace_back(sb4);
+		chart2->root.blocks.emplace_back(switchBlock);
+
+		QGraphicsItem* structureChart2 = drawer.drawStructureChart(chart2);
+		structureChart2->setPos(700.5, 400.5);
+		scene->addItem(structureChart2);
+		//--------------------------------------------------------------------------
 
 		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
