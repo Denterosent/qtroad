@@ -38,9 +38,9 @@ class StructureChartDrawer
 		int maxEmtySignScale;
 
 	public:
-		StructureChartDrawer(QGraphicsScene* scene, StructureChart* chart);
+		StructureChartDrawer(QGraphicsScene* scene);
 		void drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector);
-		void drawStructureChart();
+		QGraphicsItem* drawStructureChart(StructureChart* pChart);
 		void drawHead(QGraphicsItem* group);
 		void wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth);
 		void drawLoopHeading(QGraphicsSimpleTextItem* loopHeading);

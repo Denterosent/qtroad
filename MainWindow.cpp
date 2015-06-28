@@ -113,8 +113,10 @@ void MainWindow::on_actionGenerate_triggered()
 		scene->addItem(line);
 		scene->addItem(polygon);
 
-		StructureChartDrawer drawer(scene, parser.getResult().structureCharts.front().get());
-		drawer.drawStructureChart();
+		StructureChartDrawer drawer(scene);
+		QGraphicsItem* structureChart = drawer.drawStructureChart(parser.getResult().structureCharts.front().get());
+		structureChart->setPos(0.5, 100.5);
+		scene->addItem(structureChart);
 
 		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
@@ -151,13 +153,15 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	printer.setOutputFileName(QFileDialog::getSaveFileName(this, "Save File", "", "PDF (*.pdf)"));
 	printer.setPageSize(QPrinter::A4);
 
+	//Bug: when FileDiaog is cancelled, a direct print is intiated
+
 	QPainter painter(&printer);
 	painter.setRenderHint(QPainter::Antialiasing);
 	scene->render(&painter);
 }
 
-StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene, StructureChart* pChart):
-	scene(pScene), chart(pChart)
+StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
+	scene(pScene)
 {
 	/*Support for:
 	 * Simple Blocks
@@ -429,14 +433,14 @@ void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
 	//Why the +1 and -1? - Because without it, Qt would make the line at paddingBody = 0 around the rects, with this constants, line is drawn on the rect-lines of body when paddingBody = 0
 }
 
-void StructureChartDrawer::drawStructureChart()
+QGraphicsItem* StructureChartDrawer::drawStructureChart(StructureChart* pChart)
 {
+	chart = pChart;
 	QGraphicsItem* structureChart = new QGraphicsItemGroup();
 
 	drawHead(structureChart);
 	drawBody(structureChart, chart->root.blocks);
 	drawSurroundingRect(structureChart);
 
-	structureChart->setPos(0.5, 100.5);
-	scene->addItem(structureChart);
+	return structureChart;
 }
