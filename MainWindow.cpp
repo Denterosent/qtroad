@@ -104,7 +104,6 @@ void MainWindow::on_actionGenerate_triggered()
 		poly.append(QPointF(10*sqrt(2)/2,0));
 		poly.append(QPointF(-10*sqrt(2)/2,0));
 		polygon->setPolygon(poly);
-		polygon->setBrush(QBrush(Qt::SolidPattern));
 		polygon->setRotation(-90);
 		QGraphicsLineItem* line = new QGraphicsLineItem();
 		line->setLine(0,0,38,0);
