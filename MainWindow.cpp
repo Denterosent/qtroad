@@ -10,6 +10,7 @@
 #include <QPainter>
 #include <QPrinter>
 #include <iostream>
+#include <sstream>
 #include "Parser.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -77,6 +78,66 @@ QGraphicsItemGroup* generateClassDiagram(std::string str1, std::string str2, std
 	return group;
 }
 
+std::string visibilityToString(Visibility visibility)
+{
+	switch (visibility) {
+		case Visibility::private_:
+			return "-";
+		case Visibility::protected_:
+			return "#";
+		case Visibility::public_:
+			return "+";
+	}
+}
+
+QGraphicsItemGroup* drawClassChart(const ClassChart& classChart)
+{
+	QGraphicsItemGroup* group = new QGraphicsItemGroup();
+	int left = 0;
+	for (const std::unique_ptr<Class>& class_ : classChart.classes) {
+		std::ostringstream attrstr;
+		bool first = false;
+		for (const Attribute& attr : class_->attributes) {
+			if (first++) attrstr << "\n";
+			attrstr << visibilityToString(attr.visibility) << attr.name << ": " << attr.type->umlName();
+		}
+		std::ostringstream opstr;
+		first = false;
+		for (const Operation& op : class_->operations) {
+			if (first++) opstr << "\n";
+			opstr << visibilityToString(op.visibility) << op.name << "(";
+			if (!op.arguments.empty()) {
+				bool first;
+				for (const Argument& arg : op.arguments) {
+					if (first++) opstr << "; ";
+					opstr << arg.name << ": " << arg.type->umlName();
+				}
+			}
+			opstr << ")";
+			if (op.returnType) {
+				opstr << ": " << op.returnType->umlName();
+			}
+		}
+		QGraphicsItemGroup* classBox = generateClassDiagram(class_->name, attrstr.str(), opstr.str());
+		classBox->setPos(group->boundingRect().topRight());
+
+		group->addToGroup(classBox);
+
+		if (&class_ != &classChart.classes.back()) {
+			QGraphicsLineItem* line = new QGraphicsLineItem();
+			line->setLine({group->boundingRect().topRight() + QPointF(0,group->boundingRect().height()/2), group->boundingRect().topRight() + QPointF(30,group->boundingRect().height()/2)});
+			group->addToGroup(line);
+
+			const QPolygonF poly({{0,5*2},{5*sqrt(2),0},{-5*sqrt(2),0}});
+			QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem(poly);
+			polygon->setRotation(-90);
+			polygon->setPos(group->boundingRect().topRight() + QPointF(0,group->boundingRect().height()/2));
+			group->addToGroup(polygon);
+		}
+	}
+	return group;
+}
+
 void MainWindow::on_actionGenerate_triggered()
 {
 	std::string input = plainTextEdit->toPlainText().toStdString();
@@ -92,25 +153,14 @@ void MainWindow::on_actionGenerate_triggered()
 		this->actionDirect_Print->setEnabled(true);
 		this->actionPrint_To_PDF->setEnabled(true);
 
-		QGraphicsItemGroup* classDiagram1 = generateClassDiagram("TestClass", "#a: GZ\n#b: GZ", "+f(): GZ\n+g(): GZ");
-		QGraphicsItemGroup* classDiagram2 = generateClassDiagram("AnotherTestClass", "-x: GZ", "+y(): GZ");
-		classDiagram2->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(50, 0));
-		classDiagram1->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topLeft()));
-		scene->addItem(classDiagram1);
-		scene->addItem(classDiagram2);
-		QGraphicsPolygonItem* polygon = new QGraphicsPolygonItem();
-		QPolygonF poly;
-		poly.append(QPointF(0,10));
-		poly.append(QPointF(10*sqrt(2)/2,0));
-		poly.append(QPointF(-10*sqrt(2)/2,0));
-		polygon->setPolygon(poly);
-		polygon->setRotation(-90);
-		QGraphicsLineItem* line = new QGraphicsLineItem();
-		line->setLine(0,0,38,0);
-		line->setPos(classDiagram1->mapToScene(classDiagram1->childrenBoundingRect().topRight()) + QPointF(.5,20.5));
-		polygon->setPos(line->mapToScene(line->boundingRect().topRight()) + QPointF(.5,.5));
-		scene->addItem(line);
-		scene->addItem(polygon);
+		ClassChart demoClassChart;
+		demoClassChart.classes.emplace_back(new Class{"A", {}, {}});
+		demoClassChart.classes.back()->attributes.emplace_back("x", Type::createFromUmlName("Int"), Visibility::private_);
+		demoClassChart.classes.back()->operations.emplace_back("getX", Type::createFromUmlName("Int"), Visibility::public_);
+		demoClassChart.classes.back()->operations.emplace_back("resetX", nullptr, Visibility::public_);
+		demoClassChart.classes.emplace_back(new Class{"B", {}, {}});
+		demoClassChart.classes.back()->attributes.emplace_back("y", Type::createFromUmlName("Int"), Visibility::private_);
+		scene->addItem(drawClassChart(demoClassChart));
 
 		//draw StructureCharts
 		StructureChartDrawer drawer(scene);
