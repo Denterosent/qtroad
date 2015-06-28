@@ -219,7 +219,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			int blockWidth = commandBlock->boundingRect().width()+paddingLeft*2;
 			if(blockWidth > maxWidth){
 				maxWidth = blockWidth;
-				std::cout << blockWidth << std::endl;
+//				std::cout << blockWidth << std::endl;
 			}
 
 			//draw rect
