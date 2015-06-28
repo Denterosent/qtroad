@@ -113,10 +113,14 @@ void MainWindow::on_actionGenerate_triggered()
 		scene->addItem(line);
 		scene->addItem(polygon);
 
+		//draw StructureCharts
 		StructureChartDrawer drawer(scene);
 		QGraphicsItem* structureChart = drawer.drawStructureChart(parser.getResult().structureCharts.front().get());
 		structureChart->setPos(0.5, 100.5);
 		scene->addItem(structureChart);
+//		QGraphicsItem* structureChart2 = drawer.drawStructureChart(parser.getResult().structureCharts.front().get());
+//		structureChart2->setPos(700.5, 400.5);
+//		scene->addItem(structureChart2);
 
 		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
@@ -171,6 +175,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene):
 	 * space-filling blocks
 	 * AutoHeight of blocks
 	 * text auto-wrap
+	 * multiple Structure Charts
 	 *
 	 *no Support for:
 	 * SwitchBlocks
@@ -435,7 +440,12 @@ void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
 
 QGraphicsItem* StructureChartDrawer::drawStructureChart(StructureChart* pChart)
 {
+	//init or reset attributes:
 	chart = pChart;
+	maxWidth = 0;
+	width = 500;
+	top = 0;
+
 	QGraphicsItem* structureChart = new QGraphicsItemGroup();
 
 	drawHead(structureChart);
