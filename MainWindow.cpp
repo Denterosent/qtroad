@@ -156,7 +156,7 @@ void MainWindow::on_actionPrint_To_PDF_triggered()
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "PDF (*.pdf)");
 
-	if(fileName != 0){
+	if (!fileName.isNull()) {
 		printer.setOutputFileName(fileName);
 		printer.setPageSize(QPrinter::A4);
 		QPainter painter(&printer);
