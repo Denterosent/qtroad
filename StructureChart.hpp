@@ -52,7 +52,7 @@ struct IfElseBlock : public Block
 
 struct SwitchBlock : public Block
 {
-		SwitchBlock(std::string expression, std::map<std::string, BlockSequence> sequences)
+		SwitchBlock(std::string expression, std::map<std::string, BlockSequence>& sequences)
 			:expression(expression), sequences(std::move(sequences))
 		{
 		}
