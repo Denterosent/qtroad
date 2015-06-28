@@ -205,11 +205,11 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * AutoHeight of blocks
 	 * text auto-wrap
 	 * multiple Structure-Charts
+	 * declarations - in testing phase
 	 *
 	 *no Support for:
 	 * SwitchBlocks
 	 * AutoWidth of blocks
-	 * declarations - in testing phase
 	 */
 
 	/*buglist:
@@ -350,19 +350,65 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				}else{
 					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
 					if(switchBlock){
+
 						//draw condition
 						QString switchExpression = QString::fromStdString(switchBlock->expression);
+						QGraphicsSimpleTextItem* switchExpressionTextItem = new QGraphicsSimpleTextItem(group);
+						switchExpressionTextItem->setText(switchExpression+"\n\n");
 
-						for (std::map<std::string, BlockSequence>::iterator itr = switchBlock->sequences.begin(); itr != switchBlock->sequences.end(); itr++){
-							//draw switchValue
-//							QString::fromStdString(*itr);
+						int heightOfSwitchExpressionBlock = 2*paddingTopBlock + switchExpressionTextItem->boundingRect().height();
 
-							//draw Blocks
-//							drawBody(group, *itr.second.blocks);
+						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
+						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
+						switchExpressionTextItem->setPos(left + paddingLeft, top + paddingTopBlock);
+
+						top += heightOfSwitchExpressionBlock;
+
+						int saveTop = top, saveWidth = width, saveLeft = left;
+						int sizeOfMap = switchBlock->sequences.size();
+						int widthForEachElement = std::round(width / sizeOfMap);
+						int maxTop = 0, topValue = 0;
+						width = widthForEachElement;
+						std::vector<int> topValues;
+
+						for (const std::pair<const std::string, BlockSequence>& pair : switchBlock->sequences){
+							QString caseText = QString::fromStdString(pair.first);
+							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
+							caseTextItem->setText(caseText);
+							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
+							drawBody(group, pair.second.blocks);
+
+							left += widthForEachElement;
+							topValues.push_back(top);
+							maxTop = std::max(top, maxTop);
+							top = saveTop;
 						}
 
-//						switchBlock->sequences.size();
+						top = maxTop;
+						width = saveWidth;
+						left = saveLeft;
 
+						for (unsigned int i = 0; i < topValues.size(); i++){
+							topValue = topValues[i];
+							if(topValue < maxTop){
+								//add spacefiller
+								QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
+								spaceText->setText("∅");
+								QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
+								spaceRect->setRect(left + i * widthForEachElement, topValue, widthForEachElement, maxTop - topValue);
+
+								//scale the "∅" and position it
+								int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
+								xMultiplicator = (spaceRect->boundingRect().width())/(spaceText->boundingRect().width());
+								yMultiplicator = (spaceRect->boundingRect().height())/(spaceText->boundingRect().height());
+								multiplicator = std::min(xMultiplicator, yMultiplicator);
+								multiplicator = std::min(multiplicator, maxEmtySignScale);
+								spaceText->setScale(multiplicator);
+								spaceText->setPos((spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5)-(spaceText->boundingRect().width()*multiplicator*0.5),
+												  (spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5)-(spaceText->boundingRect().height()*multiplicator*0.5));
+
+							}
+						}
 					}else{
 						std::cout << "Error: no valid block" << std::endl;
 						throw std::runtime_error(std::string("Block is invalid"));
