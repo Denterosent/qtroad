@@ -1,7 +1,7 @@
 #-------------------------------------------------
 #
 # Project created by QtCreator 2015-05-02T13:39:57
-# qtroad = Random-Objekt-Analysing-Diagramm, created with QT
+# qtroad = Rapid-Objekt-Analysing-Diagramm, created with QT
 #-------------------------------------------------
 
 QT       += core gui
