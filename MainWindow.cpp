@@ -404,19 +404,29 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						//draw condition
 						QString switchExpression = QString::fromStdString(switchBlock->expression);
 						QGraphicsSimpleTextItem* switchExpressionTextItem = new QGraphicsSimpleTextItem(group);
-						switchExpressionTextItem->setText(switchExpression+"\n\n");
+						switchExpressionTextItem->setText(switchExpression);
 
-						int heightOfSwitchExpressionBlock = 2*paddingTopBlock + switchExpressionTextItem->boundingRect().height();
+						int b = switchExpressionTextItem->boundingRect().width() + paddingLeft;
+						int x = switchExpressionTextItem->boundingRect().height() + paddingTopBlock;
+
+						switchExpressionTextItem->setPos(left + width - b, top + paddingTopBlock);
+
+//						int heightOfSwitchExpressionBlock = 2*paddingTopBlock + switchExpressionTextItem->boundingRect().height();
+						int heightOfSwitchExpressionBlock = 50;//(width * x)/(width - b);
+
+						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
+						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock);
 
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
 						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
-						switchExpressionTextItem->setPos(left + paddingLeft, top + paddingTopBlock);
+//						switchExpressionTextItem->setPos(left + paddingLeft, top + paddingTopBlock);
 
 						top += heightOfSwitchExpressionBlock;
 
 						int saveTop = top, saveWidth = width, saveLeft = left;
 						int sizeOfMap = switchBlock->sequences.size();
 						int widthForEachElement = std::round(width / sizeOfMap);
+						int heightOfSwitchLine;
 						int maxTop = 0, topValue = 0;
 						width = widthForEachElement;
 						std::vector<int> topValues;
@@ -426,6 +436,12 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
 							caseTextItem->setText(caseText);
 							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
+
+							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * heightOfSwitchExpressionBlock) / saveWidth;
+
+							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
+							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
+
 							drawBody(group, pair.second.blocks);
 
 							left += widthForEachElement;
