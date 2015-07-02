@@ -221,7 +221,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						}
 					}else{
 						std::cout << "Error: no valid block" << std::endl;
-						throw std::runtime_error(std::string("Block is invalid"));
+						throw std::runtime_error(std::string("Error from Drawer: Block is invalid"));
 					}
 				}
 			}
@@ -345,7 +345,7 @@ void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
 
 QGraphicsItem* StructureChartDrawer::drawStructureChart(StructureChart* pChart)
 {
-	//init or reset attributes:
+	//init or reset attributes;
 	chart = pChart;
 	maxWidth = 0;
 	width = 500;
