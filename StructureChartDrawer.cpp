@@ -1,6 +1,5 @@
 #include "StructureChartDrawer.hpp"
 
-
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 {
 	scene = pScene; //for easier handling of parser
@@ -37,11 +36,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
-	maxEmtySignScale = 10;
 
-	// !!!!!!!!! those assignments are logicaly wrong !!!!!!:
-	maximumHeightOfIfElseBlock = width; //IfElseBlock doesn't get bigger than a square
-	maximumHeightOfSwitchBlock = width*0.5;
+	maxEmtySignScale = 10;
+	maxRelationIfElseBlock = 1; //maxHeight = maxRelation * width
+	maxRelationSwitchBlock = 0.5;
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -57,6 +55,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			wrapText(commandBlock, width-2*paddingLeft);
 			commandBlock->setPos(left+paddingLeft,top+paddingTopBlock);
 
+			//first point for auto width
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
 			int blockWidth = commandBlock->boundingRect().width()+paddingLeft*2;
 			if(blockWidth > maxWidth){
@@ -85,9 +84,9 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				int textHeight = conditionText->boundingRect().height();
 				int textWidth = conditionText->boundingRect().width();
 				int ifElseBlockHeight = (width*textHeight)/(width-textWidth);
-				if((ifElseBlockHeight > maximumHeightOfIfElseBlock) or (ifElseBlockHeight < 0))
+				if((ifElseBlockHeight > maxRelationIfElseBlock*width) or (ifElseBlockHeight < 0))
 				{
-					ifElseBlockHeight = maximumHeightOfIfElseBlock;
+					ifElseBlockHeight = maxRelationIfElseBlock*width;
 				}
 
 				//draw condition-rect
@@ -124,8 +123,6 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				width = saveWidth;
 				if(leftTop != rightTop){
 					top = std::max(leftTop, rightTop); //to make sure, that next blocks continue at max top of both if-bodies
-					QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
-					spaceText->setText("∅");
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){
 						//add spacefiller left
@@ -134,15 +131,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						//add spacefiller right
 						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
 					}
-					//scale the "∅" and position it
-					int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
-					xMultiplicator = (spaceRect->boundingRect().width())/(spaceText->boundingRect().width());
-					yMultiplicator = (spaceRect->boundingRect().height())/(spaceText->boundingRect().height());
-					multiplicator = std::min(xMultiplicator, yMultiplicator);
-					multiplicator = std::min(multiplicator, maxEmtySignScale);
-					spaceText->setScale(multiplicator);
-					spaceText->setPos((spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5)-(spaceText->boundingRect().width()*multiplicator*0.5),
-									  (spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5)-(spaceText->boundingRect().height()*multiplicator*0.5));
+					drawEmtySign(spaceRect, group, maxEmtySignScale);
 				}
 			}else{
 				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
@@ -176,9 +165,9 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
 
 						int heightOfSwitchExpressionBlock = (width * y)/(width - x);
-						if((heightOfSwitchExpressionBlock > maximumHeightOfSwitchBlock) or (heightOfSwitchExpressionBlock < 0))
+						if((heightOfSwitchExpressionBlock > maxRelationSwitchBlock*width) or (heightOfSwitchExpressionBlock < 0))
 						{
-							heightOfSwitchExpressionBlock = maximumHeightOfSwitchBlock;
+							heightOfSwitchExpressionBlock = maxRelationSwitchBlock*width;
 						}
 
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
@@ -220,25 +209,14 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						width = saveWidth;
 						left = saveLeft;
 
+						//add spacefillers where needed
 						for (unsigned int i = 0; i < topValues.size(); i++){
 							topValue = topValues[i];
 							if(topValue < maxTop){
 								//add spacefiller
-								QGraphicsSimpleTextItem* spaceText = new QGraphicsSimpleTextItem(group);
-								spaceText->setText("∅");
 								QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 								spaceRect->setRect(left + i * widthForEachElement, topValue, widthForEachElement, maxTop - topValue);
-
-								//scale the "∅" and position it
-								int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
-								xMultiplicator = (spaceRect->boundingRect().width())/(spaceText->boundingRect().width());
-								yMultiplicator = (spaceRect->boundingRect().height())/(spaceText->boundingRect().height());
-								multiplicator = std::min(xMultiplicator, yMultiplicator);
-								multiplicator = std::min(multiplicator, maxEmtySignScale);
-								spaceText->setScale(multiplicator);
-								spaceText->setPos((spaceRect->boundingRect().left()+spaceRect->boundingRect().width()*0.5)-(spaceText->boundingRect().width()*multiplicator*0.5),
-												  (spaceRect->boundingRect().top()+spaceRect->boundingRect().height()*0.5)-(spaceText->boundingRect().height()*multiplicator*0.5));
-
+								drawEmtySign(spaceRect, group, maxEmtySignScale);
 							}
 						}
 					}else{
@@ -249,6 +227,22 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			}
 		}
 	}
+}
+
+void StructureChartDrawer::drawEmtySign(QGraphicsRectItem* rect, QGraphicsItem* group, int maxScale){
+	//scale the "∅" and position it
+	QGraphicsSimpleTextItem* text = new QGraphicsSimpleTextItem(group);
+	text->setText("∅");
+
+	int multiplicator = 0, xMultiplicator = 0, yMultiplicator = 0;
+	xMultiplicator = (rect->boundingRect().width())/(text->boundingRect().width());
+	yMultiplicator = (rect->boundingRect().height())/(text->boundingRect().height());
+	multiplicator = std::min(xMultiplicator, yMultiplicator);
+	multiplicator = std::min(multiplicator, maxScale);
+	text->setScale(multiplicator);
+	text->setPos((rect->boundingRect().left()+rect->boundingRect().width()*0.5)-(text->boundingRect().width()*multiplicator*0.5),
+					  (rect->boundingRect().top()+rect->boundingRect().height()*0.5)-(text->boundingRect().height()*multiplicator*0.5));
+
 }
 
 void StructureChartDrawer::drawLoopHeading(QGraphicsSimpleTextItem* loopHeading)

@@ -23,8 +23,8 @@ class StructureChartDrawer
 		int paddingTopBlock;
 		int paddingBody;
 		int maxEmtySignScale;
-		int maximumHeightOfIfElseBlock;
-		int maximumHeightOfSwitchBlock;
+		float maxRelationIfElseBlock;
+		float maxRelationSwitchBlock;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene);
@@ -32,6 +32,7 @@ class StructureChartDrawer
 		QGraphicsItem* drawStructureChart(StructureChart* pChart);
 		void drawHead(QGraphicsItem* group);
 		void wrapText(QGraphicsSimpleTextItem* inputItem, int maximumWidth);
+		void drawEmtySign(QGraphicsRectItem* rect, QGraphicsItem* group, int maxScale);
 		void drawLoopHeading(QGraphicsSimpleTextItem* loopHeading);
 		void drawSurroundingRect(QGraphicsItem* group);
 };
