@@ -189,7 +189,7 @@ void MainWindow::on_actionGenerate_triggered()
 		theMap["vier"].blocks.emplace_back(sb31);
 		theMap["vier"].blocks.emplace_back(sb41);
 
-		SwitchBlock* switchBlock = new SwitchBlock("switch-expression", theMap);
+		SwitchBlock* switchBlock = new SwitchBlock("switch-expression\ntest\ntest\n...\n...", theMap);
 
 		chart2->root.blocks.emplace_back(sb4);
 		chart2->root.blocks.emplace_back(switchBlock);
@@ -256,10 +256,12 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * text auto-wrap
 	 * multiple Structure-Charts
 	 * declarations - in testing phase
+	 * SwitchBlocks
 	 *
 	 *no Support for:
-	 * SwitchBlocks
 	 * AutoWidth of blocks
+	 * Resizing of SwitchBlock line for case strings
+	 * Else-Case of SwitchBlock
 	 */
 
 	/*buglist:
@@ -277,7 +279,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
 	maxEmtySignScale = 10;
+
+	// !!!!!!!!! those assignments are logicaly wrong !!!!!!:
 	maximumHeightOfIfElseBlock = width; //IfElseBlock doesn't get bigger than a square
+	maximumHeightOfSwitchBlock = width*0.5;
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -308,7 +313,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
-				//width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
+				//general: width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
 
 				//draw condition text
 				QString text = QString::fromStdString(ifElseBlock->condition);
@@ -406,20 +411,22 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						QGraphicsSimpleTextItem* switchExpressionTextItem = new QGraphicsSimpleTextItem(group);
 						switchExpressionTextItem->setText(switchExpression);
 
-						int b = switchExpressionTextItem->boundingRect().width() + paddingLeft;
-						int x = switchExpressionTextItem->boundingRect().height() + paddingTopBlock;
+						int x = switchExpressionTextItem->boundingRect().width() + 2*paddingLeft;
+						int y = switchExpressionTextItem->boundingRect().height() + 2*paddingTopBlock;
 
-						switchExpressionTextItem->setPos(left + width - b, top + paddingTopBlock);
+						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
 
-//						int heightOfSwitchExpressionBlock = 2*paddingTopBlock + switchExpressionTextItem->boundingRect().height();
-						int heightOfSwitchExpressionBlock = 50;//(width * x)/(width - b);
+						int heightOfSwitchExpressionBlock = (width * y)/(width - x);
+						if((heightOfSwitchExpressionBlock > maximumHeightOfSwitchBlock) or (heightOfSwitchExpressionBlock < 0))
+						{
+							heightOfSwitchExpressionBlock = maximumHeightOfSwitchBlock;
+						}
 
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
 						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock);
 
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
 						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
-//						switchExpressionTextItem->setPos(left + paddingLeft, top + paddingTopBlock);
 
 						top += heightOfSwitchExpressionBlock;
 

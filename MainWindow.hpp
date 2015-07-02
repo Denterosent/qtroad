@@ -37,6 +37,7 @@ class StructureChartDrawer
 		int paddingBody;
 		int maxEmtySignScale;
 		int maximumHeightOfIfElseBlock;
+		int maximumHeightOfSwitchBlock;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene);
