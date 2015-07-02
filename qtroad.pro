@@ -16,13 +16,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         MainWindow.cpp \
     Parser.cpp\
-ChartsBase.cpp
+ChartsBase.cpp \
+    StructureChartDrawer.cpp
 
 HEADERS  += MainWindow.hpp \
     StructureChart.hpp \
     ClassChart.hpp \
     ChartsBase.hpp \
-    Parser.hpp
+    Parser.hpp \
+    StructureChartDrawer.hpp
 
 FORMS    += MainWindow.ui
 
