@@ -192,8 +192,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							caseTextItem->setText(caseText);
 							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
 
-							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / saveWidth);
-
+							//draw the small vertical lines
+							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / saveWidth) - 1;
 							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
 							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
 
