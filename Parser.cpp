@@ -69,10 +69,10 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			BlockSequence yes = parseFunctionBody(yesBlockBegin, yesBlockEnd);
 			if(falseBranche) {
 				BlockSequence no = parseFunctionBody(noBlockBegin, noBlockEnd);
-				ret.blocks.push_back(std::unique_ptr<Block>(new IfElseBlock(condition, yes, no)));
+				ret.getBlocks().push_back(std::unique_ptr<Block>(new IfElseBlock(condition, yes, no)));
 			} else {
 				BlockSequence no;
-				ret.blocks.push_back(std::unique_ptr<Block>(new IfElseBlock(condition, yes, no)));
+				ret.getBlocks().push_back(std::unique_ptr<Block>(new IfElseBlock(condition, yes, no)));
 			}
 		} else if (match(begin, end, "switch")) {
 
@@ -86,7 +86,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
 
-			ret.blocks.push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
+			ret.getBlocks().push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
 
 			skipWhitespaces(begin, end);
 
@@ -105,7 +105,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
 
-			ret.blocks.push_back(std::unique_ptr<Block>(new LoopBlock(condition, body, false)));
+			ret.getBlocks().push_back(std::unique_ptr<Block>(new LoopBlock(condition, body, false)));
 
 		} else if (matchWithFollowing(begin, end, "for", '(')){
 			std::string condition = getCondition(begin, end);
@@ -117,7 +117,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			BlockSequence body = parseFunctionBody(whileBlockBegin, whileBlockEnd);
 
-			ret.blocks.push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
+			ret.getBlocks().push_back(std::unique_ptr<Block> (new LoopBlock(condition, body, true)));
 
 			skipWhitespaces(begin, end);
 
@@ -146,7 +146,7 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				commandEnd++;
 			}
 			if(begin != end){
-				ret.blocks.push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
+				ret.getBlocks().push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
 			}
 			if (*commandEnd == ';')
 				commandEnd++;
