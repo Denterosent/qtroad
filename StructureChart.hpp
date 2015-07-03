@@ -32,11 +32,13 @@ class Block
 class BlockSequence
 {
 	private:
+		std::vector<std::unique_ptr<Block>> blocks;
 	public:
-		std::vector<std::unique_ptr<Block>> blocks; //TODO: make private
 		BlockSequence() = default;
 		BlockSequence(BlockSequence&&) = default;
 		std::vector<std::unique_ptr<Block>>& getBlocks(){return blocks;}
+		//void pushbackBlock(std::unique_ptr<Block>& block){blocks.push_back(block);}
+		//void emplaceBackBlock(std::unique_ptr<Block>& block){blocks.emplace_back(block);}
 };
 
 class SimpleBlock : public Block

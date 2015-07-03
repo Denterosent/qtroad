@@ -205,7 +205,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						std::vector<int> topValues;
 
 						//draw the small vertical lines with case-texts
-						for (const std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
+						for (std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
 							QString caseText = QString::fromStdString(pair.first);
 							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
 							caseTextItem->setText(caseText);
@@ -216,7 +216,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
 							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
 
-							drawBody(group, pair.second.blocks); //TODO: use operation call for blocks
+							drawBody(group, pair.second.getBlocks()); //TODO: use operation call for blocks
 
 							left += widthForEachElement;
 							topValues.push_back(top);
