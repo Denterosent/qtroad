@@ -36,6 +36,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin
 	left = paddingBody;
+	switchLineOffset = 10;
 
 	maxEmtySignScale = 10;
 	maxRelationIfElseBlock = 1; //maxHeight = maxRelation * width
@@ -159,19 +160,19 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						QGraphicsSimpleTextItem* switchExpressionTextItem = new QGraphicsSimpleTextItem(group);
 						switchExpressionTextItem->setText(switchExpression);
 
+						//calc height of switch-expression block
 						int x = switchExpressionTextItem->boundingRect().width() + 2*paddingLeft;
 						int y = switchExpressionTextItem->boundingRect().height() + 2*paddingTopBlock;
-
-						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
-
-						int heightOfSwitchExpressionBlock = (width * y)/(width - x);
+						int heightOfSwitchExpressionBlock = switchLineOffset + (width * y)/(width - x);
 						if((heightOfSwitchExpressionBlock > maxRelationSwitchBlock*width) or (heightOfSwitchExpressionBlock < 0))
 						{
 							heightOfSwitchExpressionBlock = maxRelationSwitchBlock*width;
 						}
 
+						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
+
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
-						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock);
+						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock - switchLineOffset);
 
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
 						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
@@ -179,10 +180,9 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						top += heightOfSwitchExpressionBlock;
 
 						int saveTop = top, saveWidth = width, saveLeft = left;
-						int sizeOfMap = switchBlock->sequences.size();
-						int widthForEachElement = std::round(width / sizeOfMap);
+						int widthForEachElement = std::round(width / switchBlock->sequences.size());
 						int heightOfSwitchLine;
-						int maxTop = 0, topValue = 0;
+						int maxTop = 0;
 						width = widthForEachElement;
 						std::vector<int> topValues;
 
@@ -192,7 +192,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							caseTextItem->setText(caseText);
 							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
 
-							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * heightOfSwitchExpressionBlock) / saveWidth;
+							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / saveWidth);
 
 							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
 							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
@@ -209,6 +209,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						width = saveWidth;
 						left = saveLeft;
 
+						int topValue = 0;
 						//add spacefillers where needed
 						for (unsigned int i = 0; i < topValues.size(); i++){
 							topValue = topValues[i];
