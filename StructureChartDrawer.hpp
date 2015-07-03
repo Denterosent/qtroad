@@ -16,7 +16,7 @@ class StructureChartDrawer
 		int top;
 		int left;
 		int loopOffset;
-		int maxWidth;
+		int initialWidth;
 		int width;
 		int paddingLeft;
 		int paddingTop;

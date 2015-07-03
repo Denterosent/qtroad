@@ -27,8 +27,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * autowrap splits at unwanted signs
 	 */
 
-	maxWidth = 0;
-	width = 500;
+	initialWidth = 500;
 	top = 0;
 	loopOffset = 20;
 	paddingLeft = 5;	//for every text relative to block, also padding for rigth
@@ -62,8 +61,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			//first point for auto width
 			int blockHeight = commandBlock->boundingRect().height()+paddingTopBlock*2;
 			int blockWidth = commandBlock->boundingRect().width()+paddingLeft*2;
-			if(blockWidth > maxWidth){
-				maxWidth = blockWidth;
+			if(blockWidth > initialWidth){
+				initialWidth = blockWidth;
 //				std::cout << blockWidth << std::endl;
 			}
 
@@ -356,8 +355,7 @@ QGraphicsItem* StructureChartDrawer::drawStructureChart(StructureChart* pChart)
 {
 	//init or reset attributes;
 	chart = pChart;
-	maxWidth = 0;
-	width = 500;
+	width = initialWidth;
 	top = 0;
 
 	QGraphicsItem* structureChart = new QGraphicsItemGroup();
