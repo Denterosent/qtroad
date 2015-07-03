@@ -13,19 +13,27 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * AutoHeight of blocks
 	 * text auto-wrap
 	 * multiple Structure-Charts
-	 * declarations - in testing phase
+	 * declarations
 	 * SwitchBlocks
 	 * IfElseBlock-Bodies with different size when else is empty
 	 *
 	 *no Support for:
-	 * AutoWidth of blocks
-	 * Resizing of SwitchBlock line for case strings
 	 * Else-Case of SwitchBlock
+	 * (AutoWidth of blocks) - not necessary, first do things which are important
+	 * (Resizing of SwitchBlock line for case strings, same for IfElseBlock) - not necessary, first do things which are important
 	 */
 
 	/*buglist:
 	 * autowrap gets into a endless loop if not stopped
 	 * autowrap splits at unwanted signs
+	 */
+
+	/*TODO's:
+	 * else-case of switchBlocks
+	 * find solution auto-wrap
+	 * get decltype from Class
+	 * set page-breaks
+	 * help chris with parser
 	 */
 
 	initialWidth = 300;
@@ -54,7 +62,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
 		if (simpleBlock) {
 			//draw text
-			QString text = QString::fromStdString(simpleBlock->command);
+			QString text = QString::fromStdString(simpleBlock->getCommand());
 			QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
 			commandBlock->setText(text);
 			wrapText(commandBlock, width-2*paddingLeft);
@@ -78,12 +86,12 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			if(ifElseBlock){
 				//calc the width of the bodies
 				float relation = 0.5;
-				if(ifElseBlock->no.blocks.size() == 0){relation = relationOfBodiesIfElseBlock;}
+				if(ifElseBlock->getNo().getBlocks().size() == 0){relation = relationOfBodiesIfElseBlock;}
 				int leftWidth = std::round(width * relation);
 				int rightWidth = width - leftWidth;
 
 				//draw condition text
-				QString text = QString::fromStdString(ifElseBlock->condition);
+				QString text = QString::fromStdString(ifElseBlock->getCondition());
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
 				wrapText(conditionText, std::round(width*0.7));
@@ -105,8 +113,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				//draw triangle-lines
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
-				leftLine->setLine(left, top, leftWidth + left, top+ifElseBlockHeight);
-				rightLine->setLine(left+width, top, leftWidth + left, top+ifElseBlockHeight);
+				leftLine->setLine(left, top, leftWidth + left, top + ifElseBlockHeight);
+				rightLine->setLine(left + width, top, leftWidth + left, top + ifElseBlockHeight);
 
 				//draw yes/no -text
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
@@ -121,12 +129,12 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				//draw both bodies by calling this function recursively
 				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
 				width = leftWidth;
-				drawBody(group, ifElseBlock->yes.blocks);
+				drawBody(group, ifElseBlock->getYes().getBlocks());
 				leftTop = top;
 				top = saveTop;
 				left += width;
 				width = rightWidth;
-				drawBody(group, ifElseBlock->no.blocks);
+				drawBody(group, ifElseBlock->getNo().getBlocks());
 				rightTop = top;
 				left = saveLeft;
 				width = saveWidth;
@@ -135,10 +143,10 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){
 						//add spacefiller left
-						spaceRect->setRect(left, leftTop, leftWidth, top-leftTop);
+						spaceRect->setRect(left, leftTop, leftWidth, top - leftTop);
 					}else{
 						//add spacefiller right
-						spaceRect->setRect(left + leftWidth, rightTop, rightWidth, top-rightTop);
+						spaceRect->setRect(left + leftWidth, rightTop, rightWidth, top - rightTop);
 					}
 					drawEmtySign(spaceRect, group, maxEmtySignScale);
 				}
@@ -146,16 +154,16 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
 				if(loopBlock){
 					QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
-					loopHeading->setText(QString::fromStdString(loopBlock->condition));
+					loopHeading->setText(QString::fromStdString(loopBlock->getCondition()));
 
 					int saveTop = top;
-					if(loopBlock->headControlled){drawLoopHeading(loopHeading);}
+					if(loopBlock->getHeadcontrolled()){drawLoopHeading(loopHeading);}
 					left += loopOffset;
 					width -= loopOffset;
-					drawBody(group, loopBlock->body.blocks);
+					drawBody(group, loopBlock->getBody().getBlocks());
 					width += loopOffset;
 					left -= loopOffset;
-					if(!loopBlock->headControlled){drawLoopHeading(loopHeading);}
+					if(!loopBlock->getHeadcontrolled()){drawLoopHeading(loopHeading);}
 
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
@@ -164,7 +172,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					if(switchBlock){
 
 						//draw condition
-						QString switchExpression = QString::fromStdString(switchBlock->expression);
+						QString switchExpression = QString::fromStdString(switchBlock->getExpression());
 						QGraphicsSimpleTextItem* switchExpressionTextItem = new QGraphicsSimpleTextItem(group);
 						switchExpressionTextItem->setText(switchExpression);
 
@@ -190,14 +198,14 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						top += heightOfSwitchExpressionBlock;
 
 						int saveTop = top, saveWidth = width, saveLeft = left;
-						int widthForEachElement = std::round(width / switchBlock->sequences.size());
+						int widthForEachElement = std::round(width / switchBlock->getSequences().size());
 						int heightOfSwitchLine;
 						int maxTop = 0;
 						width = widthForEachElement;
 						std::vector<int> topValues;
 
 						//draw the small vertical lines with case-texts
-						for (const std::pair<const std::string, BlockSequence>& pair : switchBlock->sequences){
+						for (const std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
 							QString caseText = QString::fromStdString(pair.first);
 							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
 							caseTextItem->setText(caseText);
@@ -208,7 +216,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
 							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
 
-							drawBody(group, pair.second.blocks);
+							drawBody(group, pair.second.blocks); //TODO: use operation call for blocks
 
 							left += widthForEachElement;
 							topValues.push_back(top);
@@ -325,7 +333,7 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 {
 	//draw headline
 	QGraphicsSimpleTextItem* headline = new QGraphicsSimpleTextItem(group);
-	headline->setText(QString::fromStdString(chart->headline));
+	headline->setText(QString::fromStdString(chart->getHeadline()));
 	headline->setPos(paddingLeft, paddingTop);
 	QFont font = headline->font();
 	font.setBold(true);
@@ -333,13 +341,13 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 	top += paddingTop + headline->boundingRect().height() + paddingVariablelist;
 
 	//draw declarations if there are some
-	if(chart->declarations.size() != 0){
+	if(chart->getDeclarations().size() != 0){
 		QGraphicsSimpleTextItem* declarationTextItem = new QGraphicsSimpleTextItem(group);
 		QString declarationText = "";
 
-		for (Declaration& decl : chart->declarations){
+		for (Declaration& decl : chart->getDeclarations()){
 	//		declarationText += QString::fromStdString("\n" + decl.varName+": "+decl.type->umlName());
-			declarationText += QString::fromStdString("\n" + decl.varName + ": " + decl.type);
+			declarationText += QString::fromStdString("\n" + decl.getVarName() + ": " + decl.getType());
 		}
 		declarationTextItem->setText("lokale/globale Variablen und Attribute:" + declarationText);
 		declarationTextItem->setPos(left, top);
@@ -366,7 +374,7 @@ QGraphicsItem* StructureChartDrawer::drawStructureChart(StructureChart* pChart)
 	QGraphicsItem* structureChart = new QGraphicsItemGroup();
 
 	drawHead(structureChart);
-	drawBody(structureChart, chart->root.blocks);
+	drawBody(structureChart, chart->getRoot().getBlocks());
 	drawSurroundingRect(structureChart);
 
 	return structureChart;

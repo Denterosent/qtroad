@@ -7,65 +7,93 @@
 #include <memory>
 #include <vector>
 
-struct Declaration
+class Declaration
 {
+	private:
+		std::string type;
+		std::string varName;
+
+	public:
 		Declaration(std::string pVarName, std::string pType): varName(pVarName), type(pType)
 		{
 		}
-
-		std::string type;
-		std::string varName;
+		std::string getType(){return type;}
+		std::string getVarName(){return varName;}
 };
 
-struct Block
+class Block
 {
+	public:
 		virtual ~Block()
 		{
 		}
 };
 
-struct BlockSequence
+class BlockSequence
 {
+	private:
+	public:
+		std::vector<std::unique_ptr<Block>> blocks; //TODO: make private
 		BlockSequence() = default;
 		BlockSequence(BlockSequence&&) = default;
-		std::vector<std::unique_ptr<Block>> blocks;
+		std::vector<std::unique_ptr<Block>>& getBlocks(){return blocks;}
 };
 
-struct SimpleBlock : public Block
+class SimpleBlock : public Block
 {
+	private:
+		std::string command;
+
+	public:
 		SimpleBlock(std::string command)
 			: command(command)
 		{
 		}
-		std::string command;
+		std::string getCommand(){return command;}
 };
 
-struct IfElseBlock : public Block
+class IfElseBlock : public Block
 {
+	private:
+		std::string condition;
+		BlockSequence yes;
+		BlockSequence no;
+
+	public:
 		IfElseBlock(std::string condition, BlockSequence& yes, BlockSequence& no)
 			: condition(condition)
 			, yes(std::move(yes))
 			, no(std::move(no))
 		{
 		}
-
-		std::string condition;
-		BlockSequence yes;
-		BlockSequence no;
+	std::string getCondition(){return condition;}
+	BlockSequence& getYes(){return yes;}
+	BlockSequence& getNo(){return no;}
 };
 
-struct SwitchBlock : public Block
+class SwitchBlock : public Block
 {
+	private:
+		std::string expression;
+		std::map<std::string, BlockSequence> sequences; // Empty string: else
+
+	public:
 		SwitchBlock(std::string expression, std::map<std::string, BlockSequence>& sequences)
 			:expression(expression), sequences(std::move(sequences))
 		{
 		}
-		std::string expression;
-		std::map<std::string, BlockSequence> sequences; // Empty string: else
+		std::string getExpression(){return expression;}
+		std::map<std::string, BlockSequence>& getSequences(){return sequences;}
 };
 
-struct LoopBlock : public Block
+class LoopBlock : public Block
 {
+	private:
+		std::string condition;
+		BlockSequence body;
+		bool headControlled;
+
+	public:
 		LoopBlock()
 		{
 		}
@@ -76,24 +104,29 @@ struct LoopBlock : public Block
 			, headControlled(headControlled)
 		{
 		}
-		std::string condition;
-		BlockSequence body;
-		bool headControlled;
+		std::string getCondition(){return condition;}
+		BlockSequence& getBody(){return body;}
+		bool getHeadcontrolled(){return headControlled;}
 };
 
-struct StructureChart
+class StructureChart
 {
+	private:
+		std::string headline;
+		std::vector<Declaration> declarations;
+		BlockSequence root;
+
+	public:
 		StructureChart()
 		{
 		}
-
 		StructureChart(std::string headline, std::vector<Declaration>&& declarations, BlockSequence root)
 			: headline(headline), declarations(std::move(declarations)), root(std::move(root))
 		{
 		}
-		std::string headline;
-		std::vector<Declaration> declarations;
-		BlockSequence root;
+		std::string getHeadline(){return headline;}
+		std::vector<Declaration>& getDeclarations(){return declarations;}
+		BlockSequence& getRoot(){return root;}
 };
 
 #endif
