@@ -28,7 +28,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * autowrap splits at unwanted signs
 	 */
 
-	initialWidth = 500;
+	initialWidth = 300;
 	top = 0;
 	loopOffset = 20;
 	paddingLeft = 5;	//for every text relative to block, also padding for rigth
@@ -196,6 +196,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						width = widthForEachElement;
 						std::vector<int> topValues;
 
+						//draw the small vertical lines with case-texts
 						for (const std::pair<const std::string, BlockSequence>& pair : switchBlock->sequences){
 							QString caseText = QString::fromStdString(pair.first);
 							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
