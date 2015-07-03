@@ -86,11 +86,11 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
 				wrapText(conditionText, std::round(width*0.7));
-				conditionText->setPos(left + std::round(leftWidth - conditionText->boundingRect().width() * relation), top);
+				conditionText->setPos(left + paddingLeft + std::round(leftWidth - conditionText->boundingRect().width() * relation), top + paddingTopBlock);
 
 				//calculate the height of the condition block
-				int textHeight = conditionText->boundingRect().height();
-				int textWidth = conditionText->boundingRect().width();
+				int textHeight = conditionText->boundingRect().height() + 2*paddingTopBlock;
+				int textWidth = conditionText->boundingRect().width() + 2*paddingLeft;
 				int ifElseBlockHeight = (width*textHeight)/(width-textWidth);
 				if((ifElseBlockHeight > maxRelationIfElseBlock*width) or (ifElseBlockHeight < 0))
 				{
