@@ -196,9 +196,9 @@ void MainWindow::on_actionGenerate_triggered()
 		chart2->root.blocks.emplace_back(switchBlock);
 		chart2->headline = "TestChart for Switch-Blocks";
 
-		QGraphicsItem* structureChart2 = drawer.drawStructureChart(chart2);
-		structureChart2->setPos(700.5, 400.5);
-		scene->addItem(structureChart2);
+//		QGraphicsItem* structureChart2 = drawer.drawStructureChart(chart2);
+//		structureChart2->setPos(700.5, 400.5);
+//		scene->addItem(structureChart2);
 		//--------------------------------------------------------------------------
 
 		graphicsView->setScene(scene);
