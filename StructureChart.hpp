@@ -9,7 +9,11 @@
 
 struct Declaration
 {
-		std::unique_ptr<Type> type;
+		Declaration(std::string pVarName, std::string pType): varName(pVarName), type(pType)
+		{
+		}
+
+		std::string type;
 		std::string varName;
 };
 

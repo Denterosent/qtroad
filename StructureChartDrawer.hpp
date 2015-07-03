@@ -22,6 +22,7 @@ class StructureChartDrawer
 		int paddingTop;
 		int paddingTopBlock;
 		int paddingBody;
+		int paddingVariablelist;
 		int switchLineOffset;
 		int maxEmtySignScale;
 		float relationOfBodiesIfElseBlock;

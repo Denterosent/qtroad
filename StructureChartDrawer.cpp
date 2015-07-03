@@ -15,6 +15,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * multiple Structure-Charts
 	 * declarations - in testing phase
 	 * SwitchBlocks
+	 * IfElseBlock-Bodies with different size when else is empty
 	 *
 	 *no Support for:
 	 * AutoWidth of blocks
@@ -31,10 +32,11 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	top = 0;
 	loopOffset = 20;
 	paddingLeft = 5;	//for every text relative to block, also padding for rigth
-	paddingTop = 5;		//only for heading, also padding bottom
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
-	paddingBody = 5;	//set it to 0, if you don't like the extra margin
+	paddingTop = 5;		//only for heading
+	paddingBody = 5;	//set it to 0, if you don't like the extra margin, doesn't apply on top padding
 	left = paddingBody;
+	paddingVariablelist = 5; //between heading and variablelist, variablelist and body
 	switchLineOffset = 10;
 
 	maxEmtySignScale = 10;
@@ -327,20 +329,22 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 	QFont font = headline->font();
 	font.setBold(true);
 	headline->setFont(font);
+	top += paddingTop + headline->boundingRect().height() + paddingVariablelist;
 
-	top += 2*paddingTop + headline->boundingRect().height();
+	//draw declarations if there are some
+	if(chart->declarations.size() != 0){
+		QGraphicsSimpleTextItem* declarationTextItem = new QGraphicsSimpleTextItem(group);
+		QString declarationText = "";
 
-	//draw declarations - still testing
-	QGraphicsSimpleTextItem* declarationTextItem = new QGraphicsSimpleTextItem(group);
-	QString declarationText = "";
+		for (Declaration& decl : chart->declarations){
+	//		declarationText += QString::fromStdString("\n" + decl.varName+": "+decl.type->umlName());
+			declarationText += QString::fromStdString("\n" + decl.varName + ": " + decl.type);
+		}
+		declarationTextItem->setText("lokale/globale Variablen und Attribute:" + declarationText);
+		declarationTextItem->setPos(left, top);
 
-	for (Declaration& decl : chart->declarations){
-		declarationText += QString::fromStdString(decl.varName+": "+decl.type->umlName()+"\n");
+		top += declarationTextItem->boundingRect().height() + paddingVariablelist;
 	}
-	declarationTextItem->setText(declarationText);
-
-	top += 2*paddingTop + declarationTextItem->boundingRect().height();
-
 }
 
 void StructureChartDrawer::drawSurroundingRect(QGraphicsItem* group)
