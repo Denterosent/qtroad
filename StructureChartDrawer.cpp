@@ -41,6 +41,8 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	maxEmtySignScale = 10;
 	maxRelationIfElseBlock = 1; //maxHeight = maxRelation * width
 	maxRelationSwitchBlock = 0.5;
+
+	errorTag = "Error from Drawer: ";
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -73,6 +75,11 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
 				//general: width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
+
+				if(ifElseBlock->no.blocks.size() == 0){
+					//throw std::runtime_error(errorTag + "empty else case detected.");
+				}
+
 
 				//draw condition text
 				QString text = QString::fromStdString(ifElseBlock->condition);
@@ -171,9 +178,11 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 
 						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
 
+						//draw the big line
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
 						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock - switchLineOffset);
 
+						//draw the rectangle around the expression block
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
 						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
 
@@ -209,8 +218,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 						width = saveWidth;
 						left = saveLeft;
 
-						int topValue = 0;
 						//add spacefillers where needed
+						int topValue = 0;
 						for (unsigned int i = 0; i < topValues.size(); i++){
 							topValue = topValues[i];
 							if(topValue < maxTop){
@@ -221,8 +230,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							}
 						}
 					}else{
-						std::cout << "Error: no valid block" << std::endl;
-						throw std::runtime_error(std::string("Error from Drawer: Block is invalid"));
+						throw std::runtime_error(errorTag + "Block is invalid");
 					}
 				}
 			}

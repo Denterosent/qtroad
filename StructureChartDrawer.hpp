@@ -26,6 +26,7 @@ class StructureChartDrawer
 		int maxEmtySignScale;
 		float maxRelationIfElseBlock;
 		float maxRelationSwitchBlock;
+		std::string errorTag;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene);
