@@ -24,6 +24,7 @@ class StructureChartDrawer
 		int paddingBody;
 		int switchLineOffset;
 		int maxEmtySignScale;
+		float relationOfBodiesIfElseBlock;
 		float maxRelationIfElseBlock;
 		float maxRelationSwitchBlock;
 		std::string errorTag;

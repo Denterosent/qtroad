@@ -39,6 +39,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	switchLineOffset = 10;
 
 	maxEmtySignScale = 10;
+	relationOfBodiesIfElseBlock = 0.8; //leftBodyWidth = relation * width
 	maxRelationIfElseBlock = 1; //maxHeight = maxRelation * width
 	maxRelationSwitchBlock = 0.5;
 
@@ -74,20 +75,18 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
-				//general: width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
-				int leftWidth = std::ceil(width * 0.5);
-				int rightWidth = std::floor(width * 0.5);
-				if(ifElseBlock->no.blocks.size() == 0){
-
-				}
-
+				//calc the width of the bodies
+				float relation = 0.5;
+				if(ifElseBlock->no.blocks.size() == 0){relation = relationOfBodiesIfElseBlock;}
+				int leftWidth = std::round(width * relation);
+				int rightWidth = width - leftWidth;
 
 				//draw condition text
 				QString text = QString::fromStdString(ifElseBlock->condition);
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
 				wrapText(conditionText, std::round(width*0.7));
-				conditionText->setPos(left + std::ceil(leftWidth - conditionText->boundingRect().width()*0.5), top);
+				conditionText->setPos(left + std::round(leftWidth - conditionText->boundingRect().width() * relation), top);
 
 				//calculate the height of the condition block
 				int textHeight = conditionText->boundingRect().height();
@@ -231,7 +230,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							}
 						}
 					}else{
-						throw std::runtime_error(errorTag + "Block is invalid");
+						throw std::runtime_error(errorTag + "Block is invalid.");
 					}
 				}
 			}
