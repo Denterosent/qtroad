@@ -75,9 +75,10 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
 				//general: width of left BlockSequence is calculated with "ceil", width of right one with "floor", this affects condition text and triangle lines too
-
+				int leftWidth = std::ceil(width * 0.5);
+				int rightWidth = std::floor(width * 0.5);
 				if(ifElseBlock->no.blocks.size() == 0){
-					//throw std::runtime_error(errorTag + "empty else case detected.");
+
 				}
 
 
@@ -86,7 +87,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				QGraphicsSimpleTextItem* conditionText = new QGraphicsSimpleTextItem(group);
 				conditionText->setText(text);
 				wrapText(conditionText, std::round(width*0.7));
-				conditionText->setPos(left + std::ceil(width*0.5-conditionText->boundingRect().width()*0.5), top);
+				conditionText->setPos(left + std::ceil(leftWidth - conditionText->boundingRect().width()*0.5), top);
 
 				//calculate the height of the condition block
 				int textHeight = conditionText->boundingRect().height();
@@ -104,8 +105,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				//draw triangle-lines
 				QGraphicsLineItem* leftLine = new QGraphicsLineItem(group);
 				QGraphicsLineItem* rightLine = new QGraphicsLineItem(group);
-				leftLine->setLine(left, top, std::ceil(width*0.5+left), top+ifElseBlockHeight);
-				rightLine->setLine(left+width, top, std::ceil(width*0.5+left), top+ifElseBlockHeight);
+				leftLine->setLine(left, top, leftWidth + left, top+ifElseBlockHeight);
+				rightLine->setLine(left+width, top, leftWidth + left, top+ifElseBlockHeight);
 
 				//draw yes/no -text
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
@@ -119,12 +120,12 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 
 				//draw both bodies by calling this function recursively
 				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
-				width = std::ceil(width*0.5);
+				width = leftWidth;
 				drawBody(group, ifElseBlock->yes.blocks);
 				leftTop = top;
 				top = saveTop;
 				left += width;
-				width = std::floor(saveWidth*0.5);
+				width = rightWidth;
 				drawBody(group, ifElseBlock->no.blocks);
 				rightTop = top;
 				left = saveLeft;
@@ -134,10 +135,10 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					QGraphicsRectItem* spaceRect = new QGraphicsRectItem(group);
 					if(leftTop < rightTop){
 						//add spacefiller left
-						spaceRect->setRect(left, leftTop, std::ceil(width*0.5), top-leftTop);
+						spaceRect->setRect(left, leftTop, leftWidth, top-leftTop);
 					}else{
 						//add spacefiller right
-						spaceRect->setRect(left+std::ceil(width*0.5), rightTop, std::floor(width*0.5), top-rightTop);
+						spaceRect->setRect(left + leftWidth, rightTop, rightWidth, top-rightTop);
 					}
 					drawEmtySign(spaceRect, group, maxEmtySignScale);
 				}
