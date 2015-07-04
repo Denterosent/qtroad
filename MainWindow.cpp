@@ -170,7 +170,7 @@ void MainWindow::on_actionGenerate_triggered()
 		scene->addItem(structureChart);
 
 		//-------------create test environment for switchBlock-----------------------
-		StructureChart* chart2 = new StructureChart;
+/*		StructureChart* chart2 = new StructureChart;
 
 		SimpleBlock* sb1 = new SimpleBlock("sb1");
 		SimpleBlock* sb2 = new SimpleBlock("sb2\nsb2");
@@ -188,9 +188,9 @@ void MainWindow::on_actionGenerate_triggered()
 		theMap["drei"].blocks.emplace_back(sb11);
 		theMap["vier"].blocks.emplace_back(sb21);
 		theMap["vier"].blocks.emplace_back(sb31);
-		theMap["vier"].blocks.emplace_back(sb41);
+		theMap[""].blocks.emplace_back(sb41);
 
-		SwitchBlock* switchBlock = new SwitchBlock("switch-expression\ntest\ntest\n...\n...", theMap);
+		SwitchBlock* switchBlock = new SwitchBlock("switch-expression", theMap);
 
 		chart2->headline = "TestChart for Switch-Blocks";
 		chart2->declarations.push_back(Declaration("testVar", "testtype"));
@@ -201,7 +201,7 @@ void MainWindow::on_actionGenerate_triggered()
 
 		QGraphicsItem* structureChart2 = drawer.drawStructureChart(chart2);
 		structureChart2->setPos(700.5, 400.5);
-		scene->addItem(structureChart2);
+		scene->addItem(structureChart2);*/
 		//--------------------------------------------------------------------------
 
 		graphicsView->setScene(scene);
