@@ -45,7 +45,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	paddingBody = 5;	//set it to 0, if you don't like the extra margin, doesn't apply on top padding
 	left = paddingBody;
 	paddingVariablelist = 5; //between heading and variablelist, variablelist and body
-	switchLineOffset = 10;
+	switchLineOffset = 15;
 
 	maxEmtySignScale = 10;
 	relationOfBodiesIfElseBlock = 0.8; //leftBodyWidth = relation * width
@@ -157,31 +157,35 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					loopHeading->setText(QString::fromStdString(loopBlock->getCondition()));
 
 					int saveTop = top;
-					if(loopBlock->getHeadcontrolled()){drawLoopHeading(loopHeading);}
+					if(loopBlock->getHeadcontrolled()){
+						drawLoopHeading(loopHeading);
+					}
 					left += loopOffset;
 					width -= loopOffset;
 					drawBody(group, loopBlock->getBody().getBlocks());
 					width += loopOffset;
 					left -= loopOffset;
-					if(!loopBlock->getHeadcontrolled()){drawLoopHeading(loopHeading);}
+					if(!loopBlock->getHeadcontrolled()){
+						drawLoopHeading(loopHeading);
+					}
 
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
 				}else{
 					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
 					if(switchBlock){
-						int saveWidth = width, saveLeft = left;
 						int widthForEachElement = std::round(width / switchBlock->getSequences().size());
 						float relationNormalCasesToWhole = 1;
 						int additionalOffset = 0;
+						int reducedWidth = width;
 
 						//check whether there is an else
 						bool thereIsAnElseCase = false;
 						for (std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
 							if(pair.first == ""){
 								thereIsAnElseCase = true;
-								width -= widthForEachElement;
-								relationNormalCasesToWhole = width/saveWidth;
+								reducedWidth = width - widthForEachElement;
+								relationNormalCasesToWhole = reducedWidth/width;
 								additionalOffset = widthForEachElement;
 							}
 						}
@@ -200,45 +204,54 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							heightOfSwitchExpressionBlock = maxRelationSwitchBlock*width;
 						}
 
-						switchExpressionTextItem->setPos(left + width - (switchExpressionTextItem->boundingRect().width() * relationNormalCasesToWhole) - additionalOffset - paddingLeft, top + paddingTopBlock);
+						switchExpressionTextItem->setPos(left + reducedWidth - additionalOffset - (switchExpressionTextItem->boundingRect().width() * relationNormalCasesToWhole) - paddingLeft, top + paddingTopBlock);
 
 						//draw the big line
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
-						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock - switchLineOffset);
+						switchLine->setLine(left, top, left + reducedWidth, top + heightOfSwitchExpressionBlock - switchLineOffset);
 						if(thereIsAnElseCase){
 							QGraphicsLineItem* switchLine2 = new QGraphicsLineItem(group);
-							switchLine2->setLine(left + width, top + heightOfSwitchExpressionBlock - switchLineOffset, left + saveWidth, top);
+							switchLine2->setLine(left + reducedWidth, top + heightOfSwitchExpressionBlock - switchLineOffset, left + width, top);
 						}
 
 						//draw the rectangle around the expression block
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
-						switchExpressionRectItem->setRect(left, top, saveWidth, heightOfSwitchExpressionBlock);
+						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
 
 						top += heightOfSwitchExpressionBlock;
-
-						int saveWidth2;
-						int saveTop = top;
+						int saveTop = top, saveWidth = width, saveLeft = left;
 						int heightOfSwitchLine;
 						int maxTop = 0;
 						std::vector<int> topValues; //to be able to add spacefillers
+						width = widthForEachElement;
 
 						//draw the small vertical lines with case-texts
 						for (std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
 							QString caseText = QString::fromStdString(pair.first);
-							QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
-							caseTextItem->setText(caseText);
-							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
+							if(caseText != ""){
+								QGraphicsSimpleTextItem* caseTextItem = new QGraphicsSimpleTextItem(group);
+								caseTextItem->setText(caseText);
+								caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
 
-							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / width) - 1;
-							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
-							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
+								//draw vertical line on right side of block
+								heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft + widthForEachElement)  * (heightOfSwitchExpressionBlock - switchLineOffset) / reducedWidth) - 1;
+								QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
+								caseLine->setLine(left + widthForEachElement, top, left + widthForEachElement, top - heightOfSwitchLine);
 
-							saveWidth2 = width;
-							width = widthForEachElement;
-							drawBody(group, pair.second.getBlocks());
-							width = saveWidth2;
+								drawBody(group, pair.second.getBlocks());
 
-							left += widthForEachElement;
+								left += widthForEachElement;
+								topValues.push_back(top);
+								maxTop = std::max(top, maxTop);
+								top = saveTop;
+							}
+						}
+						if(thereIsAnElseCase){
+							QGraphicsSimpleTextItem* elseCaseTextItem = new QGraphicsSimpleTextItem(group);
+							elseCaseTextItem->setText(switchElseLabel);
+							elseCaseTextItem->setPos(left + paddingLeft, saveTop - elseCaseTextItem->boundingRect().height() - paddingTopBlock);
+
+							drawBody(group, switchBlock->getSequences()[""].getBlocks());
 							topValues.push_back(top);
 							maxTop = std::max(top, maxTop);
 							top = saveTop;
