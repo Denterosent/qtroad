@@ -96,10 +96,6 @@ class LoopBlock : public Block
 		bool headControlled;
 
 	public:
-		LoopBlock()
-		{
-		}
-
 		LoopBlock(std::string condition, BlockSequence& body, bool headControlled)
 			: condition(condition)
 			, body(std::move(body))
@@ -119,9 +115,6 @@ class StructureChart
 		BlockSequence root;
 
 	public:
-		StructureChart()
-		{
-		}
 		StructureChart(std::string headline, std::vector<Declaration>&& declarations, BlockSequence root)
 			: headline(headline), declarations(std::move(declarations)), root(std::move(root))
 		{
