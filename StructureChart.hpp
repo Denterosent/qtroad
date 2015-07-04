@@ -66,11 +66,10 @@ class IfElseBlock : public Block
 			: condition(condition)
 			, yes(std::move(yes))
 			, no(std::move(no))
-		{
-		}
-	std::string getCondition(){return condition;}
-	BlockSequence& getYes(){return yes;}
-	BlockSequence& getNo(){return no;}
+		{blockType = "IfElseBlock";}
+		std::string getCondition(){return condition;}
+		BlockSequence& getYes(){return yes;}
+		BlockSequence& getNo(){return no;}
 };
 
 class SwitchBlock : public Block
@@ -115,6 +114,7 @@ class StructureChart
 		BlockSequence root;
 
 	public:
+		StructureChart() = default;
 		StructureChart(std::string headline, std::vector<Declaration>&& declarations, BlockSequence root)
 			: headline(headline), declarations(std::move(declarations)), root(std::move(root))
 		{
