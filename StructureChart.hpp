@@ -66,7 +66,8 @@ class IfElseBlock : public Block
 			: condition(condition)
 			, yes(std::move(yes))
 			, no(std::move(no))
-		{blockType = "IfElseBlock";}
+		{
+		}
 		std::string getCondition(){return condition;}
 		BlockSequence& getYes(){return yes;}
 		BlockSequence& getNo(){return no;}
