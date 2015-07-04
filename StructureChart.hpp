@@ -10,8 +10,8 @@
 class Declaration
 {
 	private:
-		std::string type;
 		std::string varName;
+		std::string type;
 
 	public:
 		Declaration(std::string pVarName, std::string pType): varName(pVarName), type(pType)
