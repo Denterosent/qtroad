@@ -53,6 +53,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	maxRelationSwitchBlock = 0.5;
 
 	errorTag = "Error from Drawer: ";
+	variablelistLabel = "lokale/globale Variablen und Attribute:";
+	ifElseTrueLabel = "wahr";
+	ifElseFalseLabel = "falsch";
+	switchElseLabel = "sonst";
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
@@ -119,8 +123,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				//draw yes/no -text
 				QGraphicsSimpleTextItem* trueText = new QGraphicsSimpleTextItem(group);
 				QGraphicsSimpleTextItem* falseText = new QGraphicsSimpleTextItem(group);
-				trueText->setText("true");
-				falseText->setText("false");
+				trueText->setText(ifElseTrueLabel);
+				falseText->setText(ifElseFalseLabel);
 				trueText->setPos(left+2, top+ifElseBlockHeight-trueText->boundingRect().height());
 				falseText->setPos(left+width-falseText->boundingRect().width()-2, top+ifElseBlockHeight-falseText->boundingRect().height());
 
@@ -382,7 +386,7 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 	//		declarationText += QString::fromStdString("\n" + decl.varName+": "+decl.type->umlName());
 			declarationText += QString::fromStdString("\n" + decl.getVarName() + ": " + decl.getType());
 		}
-		declarationTextItem->setText("lokale/globale Variablen und Attribute:" + declarationText);
+		declarationTextItem->setText(variablelistLabel + declarationText);
 		declarationTextItem->setPos(left, top);
 
 		top += declarationTextItem->boundingRect().height() + paddingVariablelist;

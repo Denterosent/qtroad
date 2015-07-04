@@ -29,6 +29,10 @@ class StructureChartDrawer
 		float maxRelationIfElseBlock;
 		float maxRelationSwitchBlock;
 		std::string errorTag;
+		QString variablelistLabel;
+		QString ifElseTrueLabel;
+		QString ifElseFalseLabel;
+		QString switchElseLabel;
 
 	public:
 		StructureChartDrawer(QGraphicsScene* scene);
