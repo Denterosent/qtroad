@@ -170,6 +170,21 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				}else{
 					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
 					if(switchBlock){
+						int saveWidth = width, saveLeft = left;
+						int widthForEachElement = std::round(width / switchBlock->getSequences().size());
+						float relationNormalCasesToWhole = 1;
+						int additionalOffset = 0;
+
+						//check whether there is an else
+						bool thereIsAnElseCase = false;
+						for (std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
+							if(pair.first == ""){
+								thereIsAnElseCase = true;
+								width -= widthForEachElement;
+								relationNormalCasesToWhole = width/saveWidth;
+								additionalOffset = widthForEachElement;
+							}
+						}
 
 						//draw condition
 						QString switchExpression = QString::fromStdString(switchBlock->getExpression());
@@ -185,24 +200,27 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							heightOfSwitchExpressionBlock = maxRelationSwitchBlock*width;
 						}
 
-						switchExpressionTextItem->setPos(left + width - switchExpressionTextItem->boundingRect().width() - paddingLeft, top + paddingTopBlock);
+						switchExpressionTextItem->setPos(left + width - (switchExpressionTextItem->boundingRect().width() * relationNormalCasesToWhole) - additionalOffset - paddingLeft, top + paddingTopBlock);
 
 						//draw the big line
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
 						switchLine->setLine(left, top, left + width, top + heightOfSwitchExpressionBlock - switchLineOffset);
+						if(thereIsAnElseCase){
+							QGraphicsLineItem* switchLine2 = new QGraphicsLineItem(group);
+							switchLine2->setLine(left + width, top + heightOfSwitchExpressionBlock - switchLineOffset, left + saveWidth, top);
+						}
 
 						//draw the rectangle around the expression block
 						QGraphicsRectItem* switchExpressionRectItem = new QGraphicsRectItem(group);
-						switchExpressionRectItem->setRect(left, top, width, heightOfSwitchExpressionBlock);
+						switchExpressionRectItem->setRect(left, top, saveWidth, heightOfSwitchExpressionBlock);
 
 						top += heightOfSwitchExpressionBlock;
 
-						int saveTop = top, saveWidth = width, saveLeft = left;
-						int widthForEachElement = std::round(width / switchBlock->getSequences().size());
+						int saveWidth2;
+						int saveTop = top;
 						int heightOfSwitchLine;
 						int maxTop = 0;
-						width = widthForEachElement;
-						std::vector<int> topValues;
+						std::vector<int> topValues; //to be able to add spacefillers
 
 						//draw the small vertical lines with case-texts
 						for (std::pair<const std::string, BlockSequence>& pair : switchBlock->getSequences()){
@@ -211,12 +229,14 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							caseTextItem->setText(caseText);
 							caseTextItem->setPos(left + paddingLeft, saveTop - caseTextItem->boundingRect().height() - paddingTopBlock);
 
-							//draw the small vertical lines
-							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / saveWidth) - 1;
+							heightOfSwitchLine = heightOfSwitchExpressionBlock - ((left - saveLeft)  * (heightOfSwitchExpressionBlock - switchLineOffset) / width) - 1;
 							QGraphicsLineItem* caseLine = new QGraphicsLineItem(group);
 							caseLine->setLine(left, top, left, top - heightOfSwitchLine);
 
-							drawBody(group, pair.second.getBlocks()); //TODO: use operation call for blocks
+							saveWidth2 = width;
+							width = widthForEachElement;
+							drawBody(group, pair.second.getBlocks());
+							width = saveWidth2;
 
 							left += widthForEachElement;
 							topValues.push_back(top);
