@@ -27,23 +27,27 @@
         </font>
        </property>
        <property name="plainText">
-        <string>Block* block = vector[index].get();
-SimpleBlock* simpleBlock = dynamic_cast&lt;SimpleBlock*&gt;(block);
-if (simpleBlock) {
-	//draw text
-	QString text = QString::fromStdString(simpleBlock-&gt;command);
-	QGraphicsSimpleTextItem* commandBlock = new QGraphicsSimpleTextItem(group);
-	commandBlock-&gt;setText(text);
-	commandBlock-&gt;setPos(left+paddingLeft,top+paddingTopBlock);
+        <string>class A
+{
+private:
+	int var1;
+protected:
+	int var2;
+public:
+	void func1();
+	float func2(int x, char y);
+};
 
-	int blockHeight = commandBlock-&gt;boundingRect().height()+paddingTopBlock*2;
-
-	//draw rect
-	QGraphicsRectItem* commandRect= new QGraphicsRectItem(group);
-	commandRect-&gt;setRect(left,top,width,blockHeight);
-
-	top += blockHeight;
-}</string>
+class B : public A
+{
+public:
+	void changeF()
+	{
+		if (true) {
+			b = 4;
+		}
+	}
+};</string>
        </property>
        <property name="tabStopWidth">
         <number>40</number>

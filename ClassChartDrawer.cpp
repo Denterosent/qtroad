@@ -158,7 +158,7 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 			maxdim = rect.height();
 	}
 
-	float radius = 2.f * maxdim;
+	float radius = maxdim;
 
 	int counter = 0;
 	for (const std::pair<const Class*, QGraphicsItemGroup*>& p : classBoxes) {
