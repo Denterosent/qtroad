@@ -500,6 +500,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 					} else if (matchWithFollowing(begin,end,"-", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
 						tmp.append(" ← " + tmp2 + " - ");
+					} else if (matchWithFollowing(begin,end,"-", '>')) {
+						tmp.append(".");
 					} else {
 						tmp.append("-");
 					}
