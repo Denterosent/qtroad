@@ -10,7 +10,7 @@ Type* Type::createFromCppName(std::string type)
 		return new PrimitiveType(PrimitiveType::Float);
 	} else if (type == "bool") {
 		return new PrimitiveType(PrimitiveType::Boolean);
-	} else if (type == "std::string") {
+	} else if (type == "std::string" || type == "QString") {
 		return new PrimitiveType(PrimitiveType::Text);
 	} else if (type == "char") {
 		return new PrimitiveType(PrimitiveType::Character);
