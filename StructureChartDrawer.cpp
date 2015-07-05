@@ -16,12 +16,14 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * declarations
 	 * SwitchBlocks
 	 * IfElseBlock-Bodies with different size when else is empty
+	 * Else-case of SwitchBlock
 	 *
 	 *no Support for:
-	 * Else-Case of SwitchBlock
+	 * Polymorphie
 	 * (AutoWidth of blocks) - not necessary, first do things which are important
 	 * (Resizing of SwitchBlock line for case strings, same for IfElseBlock) - not necessary, first do things which are important
-	 */
+	 * (page breaks, when chart gets too long)
+	 * /
 
 	/*buglist:
 	 * autowrap gets into a endless loop if not stopped
@@ -29,20 +31,21 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 */
 
 	/*TODO's:
-	 * else-case of switchBlocks
 	 * find solution auto-wrap
-	 * get decltype from Class
-	 * set page-breaks
+	 * (get decltype from Class)
+	 * (set page-breaks)
+	 * (auto-width)
 	 * help chris with parser
 	 */
 
 	initialWidth = 300;
+	width = initialWidth;
 	top = 0;
 	loopOffset = 20;
 	paddingLeft = 5;	//for every text relative to block, also padding for rigth
 	paddingTopBlock = 3;//is also a padding to bottom and used in every block
 	paddingTop = 5;		//only for heading
-	paddingBody = 5;	//set it to 0, if you don't like the extra margin, doesn't apply on top padding
+	paddingBody = 5;	//set it to 0, if you don't like the extra margin; doesn't apply on top padding
 	left = paddingBody;
 	paddingVariablelist = 5; //between heading and variablelist, variablelist and body
 	switchLineOffset = 15;
@@ -383,7 +386,6 @@ void StructureChartDrawer::drawHead(QGraphicsItem* group)
 		QString declarationText = "";
 
 		for (Declaration& decl : chart->getDeclarations()){
-	//		declarationText += QString::fromStdString("\n" + decl.varName+": "+decl.type->umlName());
 			declarationText += QString::fromStdString("\n" + decl.getVarName() + ": " + decl.getType());
 		}
 		declarationTextItem->setText(variablelistLabel + declarationText);
