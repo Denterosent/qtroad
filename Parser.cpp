@@ -13,7 +13,38 @@ void Parser::parseStructures(const char* begin, const char* end)
 	if (match(xbegin, end, "class")) {
 		parseClasses(begin, end);
 	} else {
-		result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart("test", {},  parseFunctionBody(begin, end))));
+		const char* functionNameBegin;
+		const char* functionNameEnd;
+		const char* tmp = begin;
+
+		while (begin <= end) {
+			bool functionFound = false;
+			const char* bodyBegin;
+			const char* bodyEnd;
+
+			if(matchWithFollowing(begin, end, ":", ':') ) {
+				begin++;
+				functionNameBegin = begin;
+				while(begin != end && !following(begin,end,"(")){
+					begin++;
+				}
+				functionNameEnd = begin;
+				getCondition(begin,end);
+				skipWhitespaces(begin,end);
+				if(match(begin,end,"{")){
+					bodyBegin = begin;
+					skipBody(begin,end,1);
+					bodyEnd = begin - 1;
+					functionFound = true;
+					//std::vector<Declaration> declarations;
+					result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart(std::string(functionNameBegin,functionNameEnd), {},  parseFunctionBody(bodyBegin, bodyEnd))));
+				}
+			}
+			if(begin<=end){
+				begin++;
+			}
+		}
+		//result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart("Struktogramm", {},  parseFunctionBody(tmp, end))));
 	}
 }
 
@@ -133,6 +164,11 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			skipWhitespaces(begin, end);
 
 
+		}else if (match(begin, end, "#")) {
+			begin++;
+			while(*begin != '\n' && begin != end) {
+				begin++;
+			}
 		}else if(matchWithFollowing(begin, end, "/", '/')) {
 			begin++;
 			while(*begin != '\n' && begin != end) {
@@ -144,6 +180,8 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				begin ++;
 			}
 			begin++;
+		}else if(match(begin,end, "$$$")){
+
 		}else {
 
 			const char* commandEnd = begin;
@@ -352,8 +390,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
 							tmp.append(" \u2190 " + tmp2 + " + 1");
 						} else {
-						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" \u2190 " + tmp2 + " + 1");
+							std::string tmp2 = tmp.substr(0,tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " + 1");
 						}
 					} else if (matchWithFollowing(begin,end,"+", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
@@ -369,8 +407,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
 							tmp.append(" \u2190 " + tmp2 + " - 1");
 						} else {
-						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" \u2190 " + tmp2 + " - 1");
+							std::string tmp2 = tmp.substr(0,tmp.length());
+							tmp.append(" \u2190 " + tmp2 + " - 1");
 						}
 					} else if (matchWithFollowing(begin,end,"-", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
