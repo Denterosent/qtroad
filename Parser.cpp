@@ -713,6 +713,10 @@ Operation Parser::parseOperation(const char* begin, const char* end, Visibility 
 	std::string name;
 	std::string type;
 
+	if (match(begin, end, "virtual")) {
+		skipWhitespaces(begin, end);
+	}
+
 	const char* retBegin = begin;
 
 	while (begin != end && *begin != '(') {
@@ -747,12 +751,26 @@ Operation Parser::parseOperation(const char* begin, const char* end, Visibility 
 		skipWhitespaces(begin, end);
 	}
 	begin++;
-	skipWhitespaces(begin, end);
-	if (begin != end) {
+	bool abstract = false;
+	while (begin != end) {
+		skipWhitespaces(begin, end);
+		if (match(begin, end, "override")) {
+			continue;
+		}
+		if (match(begin, end, "const")) {
+			continue;
+		}
+		if (match(begin, end, "=")) {
+			skipWhitespaces(begin, end);
+			if (match(begin, end, "0")) {
+				abstract = true;
+				continue;
+			}
+		}
 		throw std::runtime_error("Invalid operation");
 	}
 
-	return Operation(name, Type::createFromCppName(type), arguments, visibility);
+	return Operation(name, Type::createFromCppName(type), arguments, visibility, abstract);
 }
 
 bool Parser::BothAreSpaces(char lhs, char rhs)

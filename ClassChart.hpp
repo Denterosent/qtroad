@@ -34,11 +34,12 @@ class Argument
 class Operation
 {
 	public:
-		Operation(std::string name, Type* returnType, std::vector<Argument>& arguments, Visibility visibility)
+		Operation(std::string name, Type* returnType, std::vector<Argument>& arguments, Visibility visibility, bool abstract)
 			: name(name)
 			, returnType(returnType)
 			, arguments(std::move(arguments))
 			, visibility(visibility)
+			, abstract(abstract)
 		{
 		}
 
@@ -62,11 +63,17 @@ class Operation
 			return visibility;
 		}
 
+		bool isAbstract() const
+		{
+			return abstract;
+		}
+
 	private:
 		std::string name;
 		std::unique_ptr<Type> returnType;
 		std::vector<Argument> arguments;
 		Visibility visibility;
+		bool abstract;
 };
 
 class Attribute
