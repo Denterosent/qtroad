@@ -382,9 +382,19 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 							if(*(begin - 1) == '<' || *(begin - 1) == '>') {
 								tmp.append("=");
 							} else {
-								tmp.append(" \u2190 ");
+								tmp.append(" ← ");
 							}
 						}
+					}
+					break;
+				case '<':
+					if(matchWithFollowing(begin, end, "<", '=')) {
+						tmp.append(" ≤ ");
+					}
+					break;
+				case '>':
+					if(matchWithFollowing(begin, end, ">", '=')) {
+						tmp.append(" ≥ ");
 					}
 					break;
 				case '&':
@@ -399,7 +409,7 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 					break;
 				case '!':
 					if(matchWithFollowing(begin, end, "!", '=')) {
-						tmp.append(" <> ");
+						tmp.append(" ≠ ");
 					} else {
 						tmp.append(" not ");
 					}
@@ -415,14 +425,14 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 
 						if(tmp.find_last_of(" ") != std::string::npos) {
 							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
-							tmp.append(" \u2190 " + tmp2 + " + 1");
+							tmp.append(" ← " + tmp2 + " + 1");
 						} else {
 							std::string tmp2 = tmp.substr(0,tmp.length());
-							tmp.append(" \u2190 " + tmp2 + " + 1");
+							tmp.append(" ← " + tmp2 + " + 1");
 						}
 					} else if (matchWithFollowing(begin,end,"+", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" \u2190 " + tmp2 + " + ");
+						tmp.append(" ← " + tmp2 + " + ");
 					} else {
 						tmp.append("+");
 					}
@@ -432,14 +442,14 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 
 						if(tmp.find_last_of(" ") != std::string::npos) {
 							std::string tmp2 = tmp.substr(tmp.find_last_of(" "),tmp.length());
-							tmp.append(" \u2190 " + tmp2 + " - 1");
+							tmp.append(" ← " + tmp2 + " - 1");
 						} else {
 							std::string tmp2 = tmp.substr(0,tmp.length());
-							tmp.append(" \u2190 " + tmp2 + " - 1");
+							tmp.append(" ← " + tmp2 + " - 1");
 						}
 					} else if (matchWithFollowing(begin,end,"-", '=')) {
 						std::string tmp2 = tmp.substr(0,tmp.length());
-						tmp.append(" \u2190 " + tmp2 + " - ");
+						tmp.append(" ← " + tmp2 + " - ");
 					} else {
 						tmp.append("-");
 					}
