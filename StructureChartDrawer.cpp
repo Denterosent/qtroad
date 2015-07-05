@@ -35,10 +35,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * (get decltype from Class)
 	 * (set page-breaks)
 	 * (auto-width)
-	 * help chris with parser
+	 * fix misplaced switch-expresion
 	 */
 
-	initialWidth = 300;
+	initialWidth = 500;
 	width = initialWidth;
 	top = 0;
 	loopOffset = 20;
@@ -64,6 +64,13 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
 {
+	//draw empty sign if function is empty; to do not interfere with this code, empty ifelsecases arent drawn
+	if(vector.size() == 0){
+		QGraphicsRectItem* emptyRect = new QGraphicsRectItem(group);
+		emptyRect->setRect(left, top, width, 30);
+		drawEmtySign(emptyRect, group, maxEmtySignScale);
+	}
+
 	for(unsigned int index = 0; index < vector.size(); index++){
 		Block* block = vector[index].get();
 		SimpleBlock* simpleBlock = dynamic_cast<SimpleBlock*>(block);
@@ -137,11 +144,14 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				int saveTop = top, saveLeft = left, saveWidth = width, leftTop, rightTop;
 				width = leftWidth;
 				drawBody(group, ifElseBlock->getYes().getBlocks());
+
 				leftTop = top;
 				top = saveTop;
 				left += width;
 				width = rightWidth;
-				drawBody(group, ifElseBlock->getNo().getBlocks());
+				if(ifElseBlock->getNo().getBlocks().size() != 0){ //prevent drawing of hardcoded emty signs in first line of this function
+					drawBody(group, ifElseBlock->getNo().getBlocks());
+				}
 				rightTop = top;
 				left = saveLeft;
 				width = saveWidth;
