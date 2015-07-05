@@ -137,8 +137,6 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				BlockSequence no;
 				ret.getBlocks().push_back(std::unique_ptr<Block>(new IfElseBlock(condition, yes, no)));
 			}
-		} else if (match(begin, end, "switch")) {
-
 		} else if (matchWithFollowing(begin, end, "while", '(')) {
 			std::string condition = getCondition(begin, end);
 			expect(begin, end, "{");
@@ -184,12 +182,33 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 			skipWhitespaces(begin, end);
 
-		}else if (matchWithFollowing(begin, end, "switch", '(')) {
-			std::string condition = getCondition(begin, end);
-			expect(begin, end, "{");
-
+		} else if (matchWithFollowing(begin, end, "switch", '(')) {
 			skipWhitespaces(begin, end);
+			std::string expression = getCondition(begin, end);
+			expect(begin,end,"{");
+			const char* switchBegin = begin;
+			skipBody(begin,end,1);
+			const char* switchEnd = begin;
+			std::map<std::string, BlockSequence> content;
+			while(switchBegin != switchEnd  && *switchBegin != '}'){
 
+				if(match(switchBegin,switchEnd, "case") || match(switchBegin,switchEnd, "default")){
+					std::string tmp;
+					while(switchBegin != switchEnd && !matchWithFollowing(switchBegin,switchEnd,":", '{')){
+						tmp += *switchBegin;
+						switchBegin++;
+					}
+					expect(switchBegin, switchEnd, "{");
+					const char* contentBegin = switchBegin;
+					skipBody(switchBegin, switchEnd,1);
+					const char* contentEnd = switchBegin - 1;
+					content.insert(std::pair<std::string, BlockSequence>(tmp,parseFunctionBody(contentBegin,contentEnd)));
+
+				}
+				skipWhitespaces(switchBegin,switchEnd);
+
+			}
+			ret.getBlocks().push_back(std::unique_ptr<Block>(new SwitchBlock(expression, content)));
 
 		}else if (match(begin, end, "#")) {
 			begin++;
@@ -374,7 +393,7 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 		}
 		if(!text) {
 			switch (*begin) {
-				case '=':
+				case '=': {
 					if(matchWithFollowing(begin, end, "=", '=')) {
 						tmp.append("=");
 					} else{
@@ -387,40 +406,48 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 						}
 					}
 					break;
-				case '<':
+				}
+				case '<': {
 					if(matchWithFollowing(begin, end, "<", '=')) {
 						tmp.append(" ≤ ");
 					}
 					break;
-				case '>':
+				}
+				case '>': {
 					if(matchWithFollowing(begin, end, ">", '=')) {
 						tmp.append(" ≥ ");
 					}
 					break;
-				case '&':
+				}
+				case '&': {
 					if(matchWithFollowing(begin, end, "&", '&')) {
 						tmp.append(" and ");
 					}
 					break;
-				case '|':
+				}
+				case '|': {
 					if(matchWithFollowing(begin, end, "|", '|')) {
 						tmp.append(" or ");
 					}
 					break;
-				case '!':
+				}
+				case '!': {
 					if(matchWithFollowing(begin, end, "!", '=')) {
 						tmp.append(" ≠ ");
 					} else {
 						tmp.append(" not ");
 					}
 					break;
-				case '%':
+				}
+				case '%': {
 					tmp.append(" mod ");
 					break;
-				case ';':
+				}
+				case ';': {
 					tmp.append(" ");
 					break;
-				case '+':
+				}
+				case '+': {
 					if(matchWithFollowing(begin,end,"+", '+')) {
 
 						if(tmp.find_last_of(" ") != std::string::npos) {
@@ -437,7 +464,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 						tmp.append("+");
 					}
 					break;
-				case '-':
+				}
+				case '-': {
 					if(matchWithFollowing(begin,end,"-", '-')) {
 
 						if(tmp.find_last_of(" ") != std::string::npos) {
@@ -454,10 +482,12 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 						tmp.append("-");
 					}
 					break;
-				default:
+				}
+				default: {
 					if(*begin != '\n' && *begin != '\t') {
 						tmp += *begin;
 					}
+				}
 			}
 		} else {
 			tmp += *begin;
