@@ -37,15 +37,20 @@ PrimitiveType::PrimitiveType(TypeEnum typeEnum)
 std::string PrimitiveType::umlName()
 {
 	switch (typeEnum) {
-		case Integer:
+		case Integer: {
 			return "GZ";
-		case Float:
+		}
+		case Float: {
 			return "FKZ";
-		case Boolean:
+		}
+		case Boolean: {
 			return "Boolean";
-		case Text:
+		}
+		case Text: {
 			return "Text";
-		case Character:
+		}
+		case Character: {
 			return "Zeichen";
+		}
 	}
 }
