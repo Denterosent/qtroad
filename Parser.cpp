@@ -218,9 +218,9 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 			if(begin != end){
 				ret.getBlocks().push_back(std::unique_ptr<Block>(new SimpleBlock{cleanSyntax(begin, commandEnd)}));
 			}
-			if (*commandEnd == ';')
+			if (*commandEnd == ';'){
 				commandEnd++;
-
+			}
 			begin = commandEnd;
 			skipWhitespaces(begin, end);
 		}
@@ -230,14 +230,16 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 
 void Parser::skipWhitespaces(const char*& c, const char* end)
 {
-	while (c != end && (*c == ' ' || *c == '\t' || *c == '\n'))
+	while (c != end && (*c == ' ' || *c == '\t' || *c == '\n')){
 		c++;
+	}
 }
 
 void Parser::skipWhitespacesBackwards(const char*& c, const char* begin)
 {
-	while (c != begin && c-1 != begin && (*(c-1) == ' ' || *(c-1) == '\t' || *(c-1) == '\n'))
+	while (c != begin && c-1 != begin && (*(c-1) == ' ' || *(c-1) == '\t' || *(c-1) == '\n')){
 		c--;
+	}
 }
 
 bool Parser::match(const char*& begin, const char* end, const char* literal)
