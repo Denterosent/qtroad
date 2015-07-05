@@ -171,7 +171,10 @@ class Edge
 class Inheritance : public Edge
 {
 	public:
-		using Edge::Edge;
+		Inheritance(Class* head, Class* tail)
+			: Edge(head, tail)
+		{
+		}
 };
 
 class Association : public Edge
