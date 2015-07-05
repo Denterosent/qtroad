@@ -43,10 +43,10 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 			opstr << ": " << op.getReturnType()->umlName();
 		}
 		if (!op.getReturnType() && op.getName() == class_->getName()) {
-			opstr << " <<constructor>>";
+			opstr << " «constructor»";
 		}
 		if (!op.getReturnType() && op.getName() == "~" + class_->getName()) {
-			opstr << " <<destructor>>";
+			opstr << " «destructor»";
 		}
 	}
 
