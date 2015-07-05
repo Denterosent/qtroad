@@ -105,23 +105,21 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				falseBranche = true;
 				skipWhitespaces(begin, end);
 
-				if(following(begin, end, "if")) {
-					noBlockBegin = begin;
-					skipIf(begin, end);
-					noBlockEnd = begin;
-					skipWhitespaces(begin, end);
+				noBlockBegin = begin;
+				if (following(begin, end, "if")) {
+					while (following(begin, end, "if")) {
+						skipIf(begin, end);
+						noBlockEnd = begin;
+						skipWhitespaces(begin, end);
 
-					if (match(begin, end, "else")) {
-						if(following(begin, end, "if")) {
-							skipIf(begin, end);
-							noBlockEnd = begin;
-							skipWhitespaces(begin, end);
-
-						} else {
-							expect(begin, end, "{");
-							skipBody(begin, end, 1);
-							noBlockEnd = begin;
+						if (match(begin, end, "else")) {
+							if (match(begin, end, "{")) {
+								skipBody(begin, end, 1);
+								noBlockEnd = begin;
+								break;
+							}
 						}
+						skipWhitespaces(begin, end);
 					}
 				} else {
 					expect(begin, end, "{");
