@@ -18,6 +18,15 @@ void Parser::parseStructures(const char* begin, const char* end)
 		const char* bodyBegin;
 		const char* bodyEnd;
 
+		if (match(begin, end, "enum")) {
+			while (begin != end && *begin != ';') {
+				begin++;
+			}
+			if (begin == end) {
+				throw std::runtime_error("Unexpected end");
+			}
+			continue;
+		}
 		if (following(begin, end, "class")) {
 			parseClass(begin, end);
 			continue;
@@ -381,7 +390,7 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 
 void Parser::getName(const char*& begin, const char* end)
 {
-	while (begin != end && ((*begin >= 'A' && *begin <= 'Z') || (*begin >= 'a' && *begin <= 'z') || (*begin >= '0' && *begin <= '9'))) {
+	while (begin != end && ((*begin >= 'A' && *begin <= 'Z') || (*begin >= 'a' && *begin <= 'z') || (*begin >= '0' && *begin <= '9') || *begin == ':')) {
 		begin++;
 	}
 }
@@ -419,12 +428,16 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '<': {
 					if(matchWithFollowing(begin, end, "<", '=')) {
 						tmp.append(" ≤ ");
+					}else{
+						tmp.append(" < ");
 					}
 					break;
 				}
 				case '>': {
 					if(matchWithFollowing(begin, end, ">", '=')) {
 						tmp.append(" ≥ ");
+					}else{
+						tmp.append(" > ");
 					}
 					break;
 				}
@@ -492,6 +505,23 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 					}
 					break;
 				}
+			case '*': {
+				if (matchWithFollowing(begin,end,"*", '=')) {
+					std::string tmp2 = tmp.substr(0,tmp.length());
+					tmp.append(" ← " + tmp2 + " * ");
+				} else {
+					tmp.append("*");
+				}
+				break;
+			}case '/': {
+				if (matchWithFollowing(begin,end,"/", '=')) {
+					std::string tmp2 = tmp.substr(0,tmp.length());
+					tmp.append(" ← " + tmp2 + " / ");
+				} else {
+					tmp.append("/");
+				}
+				break;
+			}
 				default: {
 					if(*begin != '\n' && *begin != '\t') {
 						tmp += *begin;
@@ -593,10 +623,9 @@ void Parser::parseClass(const char*& begin, const char* end)
 			getName(begin, end);
 			const char* otherClassNameEnd = begin;
 			std::string otherClassName(otherClassNameBegin, otherClassNameEnd);
-			if (classMap.find(otherClassName) == classMap.end()) {
-				throw std::runtime_error("Inherits undefined class");
+			if (classMap.find(otherClassName) != classMap.end()) {
+				result.classChart.addEdge(new Inheritance{classMap[otherClassName], c});
 			}
-			result.classChart.addEdge(new Inheritance{classMap[otherClassName], c});
 			skipWhitespaces(begin, end);
 		} while (match(begin, end, ","));
 	}
@@ -608,18 +637,35 @@ void Parser::parseClass(const char*& begin, const char* end)
 	skipWhitespaces(begin, end);
 	while (*begin != '}') {
 		if (match(begin, end, "private")) {
+			if (match(begin, end, "slots")) {
+				skipWhitespaces(begin, end);
+			}
 			visibility = Visibility::private_;
-			skipWhitespaces(begin, end);
 			expect(begin, end, ":");
 		} else if (match(begin, end, "protected")) {
+			if (match(begin, end, "slots")) {
+				skipWhitespaces(begin, end);
+			}
 			visibility = Visibility::protected_;
 			skipWhitespaces(begin, end);
 			expect(begin, end, ":");
 		} else if (match(begin, end, "public")) {
+			if (match(begin, end, "slots")) {
+				skipWhitespaces(begin, end);
+			}
 			visibility = Visibility::public_;
 			skipWhitespaces(begin, end);
 			expect(begin, end, ":");
-		} else {
+		} else if (match(begin, end, "Q_OBJECT")) {
+			skipWhitespaces(begin, end);
+		} else if (match(begin, end, "enum")) {
+			// Ignore enums
+			while (begin != end && *begin != ';') {
+				begin++;
+			}
+			begin++;
+		}
+		else {
 			const char* declBegin = begin;
 			while (begin != end && *begin != '{' && *begin != ';' && (*begin != ':' || match(begin, end, "::"))) {
 				begin++;
@@ -648,11 +694,14 @@ void Parser::parseClass(const char*& begin, const char* end)
 			}
 			skipWhitespacesBackwards(declEnd, declBegin);
 			if (std::string(declBegin, declEnd).find_first_of('(') != std::string::npos) {
-				Operation o = parseOperation(declBegin, declEnd, visibility);
-				if (codeBegin) {
-					result.structureCharts.emplace_back(new StructureChart(o.getName(), {}, parseFunctionBody(codeBegin, begin-1)));
+				bool skip = false;
+				Operation o = parseOperation(declBegin, declEnd, visibility, skip);
+				if (!skip) {
+					if (codeBegin) {
+						result.structureCharts.emplace_back(new StructureChart(o.getName(), {}, parseFunctionBody(codeBegin, begin-1)));
+					}
+					c->addOperation(std::move(o));
 				}
-				c->addOperation(std::move(o));
 			} else {
 				std::string type;
 				std::string name;
@@ -683,7 +732,7 @@ void Parser::parseClasses(const char* begin, const char* end)
 	}
 }
 
-void Parser::parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type)
+void Parser::parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type, bool argumentMode)
 {
 	skipWhitespaces(begin, end);
 	skipWhitespacesBackwards(end, begin);
@@ -695,7 +744,11 @@ void Parser::parseTypeAndName(const char* begin, const char* end, std::string& n
 		nameBegin--;
 	}
 	if (nameBegin-1 == begin) {
-		name = std::string(begin, end);
+		if (argumentMode) {
+			type = std::string(begin, end);
+		} else {
+			name = std::string(begin, end);
+		}
 	} else {
 		const char* typeEnd = nameBegin;
 		skipWhitespacesBackwards(typeEnd, begin);
@@ -704,11 +757,18 @@ void Parser::parseTypeAndName(const char* begin, const char* end, std::string& n
 	}
 }
 
-Operation Parser::parseOperation(const char* begin, const char* end, Visibility visibility)
+Operation Parser::parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip)
 {
 	std::vector<Argument> arguments;
 	std::string name;
 	std::string type;
+
+	if (match(begin, end, "virtual")) {
+		skipWhitespaces(begin, end);
+	}
+	if (match(begin, end, "explicit")) {
+		skipWhitespaces(begin, end);
+	}
 
 	const char* retBegin = begin;
 
@@ -728,7 +788,7 @@ Operation Parser::parseOperation(const char* begin, const char* end, Visibility 
 	skipWhitespaces(begin, end);
 	while (*begin != ')') {
 		const char* argBegin = begin;
-		while (begin != end && *begin != ',' && *begin != ')') {
+		while (begin != end && *begin != ',' && *begin != ')' && *begin != '=') {
 			begin++;
 		}
 		if (begin == end) {
@@ -736,20 +796,46 @@ Operation Parser::parseOperation(const char* begin, const char* end, Visibility 
 		}
 		std::string argName;
 		std::string argType;
-		parseTypeAndName(argBegin, begin, argName, argType);
+		parseTypeAndName(argBegin, begin, argName, argType, true);
 		arguments.emplace_back(argName, Type::createFromCppName(argType));
+		if (*begin == '=') {
+			while (begin != end && *begin != ',' && *begin != ')') {
+				begin++;
+			}
+		}
 		if (*begin == ',') {
 			begin++;
 		}
 		skipWhitespaces(begin, end);
 	}
 	begin++;
-	skipWhitespaces(begin, end);
-	if (begin != end) {
+	bool abstract = false;
+	while (begin != end) {
+		skipWhitespaces(begin, end);
+		if (match(begin, end, "override")) {
+			continue;
+		}
+		if (match(begin, end, "const")) {
+			continue;
+		}
+		if (match(begin, end, "=")) {
+			skipWhitespaces(begin, end);
+			if (match(begin, end, "0")) {
+				abstract = true;
+				continue;
+			}
+			if (match(begin, end, "default")) {
+				continue;
+			}
+			if (match(begin, end, "delete")) {
+				skip = true;
+				continue;
+			}
+		}
 		throw std::runtime_error("Invalid operation");
 	}
 
-	return Operation(name, Type::createFromCppName(type), arguments, visibility);
+	return Operation(name, Type::createFromCppName(type), arguments, visibility, abstract);
 }
 
 bool Parser::BothAreSpaces(char lhs, char rhs)

@@ -20,6 +20,7 @@ std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 
 QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 {
+	bool isAbstract = false;
 	std::ostringstream attrstr;
 	bool first = false;
 	for (const Attribute& attr : class_->getAttributes()) {
@@ -48,11 +49,19 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 		if (!op.getReturnType() && op.getName() == "~" + class_->getName()) {
 			opstr << " «destructor»";
 		}
+		if (op.isAbstract()) {
+			isAbstract = true;
+			opstr << " {abstract}";
+		}
 	}
 
 	std::string str1 = class_->getName();
 	std::string str2 = attrstr.str();
 	std::string str3 = opstr.str();
+
+	if (isAbstract) {
+		str1 += " {abstract}";
+	}
 
 	QGraphicsItemGroup* group = new QGraphicsItemGroup();
 	group->setHandlesChildEvents(false);

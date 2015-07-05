@@ -40,8 +40,8 @@ class Parser
 
 		void getName(const char*& begin, const char* end);
 		void parseClass(const char*& begin, const char* end);
-		Operation parseOperation(const char* begin, const char* end, Visibility visibility);
-		void parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type);
+		Operation parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip);
+		void parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type, bool argumentMode = false);
 };
 
 #endif // PARSER_HPP
