@@ -30,6 +30,9 @@ void MainWindow::resetGraphicsView()
 
 void MainWindow::on_actionGenerate_triggered()
 {
+	const float marginClassStructure = 20.f;
+	const float marginStructure = 10.f;
+
 	std::string input = plainTextEdit->toPlainText().toStdString();
 	const char* begin = &*input.cbegin();
 	const char* end = &*input.cend();
@@ -48,50 +51,16 @@ void MainWindow::on_actionGenerate_triggered()
 		ClassChartDrawer classChartDrawer;
 		QGraphicsItem* classChart = classChartDrawer.drawClassChart(parser.getResult().classChart);
 		scene->addItem(classChart);
-		height += classChart->boundingRect().height();
+		classChart->setPos(0,0);
+		height += scene->sceneRect().height() + marginClassStructure;
 
 		for (const std::unique_ptr<StructureChart>& structureChartData : parser.getResult().structureCharts) {
 			StructureChartDrawer drawer(scene);
 			QGraphicsItem* structureChart = drawer.drawStructureChart(structureChartData.get());
 			scene->addItem(structureChart);
 			structureChart->setPos(0, height);
-			height += structureChart->childrenBoundingRect().height();
+			height += structureChart->childrenBoundingRect().height() + marginStructure;
 		}
-
-		//-------------create test environment for switchBlock-----------------------
-/*		StructureChart* chart2 = new StructureChart;
-
-		SimpleBlock* sb1 = new SimpleBlock("sb1");
-		SimpleBlock* sb2 = new SimpleBlock("sb2\nsb2");
-		SimpleBlock* sb3 = new SimpleBlock("sb3");
-		SimpleBlock* sb4 = new SimpleBlock("sb4");
-		SimpleBlock* sb11 = new SimpleBlock("sb11");
-		SimpleBlock* sb21 = new SimpleBlock("sb21");
-		SimpleBlock* sb31 = new SimpleBlock("sb31");
-		SimpleBlock* sb41 = new SimpleBlock("sb41");
-
-		std::map<std::string, BlockSequence> theMap;
-		theMap["eins"].blocks.emplace_back(sb1);
-		theMap["eins"].blocks.emplace_back(sb3);
-		theMap["zwei"].blocks.emplace_back(sb2);
-		theMap["drei"].blocks.emplace_back(sb11);
-		theMap["vier"].blocks.emplace_back(sb21);
-		theMap["vier"].blocks.emplace_back(sb31);
-		theMap[""].blocks.emplace_back(sb41);
-
-		SwitchBlock* switchBlock = new SwitchBlock("switch-expression", theMap);
-
-		chart2->headline = "TestChart for Switch-Blocks";
-		chart2->declarations.push_back(Declaration("testVar", "testtype"));
-		chart2->declarations.push_back(Declaration("testVarddd", "int"));
-		chart2->declarations.push_back(Declaration("testVar12", "human"));
-		chart2->root.blocks.emplace_back(sb4);
-		chart2->root.blocks.emplace_back(switchBlock);
-
-		QGraphicsItem* structureChart2 = drawer.drawStructureChart(chart2);
-		structureChart2->setPos(700.5, 400.5);
-		scene->addItem(structureChart2);*/
-		//--------------------------------------------------------------------------*/
 
 		graphicsView->setScene(scene);
 	} catch (std::runtime_error& e) {
