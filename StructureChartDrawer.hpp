@@ -7,7 +7,6 @@
 #include <QFont>
 #include <iostream>
 
-
 class StructureChartDrawer
 {
 	private:

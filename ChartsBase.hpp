@@ -5,27 +5,28 @@
 
 class Type
 {
-	protected:
-		std::string name;
 	public:
-		virtual std::string cppName() = 0;
 		virtual std::string umlName() = 0;
-		static Type* createFromUmlName(std::string type);
+		static Type* createFromCppName(std::string type);
 };
 
 class ClassType : public Type
 {
+	private:
+		std::string name;
 	public:
-		virtual std::string cppName() override;
+		ClassType(std::string name);
 		virtual std::string umlName() override;
 };
 
 class PrimitiveType : public Type
 {
 	public:
-		enum { Integer, Float, Boolean, Text, Character };
-		virtual std::string cppName() override;
+		enum TypeEnum { Integer, Float, Boolean, Text, Character };
+		PrimitiveType(TypeEnum typeEnum);
 		virtual std::string umlName() override;
+	private:
+		TypeEnum typeEnum;
 };
 
 #endif

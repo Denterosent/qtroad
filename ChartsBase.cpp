@@ -1,15 +1,27 @@
 #include "ChartsBase.hpp"
 
-Type* Type::createFromUmlName(std::string type)
+Type* Type::createFromCppName(std::string type)
 {
-	ClassType* ct = new ClassType();
-	ct->name = type;
-	return ct;
+	if (type == "void") {
+		return nullptr;
+	} else if (type == "int") {
+		return new PrimitiveType(PrimitiveType::Integer);
+	} else if (type == "float") {
+		return new PrimitiveType(PrimitiveType::Float);
+	} else if (type == "bool") {
+		return new PrimitiveType(PrimitiveType::Boolean);
+	} else if (type == "std::string") {
+		return new PrimitiveType(PrimitiveType::Text);
+	} else if (type == "char") {
+		return new PrimitiveType(PrimitiveType::Character);
+	} else {
+		return new ClassType(type);
+	}
 }
 
-std::string ClassType::cppName()
+ClassType::ClassType(std::string name)
+	: name(name)
 {
-	return name;
 }
 
 std::string ClassType::umlName()
@@ -17,13 +29,23 @@ std::string ClassType::umlName()
 	return name;
 }
 
-
-std::string PrimitiveType::cppName()
+PrimitiveType::PrimitiveType(TypeEnum typeEnum)
+	: typeEnum(typeEnum)
 {
-	return name;
 }
 
 std::string PrimitiveType::umlName()
 {
-	return name;
+	switch (typeEnum) {
+		case Integer:
+			return "GZ";
+		case Float:
+			return "FKZ";
+		case Boolean:
+			return "Boolean";
+		case Text:
+			return "Text";
+		case Character:
+			return "Zeichen";
+	}
 }

@@ -17,14 +17,16 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     Parser.cpp\
 ChartsBase.cpp \
-    StructureChartDrawer.cpp
+    StructureChartDrawer.cpp \
+    ClassChartDrawer.cpp
 
 HEADERS  += MainWindow.hpp \
     StructureChart.hpp \
     ClassChart.hpp \
     ChartsBase.hpp \
     Parser.hpp \
-    StructureChartDrawer.hpp
+    StructureChartDrawer.hpp \
+    ClassChartDrawer.hpp
 
 FORMS    += MainWindow.ui
 

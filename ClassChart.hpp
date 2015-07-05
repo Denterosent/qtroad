@@ -10,16 +10,23 @@ enum class Visibility { private_, protected_, public_ };
 
 struct Argument
 {
+		Argument(std::string name, Type* type)
+			: name(name)
+			, type(type)
+		{
+		}
+
 		std::string name;
 		std::unique_ptr<Type> type;
 };
 
 struct Operation
 {
-		Operation(std::string name, Type* returnType, Visibility visibility)
+		Operation(std::string name, Type* returnType, std::vector<Argument>& arguments, Visibility visibility)
 			: name(name)
 			, returnType(returnType)
 			, visibility(visibility)
+			, arguments(std::move(arguments))
 		{
 		}
 
@@ -45,6 +52,11 @@ struct Attribute
 
 struct Class
 {
+		Class(std::string name) :
+			name(name)
+		{
+		}
+
 		std::string name;
 		std::vector<Operation> operations;
 		std::vector<Attribute> attributes;
@@ -52,18 +64,32 @@ struct Class
 
 struct Edge
 {
+		Edge(Class* head, Class* tail)
+			: head(head)
+			, tail(tail)
+		{
+		}
+
 		Class* head;
 		Class* tail;
 };
 
 struct Inheritance : public Edge
 {
-
+		using Edge::Edge;
 };
 
 struct Association : public Edge
 {
+		Association(Class* head, Class* tail, unsigned multiplicity, std::string roleName)
+			: Edge(head, tail)
+			, multiplicity(multiplicity)
+			, roleName(roleName)
+		{
+		}
 
+		unsigned multiplicity;
+		std::string roleName;
 };
 
 struct ClassChart

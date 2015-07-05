@@ -6,7 +6,7 @@
 
 struct Result
 {
-		//ClassChart classChart;
+		ClassChart classChart;
 		std::vector<std::unique_ptr<StructureChart>> structureCharts;
 };
 
@@ -18,9 +18,12 @@ class Parser
 
 	private:
 
+		void parseClasses(const char* begin, const char* end);
+
 		void parseStructures(const char* begin, const char* end);
 		BlockSequence parseFunctionBody(const char*& begin, const char* end);
 		static void skipWhitespaces(const char*& c, const char* end);
+		static void skipWhitespacesBackwards(const char*& c, const char* begin);
 		static bool match(const char*& begin, const char* end, const char* literal);
 		static bool matchWithFollowing(const char*& begin, const char* end, const char* literal, const char following);
 		static bool following(const char* begin, const char* end, const char* literal); // like match but without jumping to the last position of tmp
@@ -33,7 +36,12 @@ class Parser
 
 		Result result;
 
+		std::map<std::string, Class*> classMap;
 
+		void getName(const char*& begin, const char* end);
+		void parseClass(const char*& begin, const char* end);
+		Operation parseOperation(const char* begin, const char* end, Visibility visibility);
+		void parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type);
 };
 
 #endif // PARSER_HPP
