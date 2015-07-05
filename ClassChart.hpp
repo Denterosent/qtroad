@@ -154,6 +154,8 @@ class Edge
 		{
 		}
 
+		virtual ~Edge() = default;
+
 		Class* getHead()
 		{
 			return head;

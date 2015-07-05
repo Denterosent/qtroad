@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QBrush>
 
-static const QPolygonF triangleArrowhead({{0,0},{5*sqrt(2),-5*2},{-5*sqrt(2),-5*2}});
+static const QPolygonF triangleArrowhead({{5*sqrt(2),-5*2},{0,0},{-5*sqrt(2),-5*2}});
 
 std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 {
@@ -184,7 +184,7 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 		}
 	}
 
-	float radius = maxdim;
+	float radius = 2.5 * maxdim;
 
 	int counter = 0;
 	for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
@@ -196,10 +196,18 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 	std::map<Edge*, QGraphicsItemGroup*> edgeLines;
 
 	for (const std::unique_ptr<Edge>& edge : classChart.getEdges()) {
-
-		QGraphicsPolygonItem* polygonItem = new QGraphicsPolygonItem(triangleArrowhead);
-		polygonItem->setBrush(QBrush(Qt::white));
-		QGraphicsItemGroup* a = drawArrow(classBoxes[edge->getTail()], classBoxes[edge->getHead()], nullptr, polygonItem);
+		QGraphicsItem* arrowhead = nullptr;
+		if (dynamic_cast<Inheritance*>(edge.get())) {
+			QGraphicsPolygonItem* polygonItem = new QGraphicsPolygonItem(triangleArrowhead);
+			polygonItem->setBrush(QBrush(Qt::white));
+			arrowhead = polygonItem;
+		}
+		if (dynamic_cast<Association*>(edge.get())) {
+			QPainterPath painterPath;
+			painterPath.addPolygon(triangleArrowhead);
+			arrowhead = new QGraphicsPathItem(painterPath);
+		}
+		QGraphicsItemGroup* a = drawArrow(classBoxes[edge->getTail()], classBoxes[edge->getHead()], nullptr, arrowhead);
 		edgeLines[edge.get()] = a;
 		group->addToGroup(a);
 	}
