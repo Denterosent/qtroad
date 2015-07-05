@@ -593,15 +593,23 @@ void Parser::parseClass(const char*& begin, const char* end)
 					}
 				}
 			}
+			const char* codeBegin = nullptr;
 			if (*begin == '{') {
 				begin++;
+				codeBegin = begin;
 				skipBody(begin, end, 1);
+				const char* codeEnd = begin;
+				codeEnd--;
 			} else if (*begin == ';') {
 				expect(begin, end, ";");
 			}
 			skipWhitespacesBackwards(declEnd, declBegin);
 			if (std::string(declBegin, declEnd).find_first_of('(') != std::string::npos) {
-				c->addOperation(parseOperation(declBegin, declEnd, visibility));
+				Operation o = parseOperation(declBegin, declEnd, visibility);
+				if (codeBegin) {
+					result.structureCharts.emplace_back(new StructureChart(o.getName(), {}, parseFunctionBody(codeBegin, begin-1)));
+				}
+				c->addOperation(std::move(o));
 			} else {
 				std::string type;
 				std::string name;
@@ -636,14 +644,21 @@ void Parser::parseTypeAndName(const char* begin, const char* end, std::string& n
 {
 	skipWhitespaces(begin, end);
 	skipWhitespacesBackwards(end, begin);
+	if (begin == end) {
+		throw std::runtime_error("Invalid type and name");
+	}
 	const char* nameBegin = end;
-	while (*(nameBegin-1) != ' ') {
+	while (nameBegin-1 != begin && *(nameBegin-1) != ' ') {
 		nameBegin--;
 	}
-	const char* typeEnd = nameBegin;
-	skipWhitespacesBackwards(typeEnd, begin);
-	name = std::string(nameBegin, end);
-	type = std::string(begin, typeEnd);
+	if (nameBegin-1 == begin) {
+		name = std::string(begin, end);
+	} else {
+		const char* typeEnd = nameBegin;
+		skipWhitespacesBackwards(typeEnd, begin);
+		name = std::string(nameBegin, end);
+		type = std::string(begin, typeEnd);
+	}
 }
 
 Operation Parser::parseOperation(const char* begin, const char* end, Visibility visibility)

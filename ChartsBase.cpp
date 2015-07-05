@@ -2,7 +2,7 @@
 
 Type* Type::createFromCppName(std::string type)
 {
-	if (type == "void") {
+	if (type == "void" || type == "") {
 		return nullptr;
 	} else if (type == "int") {
 		return new PrimitiveType(PrimitiveType::Integer);
