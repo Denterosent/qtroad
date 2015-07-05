@@ -410,12 +410,16 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '<': {
 					if(matchWithFollowing(begin, end, "<", '=')) {
 						tmp.append(" ≤ ");
+					}else{
+						tmp.append(" < ");
 					}
 					break;
 				}
 				case '>': {
 					if(matchWithFollowing(begin, end, ">", '=')) {
 						tmp.append(" ≥ ");
+					}else{
+						tmp.append(" > ");
 					}
 					break;
 				}
