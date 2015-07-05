@@ -9,12 +9,15 @@ static const QPolygonF triangleArrowhead({{0,0},{5*sqrt(2),-5*2},{-5*sqrt(2),-5*
 std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 {
 	switch (visibility) {
-		case Visibility::private_:
+		case Visibility::private_: {
 			return "-";
-		case Visibility::protected_:
+		}
+		case Visibility::protected_: {
 			return "#";
-		case Visibility::public_:
+		}
+		case Visibility::public_: {
 			return "+";
+		}
 	}
 }
 
@@ -24,18 +27,24 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 	std::ostringstream attrstr;
 	bool first = false;
 	for (const Attribute& attr : class_->getAttributes()) {
-		if (first++) attrstr << "\n";
+		if (first++) {
+			attrstr << "\n";
+		}
 		attrstr << visibilityToString(attr.getVisibility()) << attr.getName() << ": " << attr.getType()->umlName();
 	}
 	std::ostringstream opstr;
 	first = false;
 	for (const Operation& op : class_->getOperations()) {
-		if (first++) opstr << "\n";
+		if (first++) {
+			opstr << "\n";
+		}
 		opstr << visibilityToString(op.getVisibility()) << op.getName() << "(";
 		if (!op.getArguments().empty()) {
 			bool first = false;
 			for (const Argument& arg : op.getArguments()) {
-				if (first++) opstr << "; ";
+				if (first++) {
+					opstr << "; ";
+				}
 				opstr << arg.getName() << ": " << arg.getType()->umlName();
 			}
 		}
@@ -166,11 +175,13 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 	for (const std::pair<const Class*, QGraphicsItemGroup*>& p : classBoxes) {
 		QRectF rect = p.second->boundingRect();
 
-		if (maxdim < rect.width())
+		if (maxdim < rect.width()) {
 			maxdim = rect.width();
+		}
 
-		if (maxdim < rect.height())
+		if (maxdim < rect.height()) {
 			maxdim = rect.height();
+		}
 	}
 
 	float radius = maxdim;
