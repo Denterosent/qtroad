@@ -32,12 +32,38 @@ void Parser::parseStructures(const char* begin, const char* end)
 				getCondition(begin,end);
 				skipWhitespaces(begin,end);
 				if(match(begin,end,"{")){
+					std::vector<Declaration> declarations;
+					if(match(begin,end, "$$$")){
+						std::string type;
+						std::string name;
+						bool switched = false;
+						while(begin != end && !match(begin,end, "$$$")){
+							if(*begin != '/'){
+								if(*begin == ' '){
+									switched = !switched;
+								}else if(*begin != '\n'){
+									if(!switched){
+										type += *begin;
+									} else {
+										name += *begin;
+									}
+								}
+							}else {
+								Declaration declaration(name,type);
+								declarations.push_back(declaration);
+								type.clear();
+								name.clear();
+							}
+							begin++;
+
+						}
+					}
 					bodyBegin = begin;
 					skipBody(begin,end,1);
 					bodyEnd = begin - 1;
 					functionFound = true;
-					//std::vector<Declaration> declarations;
-					result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart(std::string(functionNameBegin,functionNameEnd), {},  parseFunctionBody(bodyBegin, bodyEnd))));
+
+					result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart(std::string(functionNameBegin,functionNameEnd), std::move(declarations),  parseFunctionBody(bodyBegin, bodyEnd))));
 				}
 			}
 			if(begin<=end){
@@ -180,8 +206,6 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 				begin ++;
 			}
 			begin++;
-		}else if(match(begin,end, "$$$")){
-
 		}else {
 
 			const char* commandEnd = begin;
