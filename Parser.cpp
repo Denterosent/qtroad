@@ -519,9 +519,11 @@ void Parser::skipBody(const char*& begin, const char* end, int pDepth)
 
 void Parser::skipIf(const char*& begin, const char* end)
 {
-	while (*(begin - 1) != '{' && begin != end) {
-		begin++;
-	}
+	expect(begin, end, "if");
+	skipWhitespaces(begin, end);
+	getCondition(begin, end);
+	skipWhitespaces(begin, end);
+	expect(begin, end, "{");
 	skipBody(begin,end, 1);
 }
 

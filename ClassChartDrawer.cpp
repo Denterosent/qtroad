@@ -32,7 +32,7 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 		if (first++) opstr << "\n";
 		opstr << visibilityToString(op.getVisibility()) << op.getName() << "(";
 		if (!op.getArguments().empty()) {
-			bool first;
+			bool first = false;
 			for (const Argument& arg : op.getArguments()) {
 				if (first++) opstr << "; ";
 				opstr << arg.getName() << ": " << arg.getType()->umlName();
@@ -43,10 +43,10 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 			opstr << ": " << op.getReturnType()->umlName();
 		}
 		if (!op.getReturnType() && op.getName() == class_->getName()) {
-			opstr << " <<constructor>>";
+			opstr << " «constructor»";
 		}
 		if (!op.getReturnType() && op.getName() == "~" + class_->getName()) {
-			opstr << " <<destructor>>";
+			opstr << " «destructor»";
 		}
 	}
 
