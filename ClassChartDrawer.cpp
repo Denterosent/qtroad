@@ -145,8 +145,8 @@ QGraphicsItemGroup*ClassChartDrawer::drawClassChart(const ClassChart& classChart
 
 	int counter = 0;
 	for (const std::pair<const Class*, QGraphicsItemGroup*>& p : classBoxes) {
-		p.second->setPos(radius + std::cos(2 * M_PI * (counter/float(classBoxes.size()))) * radius,
-						 radius + std::sin(2 * M_PI * (counter/float(classBoxes.size()))) * radius);
+		p.second->setPos(radius + std::cos(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius,
+						 radius + std::sin(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius);
 		counter++;
 	}
 
