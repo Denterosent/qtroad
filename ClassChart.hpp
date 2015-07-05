@@ -170,7 +170,7 @@ class Inheritance : public Edge
 class Association : public Edge
 {
 	public:
-		Association(Class* head, Class* tail, unsigned multiplicity, std::string roleName)
+		Association(Class* head, Class* tail, int multiplicity, std::string roleName)
 			: Edge(head, tail)
 			, multiplicity(multiplicity)
 			, roleName(roleName)
