@@ -167,9 +167,9 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 	float radius = maxdim;
 
 	int counter = 0;
-	for (const std::pair<const Class*, QGraphicsItemGroup*>& p : classBoxes) {
-		p.second->setPos(radius + std::cos(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius,
-						 radius + std::sin(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius);
+	for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
+		classBoxes[class_.get()]->setPos(radius + std::cos(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius,
+										 radius + std::sin(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius);
 		counter++;
 	}
 
