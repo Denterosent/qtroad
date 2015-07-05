@@ -487,6 +487,23 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 					}
 					break;
 				}
+			case '*': {
+				if (matchWithFollowing(begin,end,"*", '=')) {
+					std::string tmp2 = tmp.substr(0,tmp.length());
+					tmp.append(" ← " + tmp2 + " * ");
+				} else {
+					tmp.append("*");
+				}
+				break;
+			}case '/': {
+				if (matchWithFollowing(begin,end,"/", '=')) {
+					std::string tmp2 = tmp.substr(0,tmp.length());
+					tmp.append(" ← " + tmp2 + " / ");
+				} else {
+					tmp.append("/");
+				}
+				break;
+			}
 				default: {
 					if(*begin != '\n' && *begin != '\t') {
 						tmp += *begin;
