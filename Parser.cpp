@@ -90,7 +90,6 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 {
 	BlockSequence ret;
 	skipWhitespaces(begin, end);
-	bool comment = false;
 	while (begin != end) {
 		skipWhitespaces(begin, end);
 
@@ -238,7 +237,17 @@ BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
 		}else {
 
 			const char* commandEnd = begin;
-			while (*commandEnd != ';' && commandEnd < end) {
+			bool text1 = false;
+			bool text2 = false;
+			while ((*commandEnd != ';' || (following(commandEnd,end, ";")&& (text1 || text2))) && commandEnd < end) {
+				if (*commandEnd == '\\' && commandEnd + 2 < end) {
+					commandEnd = commandEnd + 2;
+				}
+				if (*commandEnd == '\"' && !text2) {
+					text1 = !text1;
+				} else if (*commandEnd == '\'' && !text1) {
+					text2 = !text2;
+				}
 				commandEnd++;
 			}
 			if(begin != end){
@@ -525,18 +534,6 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 		begin++;
 
 	}
-	//	bool multipleSpaces = false;
-	//	for(unsigned int i = 0; i <= tmp.length(); i++) {
-	//		if(tmp[i] == ' ') {
-	//			if(multipleSpaces || i == 0 || i == tmp.length()) {
-	//				tmp.erase(i);
-	//				i--;
-	//			}
-	//			multipleSpaces = true;
-	//		} else {
-	//			multipleSpaces = false;
-	//		}
-	//	}
 
 	return tmp;
 }
