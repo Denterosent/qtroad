@@ -22,6 +22,10 @@ void Parser::parseStructures(const char* begin, const char* end)
 			parseClass(begin, end);
 			continue;
 		}
+		if (following(begin, end, "struct")) {
+			parseClass(begin, end);
+			continue;
+		}
 		if(matchWithFollowing(begin, end, ":", ':') ) {
 			begin++;
 			functionNameBegin = begin;
@@ -578,7 +582,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			expect(begin, end, ":");
 		} else {
 			const char* declBegin = begin;
-			while (begin != end && *begin != '{' && *begin != ':' && *begin != ';') {
+			while (begin != end && *begin != '{' && *begin != ';' && (*begin != ':' || match(begin, end, "::"))) {
 				begin++;
 			}
 			const char* declEnd = begin;
