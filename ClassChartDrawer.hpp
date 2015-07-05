@@ -11,7 +11,7 @@ class ClassChartDrawer
 	private:
 		std::string visibilityToString(Visibility visibility);
 		QGraphicsItemGroup* generateClassBox(Class* class_);
-		bool drawArrowInternal(QGraphicsItemGroup* ret, QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym);
+		QLineF calcArrow(QRectF r1, QRectF r2);
 		QGraphicsItemGroup* drawArrow(QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym);
 };
 

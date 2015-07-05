@@ -9,10 +9,6 @@ Parser::Parser(const char *begin, const char *end)
 
 void Parser::parseStructures(const char* begin, const char* end)
 {
-	const char* xbegin = begin;
-	if (match(xbegin, end, "class")) {
-		parseClasses(begin, end);
-	} else {
 		const char* functionNameBegin;
 		const char* functionNameEnd;
 		const char* tmp = begin;
@@ -22,6 +18,10 @@ void Parser::parseStructures(const char* begin, const char* end)
 			const char* bodyBegin;
 			const char* bodyEnd;
 
+			const char* xbegin = begin;
+			if (match(xbegin, end, "class")) {
+				parseClasses(begin, end);
+			}
 			if(matchWithFollowing(begin, end, ":", ':') ) {
 				begin++;
 				functionNameBegin = begin;
@@ -71,7 +71,6 @@ void Parser::parseStructures(const char* begin, const char* end)
 			}
 		}
 		//result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart("Struktogramm", {},  parseFunctionBody(tmp, end))));
-	}
 }
 
 BlockSequence Parser::parseFunctionBody(const char*& begin, const char* end)
@@ -533,7 +532,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 	if (classMap.find(className) == classMap.end()) {
 		c = new Class(className);
 		classMap[className] = c;
-		result.classChart.classes.emplace_back(c);
+		result.classChart.addClass(c);
 	} else {
 		c = classMap[className];
 	}
@@ -554,7 +553,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			if (classMap.find(otherClassName) == classMap.end()) {
 				throw std::runtime_error("Inherits undefined class");
 			}
-			result.classChart.edges.emplace_back(new Inheritance{classMap[otherClassName], c});
+			result.classChart.addEdge(new Inheritance{classMap[otherClassName], c});
 			skipWhitespaces(begin, end);
 		} while (match(begin, end, ","));
 	}
@@ -602,7 +601,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			}
 			skipWhitespacesBackwards(declEnd, declBegin);
 			if (std::string(declBegin, declEnd).find_first_of('(') != std::string::npos) {
-				c->operations.push_back(parseOperation(declBegin, declEnd, visibility));
+				c->addOperation(parseOperation(declBegin, declEnd, visibility));
 			} else {
 				std::string type;
 				std::string name;
@@ -610,10 +609,10 @@ void Parser::parseClass(const char*& begin, const char* end)
 				if (type.back() == '*') {
 					std::string className = type.substr(0, type.length() - 1);
 					if (classMap.find(className) != classMap.end()) {
-						result.classChart.edges.emplace_back(new Association(classMap[className], c, 1, name));
+						result.classChart.addEdge(new Association(classMap[className], c, 1, name));
 					}
 				} else {
-					c->attributes.emplace_back(name, Type::createFromCppName(type), visibility);
+					c->addAttribute(Attribute(name, Type::createFromCppName(type), visibility));
 				}
 			}
 		}
@@ -638,7 +637,7 @@ void Parser::parseTypeAndName(const char* begin, const char* end, std::string& n
 	skipWhitespaces(begin, end);
 	skipWhitespacesBackwards(end, begin);
 	const char* nameBegin = end;
-	if (*(nameBegin-1) != ' ') {
+	while (*(nameBegin-1) != ' ') {
 		nameBegin--;
 	}
 	const char* typeEnd = nameBegin;

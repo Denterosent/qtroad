@@ -2,8 +2,9 @@
 #include <sstream>
 #include <iostream>
 #include <QFont>
+#include <QBrush>
 
-static const QPolygonF poly({{0,5*2},{5*sqrt(2),0},{-5*sqrt(2),0}});
+static const QPolygonF triangleArrowhead({{0,0},{5*sqrt(2),-5*2},{-5*sqrt(2),-5*2}});
 
 std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 {
@@ -21,29 +22,29 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 {
 	std::ostringstream attrstr;
 	bool first = false;
-	for (const Attribute& attr : class_->attributes) {
+	for (const Attribute& attr : class_->getAttributes()) {
 		if (first++) attrstr << "\n";
-		attrstr << visibilityToString(attr.visibility) << attr.name << ": " << attr.type->umlName();
+		attrstr << visibilityToString(attr.getVisibility()) << attr.getName() << ": " << attr.getType()->umlName();
 	}
 	std::ostringstream opstr;
 	first = false;
-	for (const Operation& op : class_->operations) {
+	for (const Operation& op : class_->getOperations()) {
 		if (first++) opstr << "\n";
-		opstr << visibilityToString(op.visibility) << op.name << "(";
-		if (!op.arguments.empty()) {
+		opstr << visibilityToString(op.getVisibility()) << op.getName() << "(";
+		if (!op.getArguments().empty()) {
 			bool first;
-			for (const Argument& arg : op.arguments) {
+			for (const Argument& arg : op.getArguments()) {
 				if (first++) opstr << "; ";
-				opstr << arg.name << ": " << arg.type->umlName();
+				opstr << arg.getName() << ": " << arg.getType()->umlName();
 			}
 		}
 		opstr << ")";
-		if (op.returnType) {
-			opstr << ": " << op.returnType->umlName();
+		if (op.getReturnType()) {
+			opstr << ": " << op.getReturnType()->umlName();
 		}
 	}
 
-	std::string str1 = class_->name;
+	std::string str1 = class_->getName();
 	std::string str2 = attrstr.str();
 	std::string str3 = opstr.str();
 
@@ -95,35 +96,51 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 	return group;
 }
 
-bool ClassChartDrawer::drawArrowInternal(QGraphicsItemGroup* ret, QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym)
+QLineF ClassChartDrawer::calcArrow(QRectF r1, QRectF r2)
 {
-	QRectF r1 = tail->mapToParent(tail->boundingRect()).boundingRect();
-	QRectF r2 = head->mapToParent(head->boundingRect()).boundingRect();
-	if (r1.right() < r2.left()) {
-		QGraphicsLineItem* line = new QGraphicsLineItem();
-		line->setLine(r1.right(), r1.top() + .5 * r1.height(),
-					  r2.left(), r2.top() + .5 * r2.height());
-		ret->addToGroup(line);
-		return true;
+	if (r1.right() < r2.left() && r1.bottom() < r2.top()) {
+		return QLineF(r1.bottomRight(), r2.topLeft());
+	} else if (r2.right() < r1.left() && r2.bottom() < r1.top()) {
+		return QLineF(r1.topLeft(), r2.bottomRight());
+	} else if (r1.right() < r2.left() && r2.bottom() < r1.top()) {
+		return QLineF(r1.topRight(), r2.bottomLeft());
+	} else if (r2.right() < r1.left() && r1.bottom() < r2.top()) {
+		return QLineF(r1.bottomLeft(), r2.topRight());
+	} else if (r1.right() < r2.left()) {
+		return QLineF(r1.right(), r1.top() + .5 * r1.height(), r2.left(), r2.top() + .5 * r2.height());
+	} else if (r2.right() < r1.left()) {
+		return QLineF(r1.left(), r1.top() + .5 * r1.height(), r2.right(), r2.top() + .5 * r2.height());
+	} else if (r1.bottom() < r2.top()) {
+		return QLineF(r1.left() + .5 * r1.width(), r1.bottom(), r2.left() + .5 * r2.width(), r2.top());
+	} else {
+		return QLineF(r1.left() + .5 * r1.width(), r1.top(), r2.left() + .5 * r2.width(), r2.bottom());
 	}
-
-	return false;
 }
 
-QGraphicsItemGroup*ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym)
+QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym)
 {
 	QGraphicsItemGroup* ret = new QGraphicsItemGroup();
-	if (!drawArrowInternal(ret, tail, head, tailsym, headsym)) {
-		drawArrowInternal(ret, head, tail, tailsym, headsym);
+
+	QRectF r1 = tail->mapToParent(tail->boundingRect()).boundingRect();
+	QRectF r2 = head->mapToParent(head->boundingRect()).boundingRect();
+
+	QGraphicsLineItem* line = new QGraphicsLineItem(calcArrow(r1, r2));
+	ret->addToGroup(line);
+
+	if (headsym) {
+		headsym->setPos(line->line().p2());
+		headsym->setRotation(-line->line().angle() - 90);
+		ret->addToGroup(headsym);
 	}
+
 	return ret;
 }
 
-QGraphicsItemGroup*ClassChartDrawer::drawClassChart(const ClassChart& classChart)
+QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChart)
 {
 	QGraphicsItemGroup* group = new QGraphicsItemGroup();
 	std::map<Class*, QGraphicsItemGroup*> classBoxes;
-	for (const std::unique_ptr<Class>& class_ : classChart.classes) {
+	for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
 		QGraphicsItemGroup* classBox = generateClassBox(class_.get());
 		group->addToGroup(classBox);
 		classBoxes[class_.get()] = classBox;
@@ -152,8 +169,11 @@ QGraphicsItemGroup*ClassChartDrawer::drawClassChart(const ClassChart& classChart
 
 	std::map<Edge*, QGraphicsItemGroup*> edgeLines;
 
-	for (const std::unique_ptr<Edge>& edge : classChart.edges) {
-		QGraphicsItemGroup* a = drawArrow(classBoxes[edge->tail], classBoxes[edge->head], nullptr, nullptr);
+	for (const std::unique_ptr<Edge>& edge : classChart.getEdges()) {
+
+		QGraphicsPolygonItem* polygonItem = new QGraphicsPolygonItem(triangleArrowhead);
+		polygonItem->setBrush(QBrush(Qt::white));
+		QGraphicsItemGroup* a = drawArrow(classBoxes[edge->getTail()], classBoxes[edge->getHead()], nullptr, polygonItem);
 		edgeLines[edge.get()] = a;
 		group->addToGroup(a);
 	}
