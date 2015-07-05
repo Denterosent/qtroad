@@ -43,20 +43,19 @@ void MainWindow::on_actionGenerate_triggered()
 		this->actionDirect_Print->setEnabled(true);
 		this->actionPrint_To_PDF->setEnabled(true);
 
-		QPointF pos;
+		float height = 0.;
 
 		ClassChartDrawer classChartDrawer;
 		QGraphicsItem* classChart = classChartDrawer.drawClassChart(parser.getResult().classChart);
 		scene->addItem(classChart);
-		classChart->setPos(pos);
-		pos = classChart->mapToParent(classChart->boundingRect().bottomLeft());
+		height += classChart->boundingRect().height();
 
 		for (const std::unique_ptr<StructureChart>& structureChartData : parser.getResult().structureCharts) {
 			StructureChartDrawer drawer(scene);
 			QGraphicsItem* structureChart = drawer.drawStructureChart(structureChartData.get());
 			scene->addItem(structureChart);
-			structureChart->setPos(pos);
-			pos = structureChart->mapToParent(structureChart->boundingRect().bottomLeft());
+			structureChart->setPos(0, height);
+			height += structureChart->childrenBoundingRect().height();
 		}
 
 		//-------------create test environment for switchBlock-----------------------
