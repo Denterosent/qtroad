@@ -98,17 +98,20 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 		} else {
 			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
 			if(ifElseBlock){
-				//calc the width of the bodies
-				float relation = 0.5;
-				int leftNumberOfBodies = 1 + countIfElseBodies(ifElseBlock->getYes().getBlocks());
-				int rightNumberOfBodies = 1 + countIfElseBodies(ifElseBlock->getNo().getBlocks());
-				int wholeNumberOfBodies = leftNumberOfBodies + rightNumberOfBodies;
-				relation = wholeNumberOfBodies / float(leftNumberOfBodies);
-
-				if(ifElseBlock->getNo().getBlocks().size() == 0){
-					relation = relationOfBodiesIfElseBlock;
+				IfElseBlock* innerIfElseBlock = ifElseBlock;
+				int nestingCounter = 1;
+				while (innerIfElseBlock) {
+					nestingCounter++;
+					if (!innerIfElseBlock->getNo().getBlocks().empty()) {
+						innerIfElseBlock = dynamic_cast<IfElseBlock*>(innerIfElseBlock->getNo().getBlocks().front().get());
+					} else {
+						innerIfElseBlock = nullptr;
+					}
 				}
-				int leftWidth = std::round(width * relation);
+
+				float relation = 1.f / (nestingCounter);
+
+				int leftWidth = width * relation;
 				int rightWidth = width - leftWidth;
 
 				//draw condition text
