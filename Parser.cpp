@@ -42,7 +42,7 @@ void Parser::parseStructures(const char* begin, const char* end)
 				begin++;
 			}
 			functionNameEnd = begin;
-			getCondition(begin,end);
+			std::string condition = getCondition(begin,end);
 			skipWhitespaces(begin,end);
 			if(match(begin,end,"{")){
 				std::vector<Declaration> declarations;
@@ -79,7 +79,7 @@ void Parser::parseStructures(const char* begin, const char* end)
 				bodyEnd = begin - 1;
 				functionFound = true;
 
-				result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart(std::string(functionNameBegin,functionNameEnd), std::move(declarations),  parseFunctionBody(bodyBegin, bodyEnd))));
+				result.structureCharts.push_back(std::unique_ptr<StructureChart>(new StructureChart(std::string(functionNameBegin,functionNameEnd)+"("+condition+")", std::move(declarations),  parseFunctionBody(bodyBegin, bodyEnd))));
 			}
 		}
 		if(begin<=end){
