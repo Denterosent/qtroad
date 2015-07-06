@@ -103,7 +103,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				while (innerIfElseBlock) {
 					nestingCounter++;
 					if (!innerIfElseBlock->getNo().getBlocks().empty()) {
-						innerIfElseBlock = dynamic_cast<IfElseBlock*>(innerIfElseBlock->getNo().getBlocks().front().get());
+						Block* inner = innerIfElseBlock->getNo().getBlocks().front().get();
+						innerIfElseBlock = dynamic_cast<IfElseBlock*>(inner);
 					} else {
 						innerIfElseBlock = nullptr;
 					}
@@ -124,7 +125,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 				//calculate the height of the condition block
 				int textHeight = conditionText->boundingRect().height() + 2*paddingTopBlock;
 				int textWidth = conditionText->boundingRect().width() + 2*paddingLeft;
-				int ifElseBlockHeight = (width*textHeight)/(width-textWidth);
+				int ifElseBlockHeight = (width*textHeight)/((width-textWidth>60)?width-textWidth:60);
 				if((ifElseBlockHeight > maxRelationIfElseBlock*width) or (ifElseBlockHeight < 0))
 				{
 					ifElseBlockHeight = maxRelationIfElseBlock*width;
@@ -306,20 +307,6 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			}
 		}
 	}
-}
-int StructureChartDrawer::countIfElseBodies(const std::vector<std::unique_ptr<Block>>& vector){
-	int numberOfIfElseBodies = 0;
-
-	for(unsigned int index = 0; index < vector.size(); index++){
-		Block* block = vector[index].get();
-		IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
-		if(ifElseBlock){
-			numberOfIfElseBodies++;
-			numberOfIfElseBodies += countIfElseBodies(ifElseBlock->getYes().getBlocks());
-			numberOfIfElseBodies += countIfElseBodies(ifElseBlock->getNo().getBlocks());
-		}
-	}
-	return numberOfIfElseBodies;
 }
 
 void StructureChartDrawer::drawEmtySign(QGraphicsRectItem* rect, QGraphicsItem* group, int maxScale){
