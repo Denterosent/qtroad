@@ -51,9 +51,9 @@ void Parser::parseStructures(const char* begin, const char* end)
 					std::string name;
 					bool switched = false;
 					while(begin != end && !match(begin,end, "$$$")){
-						skipWhitespaces(begin,end);
+
 						if(*begin != '/'){
-							skipWhitespaces(begin,end);
+
 							if(*begin == ' '){
 								switched = !switched;
 							}else if(*begin != '\n'){
