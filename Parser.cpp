@@ -431,6 +431,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '<': {
 					if(matchWithFollowing(begin, end, "<", '=')) {
 						tmp.append(" ≤ ");
+					}else if(matchWithFollowing(begin, end, "<", '<')) {
+						tmp.append(" << ");
 					}else{
 						tmp.append(" < ");
 					}
@@ -439,6 +441,8 @@ std::string Parser::cleanSyntax(const char* begin, const char* end)
 				case '>': {
 					if(matchWithFollowing(begin, end, ">", '=')) {
 						tmp.append(" ≥ ");
+					}else if(matchWithFollowing(begin, end, ">", '>')) {
+						tmp.append(" >> ");
 					}else{
 						tmp.append(" > ");
 					}
