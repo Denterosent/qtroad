@@ -38,7 +38,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * fix misplaced switch-expresion
 	 */
 
-	initialWidth = 500;
+	initialWidth = 1980;
 	width = initialWidth;
 	top = 0;
 	loopOffset = 20;
