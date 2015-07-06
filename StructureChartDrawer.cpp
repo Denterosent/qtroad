@@ -67,7 +67,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 	//draw empty sign if function is empty; to do not interfere with this code, empty ifelsecases arent drawn
 	if(vector.size() == 0){
 		QGraphicsRectItem* emptyRect = new QGraphicsRectItem(group);
-		emptyRect->setRect(left, top, width, 30);
+		emptyRect->setRect(left, top, width, 20);
 		drawEmtySign(emptyRect, group, maxEmtySignScale);
 	}
 
@@ -231,7 +231,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 							heightOfSwitchExpressionBlock = maxRelationSwitchBlock*width;
 						}
 
-						switchExpressionTextItem->setPos(left + reducedWidth - additionalOffset - (switchExpressionTextItem->boundingRect().width() * relationNormalCasesToWhole) - paddingLeft, top + paddingTopBlock);
+						switchExpressionTextItem->setPos(left + reducedWidth - (switchExpressionTextItem->boundingRect().width() * relationNormalCasesToWhole) - paddingLeft, top + paddingTopBlock);
 
 						//draw the big line
 						QGraphicsLineItem* switchLine = new QGraphicsLineItem(group);
@@ -306,6 +306,20 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			}
 		}
 	}
+}
+int StructureChartDrawer::countIfElseBodies(const std::vector<std::unique_ptr<Block>>& vector){
+	int numberOfIfElseBodies = 0;
+
+	for(unsigned int index = 0; index < vector.size(); index++){
+		Block* block = vector[index].get();
+		IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
+		if(ifElseBlock){
+			numberOfIfElseBodies++;
+			numberOfIfElseBodies += countIfElseBodies(ifElseBlock->getYes().getBlocks());
+			numberOfIfElseBodies += countIfElseBodies(ifElseBlock->getNo().getBlocks());
+		}
+	}
+	return numberOfIfElseBodies;
 }
 
 void StructureChartDrawer::drawEmtySign(QGraphicsRectItem* rect, QGraphicsItem* group, int maxScale){
