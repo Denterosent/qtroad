@@ -38,7 +38,7 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 * fix misplaced switch-expresion
 	 */
 
-	initialWidth = 1980;
+	initialWidth = 3000;
 	width = initialWidth;
 	top = 0;
 	loopOffset = 20;
@@ -96,8 +96,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 
 			top += blockHeight;
 		} else {
-			IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block);
-			if(ifElseBlock){
+			if(IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block)){
 				IfElseBlock* innerIfElseBlock = ifElseBlock;
 				int nestingCounter = 1;
 				while (innerIfElseBlock) {
@@ -179,8 +178,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					drawEmtySign(spaceRect, group, maxEmtySignScale);
 				}
 			}else{
-				LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block);
-				if(loopBlock){
+				if(LoopBlock* loopBlock = dynamic_cast<LoopBlock*>(block)){
 					QGraphicsSimpleTextItem* loopHeading = new QGraphicsSimpleTextItem(group);
 					loopHeading->setText(QString::fromStdString(loopBlock->getCondition()));
 
@@ -200,8 +198,7 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 					QGraphicsRectItem* border = new QGraphicsRectItem(group);
 					border->setRect(left, saveTop, width, top-saveTop);
 				}else{
-					SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block);
-					if(switchBlock){
+					if(SwitchBlock* switchBlock = dynamic_cast<SwitchBlock*>(block)){
 						int widthForEachElement = std::round(width / switchBlock->getSequences().size());
 						float relationNormalCasesToWhole = 1;
 						int additionalOffset = 0;
