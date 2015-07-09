@@ -97,6 +97,8 @@ void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std:
 			top += blockHeight;
 		} else {
 			if(IfElseBlock* ifElseBlock = dynamic_cast<IfElseBlock*>(block)){
+
+				//make directly interconnected IfElseBodies with equal width
 				IfElseBlock* innerIfElseBlock = ifElseBlock;
 				int nestingCounter = 1;
 				while (innerIfElseBlock) {
