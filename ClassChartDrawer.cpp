@@ -186,28 +186,26 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 		classBoxes[class_.get()] = classBox;
 	}
 
-	float maxdim = 0.f;
+	int radius = 0;
+	bool intersection = false;
 
-	for (const std::pair<const Class*, QGraphicsItemGroup*>& p : classBoxes) {
-		QRectF rect = p.second->boundingRect();
-
-		if (maxdim < rect.width()) {
-			maxdim = rect.width();
+	do {
+		radius += 100;
+		int counter = 0;
+		for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
+			classBoxes[class_.get()]->setPos(radius + std::cos(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius,
+											 radius + std::sin(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius);
+			counter++;
 		}
-
-		if (maxdim < rect.height()) {
-			maxdim = rect.height();
+		intersection = false;
+		for (std::map<Class*, QGraphicsItemGroup*>::iterator it = classBoxes.begin(); it != classBoxes.end() && !intersection; it++) {
+			for (std::map<Class*, QGraphicsItemGroup*>::iterator jt = classBoxes.begin(); it != jt && !intersection; jt++) {
+				QRectF r1 = it->second->mapToParent(it->second->boundingRect()).boundingRect();
+				QRectF r2 = jt->second->mapToParent(jt->second->boundingRect()).boundingRect();
+				intersection |= r1.intersects(r2);
+			}
 		}
-	}
-
-	float radius = 2.5 * maxdim;
-
-	int counter = 0;
-	for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
-		classBoxes[class_.get()]->setPos(radius + std::cos(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius,
-										 radius + std::sin(2 * 3.14159 * (counter/float(classBoxes.size()))) * radius);
-		counter++;
-	}
+	} while (intersection);
 
 	std::map<Edge*, QGraphicsItemGroup*> edgeLines;
 
