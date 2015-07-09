@@ -34,12 +34,15 @@ class Argument
 class Operation
 {
 	public:
-		Operation(std::string name, Type* returnType, std::vector<Argument>& arguments, Visibility visibility, bool abstract)
+		enum Stereotype { normal, constructor, destructor };
+
+		Operation(std::string name, Type* returnType, std::vector<Argument>& arguments, Visibility visibility, bool abstract, Stereotype stereotype)
 			: name(name)
 			, returnType(returnType)
 			, arguments(std::move(arguments))
 			, visibility(visibility)
 			, abstract(abstract)
+			, stereotype(stereotype)
 		{
 		}
 
@@ -68,12 +71,18 @@ class Operation
 			return abstract;
 		}
 
+		Stereotype getStereotype() const
+		{
+			return stereotype;
+		}
+
 	private:
 		std::string name;
 		std::unique_ptr<Type> returnType;
 		std::vector<Argument> arguments;
 		Visibility visibility;
 		bool abstract;
+		Stereotype stereotype;
 };
 
 class Attribute
@@ -137,6 +146,16 @@ class Class
 		void addAttribute(Attribute&& attribute)
 		{
 			attributes.push_back(std::move(attribute));
+		}
+
+		bool isAbstract() const
+		{
+			for (const Operation& operation : operations) {
+				if (operation.isAbstract()) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 	private:

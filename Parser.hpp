@@ -18,8 +18,6 @@ class Parser
 
 	private:
 
-		void parseClasses(const char* begin, const char* end);
-
 		void parseStructures(const char* begin, const char* end);
 		BlockSequence parseFunctionBody(const char*& begin, const char* end);
 		static void skipWhitespaces(const char*& c, const char* end);
@@ -32,15 +30,14 @@ class Parser
 		std::string cleanSyntax (const char* begin, const char* end);
 		void skipBody(const char*& begin, const char* end, int pDepth);
 		void skipIf(const char*& begin, const char* end);
-		bool BothAreSpaces(char lhs, char rhs);
 
 		Result result;
 
 		std::map<std::string, Class*> classMap;
 
-		void getName(const char*& begin, const char* end);
+		void skipName(const char*& begin, const char* end);
 		void parseClass(const char*& begin, const char* end);
-		Operation parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip);
+		Operation parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip, std::string className);
 		void parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type, bool argumentMode = false);
 };
 

@@ -391,9 +391,16 @@ std::string Parser::getCondition(const char*& begin, const char* end)
 	return cleanSyntax(conditionBegin,conditionEnd);
 }
 
-void Parser::getName(const char*& begin, const char* end)
+void Parser::skipName(const char*& begin, const char* end)
 {
 	while (begin != end && ((*begin >= 'A' && *begin <= 'Z') || (*begin >= 'a' && *begin <= 'z') || (*begin >= '0' && *begin <= '9') || *begin == ':')) {
+		if (*begin == ':') {
+			if (begin+1 != end && *(begin+1) == ':') {
+				begin++;
+			} else {
+				return;
+			}
+		}
 		begin++;
 	}
 }
@@ -607,7 +614,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 	}
 	skipWhitespaces(begin, end);
 	const char* classNameBegin = begin;
-	getName(begin, end);
+	skipName(begin, end);
 	const char* classNameEnd = begin;
 	std::string className(classNameBegin, classNameEnd);
 	Class* c;
@@ -629,7 +636,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			}
 			skipWhitespaces(begin, end);
 			const char* otherClassNameBegin = begin;
-			getName(begin, end);
+			skipName(begin, end);
 			const char* otherClassNameEnd = begin;
 			std::string otherClassName(otherClassNameBegin, otherClassNameEnd);
 			if (classMap.find(otherClassName) != classMap.end()) {
@@ -704,7 +711,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			skipWhitespacesBackwards(declEnd, declBegin);
 			if (std::string(declBegin, declEnd).find_first_of('(') != std::string::npos) {
 				bool skip = false;
-				Operation o = parseOperation(declBegin, declEnd, visibility, skip);
+				Operation o = parseOperation(declBegin, declEnd, visibility, skip, className);
 				if (!skip) {
 					if (codeBegin) {
 						result.structureCharts.emplace_back(new StructureChart(o.getName(), {}, parseFunctionBody(codeBegin, begin-1)));
@@ -733,14 +740,6 @@ void Parser::parseClass(const char*& begin, const char* end)
 	skipWhitespaces(begin, end);
 }
 
-void Parser::parseClasses(const char* begin, const char* end)
-{
-	while (begin != end) {
-		skipWhitespaces(begin, end);
-		parseClass(begin, end);
-	}
-}
-
 void Parser::parseTypeAndName(const char* begin, const char* end, std::string& name, std::string& type, bool argumentMode)
 {
 	skipWhitespaces(begin, end);
@@ -766,7 +765,7 @@ void Parser::parseTypeAndName(const char* begin, const char* end, std::string& n
 	}
 }
 
-Operation Parser::parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip)
+Operation Parser::parseOperation(const char* begin, const char* end, Visibility visibility, bool& skip, std::string className)
 {
 	std::vector<Argument> arguments;
 	std::string name;
@@ -844,10 +843,13 @@ Operation Parser::parseOperation(const char* begin, const char* end, Visibility 
 		throw std::runtime_error("Invalid operation");
 	}
 
-	return Operation(name, Type::createFromCppName(type), arguments, visibility, abstract);
-}
+	Operation::Stereotype stereotype = Operation::normal;
+	if (name == className) {
+		stereotype = Operation::constructor;
+	}
+	if (name == "~" + className) {
+		stereotype = Operation::destructor;
+	}
 
-bool Parser::BothAreSpaces(char lhs, char rhs)
-{
-	return (lhs == rhs) && (lhs == ' ');
+	return Operation(name, Type::createFromCppName(type), arguments, visibility, abstract, stereotype);
 }

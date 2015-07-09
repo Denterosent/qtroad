@@ -21,54 +21,32 @@ std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 	}
 }
 
-QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
+QGraphicsItemGroup* ClassChartDrawer::drawClassBox(Class* class_)
 {
-	bool isAbstract = false;
 	std::ostringstream attrstr;
-	bool first = false;
-	for (const Attribute& attr : class_->getAttributes()) {
-		if (first++) {
+	bool first = true;
+	for (const Attribute& attribute : class_->getAttributes()) {
+		if (!first) {
 			attrstr << "\n";
 		}
-		attrstr << visibilityToString(attr.getVisibility()) << attr.getName() << ": " << attr.getType()->umlName();
+		first = false;
+		attrstr << attributeToString(attribute);
 	}
 	std::ostringstream opstr;
-	first = false;
-	for (const Operation& op : class_->getOperations()) {
-		if (first++) {
+	first = true;
+	for (const Operation& operation : class_->getOperations()) {
+		if (!first) {
 			opstr << "\n";
 		}
-		opstr << visibilityToString(op.getVisibility()) << op.getName() << "(";
-		if (!op.getArguments().empty()) {
-			bool first = false;
-			for (const Argument& arg : op.getArguments()) {
-				if (first++) {
-					opstr << "; ";
-				}
-				opstr << arg.getName() << ": " << arg.getType()->umlName();
-			}
-		}
-		opstr << ")";
-		if (op.getReturnType()) {
-			opstr << ": " << op.getReturnType()->umlName();
-		}
-		if (!op.getReturnType() && op.getName() == class_->getName()) {
-			opstr << " «constructor»";
-		}
-		if (!op.getReturnType() && op.getName() == "~" + class_->getName()) {
-			opstr << " «destructor»";
-		}
-		if (op.isAbstract()) {
-			isAbstract = true;
-			opstr << " {abstract}";
-		}
+		first = false;
+		opstr << operationToString(operation);
 	}
 
 	std::string str1 = class_->getName();
 	std::string str2 = attrstr.str();
 	std::string str3 = opstr.str();
 
-	if (isAbstract) {
+	if (class_->isAbstract()) {
 		str1 += " {abstract}";
 	}
 
@@ -120,7 +98,7 @@ QGraphicsItemGroup* ClassChartDrawer::generateClassBox(Class* class_)
 	return group;
 }
 
-QLineF ClassChartDrawer::calcArrow(QRectF r1, QRectF r2)
+QLineF ClassChartDrawer::calculateArrowLine(QRectF r1, QRectF r2)
 {
 	if (r1.right() < r2.left() && r1.bottom() < r2.top()) {
 		return QLineF(r1.bottomRight(), r2.topLeft());
@@ -148,7 +126,7 @@ QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsIt
 	QRectF r1 = tail->mapToParent(tail->boundingRect()).boundingRect();
 	QRectF r2 = head->mapToParent(head->boundingRect()).boundingRect();
 
-	QGraphicsLineItem* line = new QGraphicsLineItem(calcArrow(r1, r2));
+	QGraphicsLineItem* line = new QGraphicsLineItem(calculateArrowLine(r1, r2));
 	ret->addToGroup(line);
 
 	if (headsym) {
@@ -160,12 +138,50 @@ QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsIt
 	return ret;
 }
 
+std::string ClassChartDrawer::attributeToString(const Attribute& attribute)
+{
+	std::ostringstream str;
+	str << visibilityToString(attribute.getVisibility()) << attribute.getName() << ": " << attribute.getType()->umlName();
+	return str.str();
+}
+
+std::string ClassChartDrawer::operationToString(const Operation& operation)
+{
+	std::ostringstream str;
+	bool first = false;
+	str << visibilityToString(operation.getVisibility()) << operation.getName() << "(";
+	if (!operation.getArguments().empty()) {
+		bool first = true;
+		for (const Argument& arg : operation.getArguments()) {
+			if (!first) {
+				str << "; ";
+			}
+			first = false;
+			str << arg.getName() << ": " << arg.getType()->umlName();
+		}
+	}
+	str << ")";
+	if (operation.getReturnType()) {
+		str << ": " << operation.getReturnType()->umlName();
+	}
+	if (operation.getStereotype() == Operation::constructor) {
+		str << " «constructor»";
+	}
+	if (operation.getStereotype() == Operation::destructor) {
+		str << " «destructor»";
+	}
+	if (operation.isAbstract()) {
+		str << " {abstract}";
+	}
+	return str.str();
+}
+
 QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChart)
 {
 	QGraphicsItemGroup* group = new QGraphicsItemGroup();
 	std::map<Class*, QGraphicsItemGroup*> classBoxes;
 	for (const std::unique_ptr<Class>& class_ : classChart.getClasses()) {
-		QGraphicsItemGroup* classBox = generateClassBox(class_.get());
+		QGraphicsItemGroup* classBox = drawClassBox(class_.get());
 		group->addToGroup(classBox);
 		classBoxes[class_.get()] = classBox;
 	}
