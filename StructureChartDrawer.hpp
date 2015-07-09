@@ -42,6 +42,5 @@ class StructureChartDrawer
 		void drawEmtySign(QGraphicsRectItem* rect, QGraphicsItem* group, int maxScale);
 		void drawLoopHeading(QGraphicsSimpleTextItem* loopHeading);
 		void drawSurroundingRect(QGraphicsItem* group);
-		int countIfElseBodies(const std::vector<std::unique_ptr<Block>>& vector);
 };
 #endif // STRUCTURECHARTDRAWER_H
