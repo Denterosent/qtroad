@@ -40,7 +40,7 @@ public:
 		var2 = 2;
 	}
 
-	void func1();
+	virtual void func1() = 0;
 	float func2(int x, char y);
 };
 
@@ -54,6 +54,14 @@ public:
 		if (var1 == 0) {
 			var2 = 4;
 		}
+	}
+};
+
+class C : public B
+{
+	virtual void func1()
+	{
+		var1++;
 	}
 };</string>
        </property>

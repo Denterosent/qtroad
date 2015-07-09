@@ -641,6 +641,7 @@ void Parser::parseClass(const char*& begin, const char* end)
 			std::string otherClassName(otherClassNameBegin, otherClassNameEnd);
 			if (classMap.find(otherClassName) != classMap.end()) {
 				result.classChart.addEdge(new Inheritance{classMap[otherClassName], c});
+				c->addParentClass(classMap[otherClassName]);
 			}
 			skipWhitespaces(begin, end);
 		} while (match(begin, end, ","));

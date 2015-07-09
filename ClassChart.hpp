@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
+#include <map>
 
 enum class Visibility { private_, protected_, public_ };
 
@@ -138,6 +140,21 @@ class Class
 			return attributes;
 		}
 
+		const std::vector<Class*>& getParentClasses() const
+		{
+			return parentClasses;
+		}
+
+		void getAncestorsClasses(std::set<const Class*>& classes) const
+		{
+			for (Class* parent : parentClasses) {
+				if (classes.find(parent) == classes.end()) {
+					classes.insert(parent);
+					parent->getAncestorsClasses(classes);
+				}
+			}
+		}
+
 		void addOperation(Operation&& operation)
 		{
 			operations.push_back(std::move(operation));
@@ -148,10 +165,24 @@ class Class
 			attributes.push_back(std::move(attribute));
 		}
 
+		void addParentClass(Class* class_)
+		{
+			parentClasses.push_back(class_);
+		}
+
 		bool isAbstract() const
 		{
-			for (const Operation& operation : operations) {
-				if (operation.isAbstract()) {
+			std::set<const Class*> classes;
+			getAncestorsClasses(classes);
+			classes.insert(this);
+			std::map<std::string, bool> operationImplemented;
+			for (const Class* parent : classes) {
+				for (const Operation& operation : parent->getOperations()) {
+					operationImplemented[operation.getName()] |= !operation.isAbstract();
+				}
+			}
+			for (const std::pair<const std::string, bool>& operation : operationImplemented) {
+				if (!operation.second) {
 					return true;
 				}
 			}
@@ -162,6 +193,7 @@ class Class
 		std::string name;
 		std::vector<Operation> operations;
 		std::vector<Attribute> attributes;
+		std::vector<Class*> parentClasses;
 };
 
 class Edge
