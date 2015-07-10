@@ -2583,10 +2583,10 @@
 <XPD:REF name="Model">yCaErVOqB0ypa5xM5FyhyQAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="HeadRoleNameLabel" type="EdgeLabelView" guid="r1GcYO88i0Wr6LFZ0XqGqQAA">
-<XPD:ATTR name="Alpha" type="real">-0,523598775598299</XPD:ATTR>
-<XPD:ATTR name="Distance" type="real">30</XPD:ATTR>
+<XPD:ATTR name="Alpha" type="real">-0,434315952469639</XPD:ATTR>
+<XPD:ATTR name="Distance" type="real">26,9072480941474</XPD:ATTR>
 <XPD:ATTR name="EdgePosition" type="EdgePositionKind">epHead</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">+result</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">-result</XPD:ATTR>
 <XPD:REF name="Model">3nPJ7o+B0022MsRSO5PPKAAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="TailRoleNameLabel" type="EdgeLabelView" guid="yJAJLm3veU67/lBf4N49dQAA">
@@ -2597,8 +2597,8 @@
 <XPD:REF name="Model">fnHciQ0VAkKINoUe3EtxNwAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="HeadMultiplicityLabel" type="EdgeLabelView" guid="XTlwojU4Q0e0GtN1GJRULAAA">
-<XPD:ATTR name="Alpha" type="real">0,523598775598299</XPD:ATTR>
-<XPD:ATTR name="Distance" type="real">25</XPD:ATTR>
+<XPD:ATTR name="Alpha" type="real">0,385237201850701</XPD:ATTR>
+<XPD:ATTR name="Distance" type="real">23,0867927612304</XPD:ATTR>
 <XPD:ATTR name="EdgePosition" type="EdgePositionKind">epHead</XPD:ATTR>
 <XPD:ATTR name="Text" type="string">1</XPD:ATTR>
 <XPD:REF name="Model">3nPJ7o+B0022MsRSO5PPKAAA</XPD:REF>
@@ -5863,7 +5863,6 @@
 <XPD:ATTR name="#Connections" type="integer">2</XPD:ATTR>
 <XPD:OBJ name="Connections[0]" type="UMLAssociationEnd" guid="fnHciQ0VAkKINoUe3EtxNwAA">
 <XPD:ATTR name="IsNavigable" type="boolean">False</XPD:ATTR>
-<XPD:ATTR name="Aggregation" type="UMLAggregationKind">akComposite</XPD:ATTR>
 <XPD:REF name="Association">yCaErVOqB0ypa5xM5FyhyQAA</XPD:REF>
 <XPD:REF name="Participant">qQExKqZ8UE6R1nhTDznGJwAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
@@ -5874,7 +5873,7 @@
 </XPD:OBJ>
 <XPD:OBJ name="Connections[1]" type="UMLAssociationEnd" guid="3nPJ7o+B0022MsRSO5PPKAAA">
 <XPD:ATTR name="Name" type="string">result</XPD:ATTR>
-<XPD:ATTR name="IsNavigable" type="boolean">False</XPD:ATTR>
+<XPD:ATTR name="Visibility" type="UMLVisibilityKind">vkPrivate</XPD:ATTR>
 <XPD:ATTR name="Multiplicity" type="string">1</XPD:ATTR>
 <XPD:REF name="Association">yCaErVOqB0ypa5xM5FyhyQAA</XPD:REF>
 <XPD:REF name="Participant">A66w1CQjnUW5EIO8xfu+xgAA</XPD:REF>
