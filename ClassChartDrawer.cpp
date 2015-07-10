@@ -5,7 +5,7 @@
 #include <QBrush>
 #include <QPen>
 
-static const QPolygonF triangleArrowhead({{5*sqrt(2),-5*2},{0,0},{-5*sqrt(2),-5*2}});
+static const QPolygonF triangleArrowhead({{5,-5*2},{0,0},{-5,-5*2}});
 
 std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 {
