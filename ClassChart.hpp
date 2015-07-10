@@ -203,9 +203,9 @@ class Class
 			attributes.push_back(std::move(attribute));
 		}
 
-		void addEdge(Edge* class_)
+		void addEdge(Edge* edge)
 		{
-			edges.push_back(class_);
+			edges.push_back(edge);
 		}
 
 		bool isAbstract() const
