@@ -32,7 +32,6 @@ std::string ClassChartDrawer::attributeToString(const Attribute& attribute)
 std::string ClassChartDrawer::operationToString(const Operation& operation)
 {
 	std::ostringstream str;
-	bool first = false;
 	str << visibilityToString(operation.getVisibility()) << operation.getName() << "(";
 	if (!operation.getArguments().empty()) {
 		bool first = true;
@@ -239,9 +238,9 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChar
 			painterPath.addPolygon(triangleArrowhead);
 			arrowhead = new QGraphicsPathItem(painterPath);
 		}
-		QGraphicsItemGroup* a = drawArrow(classBoxes[edge->getTail()], classBoxes[edge->getHead()], nullptr, arrowhead);
-		edgeLines[edge.get()] = a;
-		group->addToGroup(a);
+		QGraphicsItemGroup* arrow = drawArrow(classBoxes[edge->getTail()], classBoxes[edge->getHead()], nullptr, arrowhead);
+		edgeLines[edge.get()] = arrow;
+		group->addToGroup(arrow);
 	}
 
 	return group;
