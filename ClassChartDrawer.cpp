@@ -147,21 +147,26 @@ QLineF ClassChartDrawer::calculateArrowLine(QRectF r1, QRectF r2)
 {
 	if (r1.right() < r2.left() && r1.bottom() < r2.top()) {
 		return QLineF(r1.bottomRight(), r2.topLeft());
-	} else if (r2.right() < r1.left() && r2.bottom() < r1.top()) {
-		return QLineF(r1.topLeft(), r2.bottomRight());
-	} else if (r1.right() < r2.left() && r2.bottom() < r1.top()) {
-		return QLineF(r1.topRight(), r2.bottomLeft());
-	} else if (r2.right() < r1.left() && r1.bottom() < r2.top()) {
-		return QLineF(r1.bottomLeft(), r2.topRight());
-	} else if (r1.right() < r2.left()) {
-		return QLineF(r1.right(), r1.top() + .5 * r1.height(), r2.left(), r2.top() + .5 * r2.height());
-	} else if (r2.right() < r1.left()) {
-		return QLineF(r1.left(), r1.top() + .5 * r1.height(), r2.right(), r2.top() + .5 * r2.height());
-	} else if (r1.bottom() < r2.top()) {
-		return QLineF(r1.left() + .5 * r1.width(), r1.bottom(), r2.left() + .5 * r2.width(), r2.top());
-	} else {
-		return QLineF(r1.left() + .5 * r1.width(), r1.top(), r2.left() + .5 * r2.width(), r2.bottom());
 	}
+	if (r2.right() < r1.left() && r2.bottom() < r1.top()) {
+		return QLineF(r1.topLeft(), r2.bottomRight());
+	}
+	if (r1.right() < r2.left() && r2.bottom() < r1.top()) {
+		return QLineF(r1.topRight(), r2.bottomLeft());
+	}
+	if (r2.right() < r1.left() && r1.bottom() < r2.top()) {
+		return QLineF(r1.bottomLeft(), r2.topRight());
+	}
+	if (r1.right() < r2.left()) {
+		return QLineF(r1.right(), r1.top() + .5 * r1.height(), r2.left(), r2.top() + .5 * r2.height());
+	}
+	if (r2.right() < r1.left()) {
+		return QLineF(r1.left(), r1.top() + .5 * r1.height(), r2.right(), r2.top() + .5 * r2.height());
+	}
+	if (r1.bottom() < r2.top()) {
+		return QLineF(r1.left() + .5 * r1.width(), r1.bottom(), r2.left() + .5 * r2.width(), r2.top());
+	}
+	return QLineF(r1.left() + .5 * r1.width(), r1.top(), r2.left() + .5 * r2.width(), r2.bottom());
 }
 
 QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsItem* head, QGraphicsItem* tailsym, QGraphicsItem* headsym)
@@ -178,6 +183,12 @@ QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsIt
 		headsym->setPos(line->line().p2());
 		headsym->setRotation(-line->line().angle() - 90);
 		ret->addToGroup(headsym);
+	}
+
+	if (tailsym) {
+		tailsym->setPos(line->line().p1());
+		tailsym->setRotation(-line->line().angle() + 90);
+		ret->addToGroup(tailsym);
 	}
 
 	return ret;
