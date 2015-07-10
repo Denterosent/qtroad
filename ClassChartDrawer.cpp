@@ -3,6 +3,7 @@
 #include <iostream>
 #include <QFont>
 #include <QBrush>
+#include <QPen>
 
 static const QPolygonF triangleArrowhead({{5*sqrt(2),-5*2},{0,0},{-5*sqrt(2),-5*2}});
 
@@ -19,6 +20,44 @@ std::string ClassChartDrawer::visibilityToString(Visibility visibility)
 			return "+";
 		}
 	}
+}
+
+std::string ClassChartDrawer::attributeToString(const Attribute& attribute)
+{
+	std::ostringstream str;
+	str << visibilityToString(attribute.getVisibility()) << attribute.getName() << ": " << attribute.getType()->umlName();
+	return str.str();
+}
+
+std::string ClassChartDrawer::operationToString(const Operation& operation)
+{
+	std::ostringstream str;
+	bool first = false;
+	str << visibilityToString(operation.getVisibility()) << operation.getName() << "(";
+	if (!operation.getArguments().empty()) {
+		bool first = true;
+		for (const Argument& arg : operation.getArguments()) {
+			if (!first) {
+				str << "; ";
+			}
+			first = false;
+			str << arg.getName() << ": " << arg.getType()->umlName();
+		}
+	}
+	str << ")";
+	if (operation.getReturnType()) {
+		str << ": " << operation.getReturnType()->umlName();
+	}
+	if (operation.getStereotype() == Operation::constructor) {
+		str << " «constructor»";
+	}
+	if (operation.getStereotype() == Operation::destructor) {
+		str << " «destructor»";
+	}
+	if (operation.isAbstract()) {
+		str << " {abstract}";
+	}
+	return str.str();
 }
 
 QGraphicsItemGroup* ClassChartDrawer::drawClassBox(Class* class_)
@@ -58,25 +97,31 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassBox(Class* class_)
 	text1->setText(QString::fromStdString(str1));
 	group->addToGroup(text1);
 
-	QGraphicsSimpleTextItem* text2 = new QGraphicsSimpleTextItem();
-	text2->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	QGraphicsItem* item2;
 	if (str2.empty()) {
-		text2->setText("\n");
-		text2->setFont(QFont("", 2));
+		QGraphicsRectItem* rect2 = new QGraphicsRectItem(0, 0, 1, 8);
+		rect2->setPen(QPen(Qt::NoPen));
+		item2 = rect2;
 	} else {
+		QGraphicsSimpleTextItem* text2 = new QGraphicsSimpleTextItem();
 		text2->setText(QString::fromStdString(str2));
+		item2 = text2;
 	}
-	group->addToGroup(text2);
+	item2->setPos(text1->mapToParent(text1->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	group->addToGroup(item2);
 
-	QGraphicsSimpleTextItem* text3 = new QGraphicsSimpleTextItem();
-	text3->setPos(text2->mapToParent(text2->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	QGraphicsItem* item3;
 	if (str3.empty()) {
-		text3->setText("\n");
-		text3->setFont(QFont("", 2));
+		QGraphicsRectItem* rect3 = new QGraphicsRectItem(0, 0, 1, 8);
+		rect3->setPen(QPen(Qt::NoPen));
+		item3 = rect3;
 	} else {
+		QGraphicsSimpleTextItem* text3 = new QGraphicsSimpleTextItem();
 		text3->setText(QString::fromStdString(str3));
+		item3 = text3;
 	}
-	group->addToGroup(text3);
+	item3->setPos(item2->mapToParent(item2->boundingRect().bottomLeft()) + QPointF(0.,1.));
+	group->addToGroup(item3);
 
 	QRectF textRect = group->boundingRect().adjusted(-1., -1., 0., 0.);
 	textRect.setWidth(std::ceil(textRect.width()));
@@ -91,8 +136,8 @@ QGraphicsItemGroup* ClassChartDrawer::drawClassBox(Class* class_)
 	group->addToGroup(line1);
 
 	QGraphicsLineItem* line2 = new QGraphicsLineItem();
-	line2->setLine(QLineF(text2->mapToParent(text2->boundingRect().bottomLeft()),
-						  QPointF(textRect.right(), text2->mapToParent(0., text2->boundingRect().bottom()).y())));
+	line2->setLine(QLineF(item2->mapToParent(item2->boundingRect().bottomLeft()),
+						  QPointF(textRect.right(), item2->mapToParent(0., item2->boundingRect().bottom()).y())));
 	group->addToGroup(line2);
 
 	return group;
@@ -136,44 +181,6 @@ QGraphicsItemGroup* ClassChartDrawer::drawArrow(QGraphicsItem* tail, QGraphicsIt
 	}
 
 	return ret;
-}
-
-std::string ClassChartDrawer::attributeToString(const Attribute& attribute)
-{
-	std::ostringstream str;
-	str << visibilityToString(attribute.getVisibility()) << attribute.getName() << ": " << attribute.getType()->umlName();
-	return str.str();
-}
-
-std::string ClassChartDrawer::operationToString(const Operation& operation)
-{
-	std::ostringstream str;
-	bool first = false;
-	str << visibilityToString(operation.getVisibility()) << operation.getName() << "(";
-	if (!operation.getArguments().empty()) {
-		bool first = true;
-		for (const Argument& arg : operation.getArguments()) {
-			if (!first) {
-				str << "; ";
-			}
-			first = false;
-			str << arg.getName() << ": " << arg.getType()->umlName();
-		}
-	}
-	str << ")";
-	if (operation.getReturnType()) {
-		str << ": " << operation.getReturnType()->umlName();
-	}
-	if (operation.getStereotype() == Operation::constructor) {
-		str << " «constructor»";
-	}
-	if (operation.getStereotype() == Operation::destructor) {
-		str << " «destructor»";
-	}
-	if (operation.isAbstract()) {
-		str << " {abstract}";
-	}
-	return str.str();
 }
 
 QGraphicsItemGroup* ClassChartDrawer::drawClassChart(const ClassChart& classChart)
