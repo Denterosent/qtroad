@@ -20,25 +20,25 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	 *
 	 *no Support for:
 	 * Polymorphie
-	 * (AutoWidth of blocks) - not necessary, first do things which are important
-	 * (Resizing of SwitchBlock line for case strings, same for IfElseBlock) - not necessary, first do things which are important
-	 * (page breaks, when chart gets too long)
+	 * AutoWidth of blocks
+	 * Resizing of SwitchBlock line for case strings, same for IfElseBlock
+	 * page breaks, when chart gets too long
 	 * /
 
 	/*buglist:
 	 * autowrap gets into a endless loop if not stopped
 	 * autowrap splits at unwanted signs
+	 * most down triangle point of switch blocks is not placed exactly correct
 	 */
 
 	/*TODO's:
 	 * find solution auto-wrap
-	 * (get decltype from Class)
-	 * (set page-breaks)
-	 * (auto-width)
+	 * set page-breaks
+	 * auto-width
 	 * fix misplaced switch-expresion
 	 */
 
-	initialWidth = 500;
+	initialWidth = 700;
 	width = initialWidth;
 	top = 0;
 	loopOffset = 20;
@@ -56,10 +56,10 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 	maxRelationSwitchBlock = 0.5;
 
 	errorTag = "Error from Drawer: ";
-	variablelistLabel = "lokale/globale Variablen und Attribute:";
-	ifElseTrueLabel = "wahr";
-	ifElseFalseLabel = "falsch";
-	switchElseLabel = "sonst";
+	variablelistLabel = "local/ global variables and attributes:";
+	ifElseTrueLabel = "true";
+	ifElseFalseLabel = "false";
+	switchElseLabel = "else";
 }
 
 void StructureChartDrawer::drawBody(QGraphicsItem* group, const std::vector<std::unique_ptr<Block>>& vector)
