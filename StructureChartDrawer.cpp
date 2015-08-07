@@ -32,7 +32,6 @@ StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 
 	/*TODO's:
 	 * find solution auto-wrap
-	 * (get decltype from Class)
 	 * (set page-breaks)
 	 * (auto-width)
 	 * fix misplaced switch-expresion
