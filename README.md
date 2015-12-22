@@ -13,4 +13,4 @@ Hints:
 Authors:
 * Lukas Lihotzki
 * Christian Autenrieht
-* Marvin Baral
+* Marvin Baral (github@marvinbaral.de)
