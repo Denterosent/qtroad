@@ -1,5 +1,5 @@
 # qtroad 
-# = rapid-object-analyzing-diagramm, implemented with QT Creator
+= rapid-object-analyzing-diagramm, implemented with QT Creator
 
 This program converts c/cpp-code to UML Structure- and Classcharts.
 Content of Edit is converted to graphic on Graphics View.
