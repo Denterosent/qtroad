@@ -1,4 +1,5 @@
 #include "StructureChartDrawer.hpp"
+#include <math.h>
 
 StructureChartDrawer::StructureChartDrawer(QGraphicsScene* pScene)
 {

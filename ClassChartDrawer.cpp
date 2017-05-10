@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QBrush>
 #include <QPen>
+#include <math.h>
 
 static const QPolygonF triangleArrowhead({{5,-5*2},{0,0},{-5,-5*2}});
 
