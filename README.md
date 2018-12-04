@@ -1,10 +1,10 @@
 # qtroad 
-= rapid-object-analyzing-diagramm, implemented with QT Creator
+= rapid-object-analyzing-diagram, implemented with Qt Creator
 
 This program converts c/cpp-code to UML Structure- and Classcharts.
-Content of Edit is converted to graphic on Graphics View.
-Multiple c/cpp-files can be loaded to the Edit and the displayed 
-content on the Graphics View can be printed directly or saved as PDF.
+The content in the textfield at the left side is converted to a graphic on the Graphics View on the right side.
+Multiple c/cpp-files can be loaded to the textfield and then displayed on the Graphics View.
+The content of the Graphics View can be printed directly or saved as PDF.
 
 Hints:
 * there currently is no auto-width -> you need to recompile with new value in the construcor of structureChartDrawer, to adapt the width
