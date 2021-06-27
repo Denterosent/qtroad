@@ -12,5 +12,5 @@ Hints:
 
 Authors:
 * Lukas Lihotzki
-* Christian Autenrieht
+* Christian Autenrieth
 * Marvin Baral (github@marvinbaral.de)
